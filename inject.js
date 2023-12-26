@@ -3,9 +3,6 @@ var observer = new MutationObserver(function (mutations) {
   initAbout();
 });
 
-// document.activeElement
-// el.contains(document.activeElement);
-
 const initialized = {
   sidebar: false,
   about: false,
