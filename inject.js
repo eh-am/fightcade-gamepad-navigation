@@ -1,3 +1,12 @@
+const ARCADE_STICK_MAPPINGS = {
+  DPAD_UP: 12,
+  DPAD_DOWN: 13,
+  DPAD_LEFT: 14,
+  DPAD_RIGHT: 15,
+  BUTTON_A: 0,
+  BUTTON_B: 1,
+};
+
 function initSidebar() {
   const me = document.querySelector(".mainToolbar");
   if (!me) {
@@ -211,6 +220,7 @@ function initSearch() {
     // Register handler
     el.addEventListener("keydown", (e) => {
       const currentFocused = document.activeElement;
+      console.log("element", el, "received event", e);
       console.log("current focused is", currentFocused);
 
       // Simulate a click event
@@ -309,4 +319,88 @@ observer.observe(document, {
   childList: true,
   characterData: false,
   subtree: true,
+});
+
+window.addEventListener("gamepadconnected", (e) => {
+  const gp = navigator.getGamepads()[e.gamepad.index];
+
+  setInterval(function () {
+    gameLoop();
+  }, 100);
+});
+
+function gameLoop() {
+  const gamepads = navigator.getGamepads();
+  if (!gamepads) {
+    return;
+  }
+
+  // TODO: technically any index could work
+  const gp = gamepads[0];
+
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.BUTTON_A].pressed) {
+    handleTab(prevCircular);
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.BUTTON_B].pressed) {
+    handleTab(nextCircular);
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_UP].pressed) {
+    getCurrentFocusedElement().dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true })
+    );
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_DOWN].pressed) {
+    getCurrentFocusedElement().dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+    );
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_RIGHT].pressed) {
+    console.log("pressed right", getCurrentFocusedElement());
+    getCurrentFocusedElement().dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
+    );
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_LEFT].pressed) {
+    getCurrentFocusedElement().dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })
+    );
+  }
+}
+
+// TODO: sometimes it returns the body
+function getCurrentFocusedElement() {
+  return document.activeElement;
+}
+
+/*
+ * Reimplement tabbing
+ * Notice that it follows only the DOM order
+ * Ie no positive tabIndex handling/disabled items
+ * Source: https://stackoverflow.com/a/7329696
+ */
+function handleTab(nextItemFn) {
+  // Find all tablable elements
+  const tabbableElements = Array.from(
+    document.querySelectorAll(
+      "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
+    )
+  ).filter((a) => a.getAttribute("tabindex") !== "-1");
+
+  const currentFocused = document.activeElement;
+  const currentFocusedIndex = Array.from(tabbableElements).findIndex(
+    (a) => a === currentFocused
+  );
+
+  let focusOn;
+  if (currentFocused) {
+    focusOn = nextItemFn(tabbableElements, currentFocusedIndex);
+  } else {
+    focusOn = tabbableElements[0];
+  }
+
+  focusOn.focus();
+}
+
+document.body.addEventListener("keydown", (e) => {
+  console.log("pressed", e.key);
 });

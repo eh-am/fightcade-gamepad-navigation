@@ -14,8 +14,6 @@ div:focus {
 <div id="bare" tabindex="0">ITEM 7</div>
 <div id="bare" tabindex="0">ITEM 8</div>
 <script>
-const foo = document.getElementById('foo');
-
 window.addEventListener("gamepadconnected", (e) => {
   const gp = navigator.getGamepads()[e.gamepad.index];
 
@@ -24,9 +22,18 @@ window.addEventListener("gamepadconnected", (e) => {
   }, 100)
 });
 
-foo.addEventListener("keydown", (e) => {
-  console.log(`pressed ${e.key}`);
+document.body.addEventListener("keydown", (e) => {
+  console.log("pressed", e.key);
 })
+
+const ARCADE_STICK_MAPPINGS = {
+  DPAD_UP: 12,
+  DPAD_DOWN: 13,
+  DPAD_LEFT: 14,
+  DPAD_RIGHT: 15,
+  BUTTON_A: 0,
+  BUTTON_B: 1,
+}
 
 /*
  * Finds the next item in a circular list
@@ -62,49 +69,48 @@ function gameLoop() {
   }
 
   const gp = gamepads[0];
-  if (gp.buttons[0].pressed) {
+  /*
+  for ([index, button] of gp.buttons.entries()) {
+    if (button.pressed) {
+      console.log('button pressed', button, index)
+    }
+  }*/
+
+//  console.log("gp buttons 0", gp.buttons[0])
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.BUTTON_A].pressed) {
     handleTab(prevCircular)
   }
-  if (gp.buttons[1].pressed) {
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.BUTTON_B].pressed) {
     handleTab(nextCircular)
-
-    /*
-    handleTab(nextCircular)
-    // Find all tablable elements
-    const tabbableElements = document
-    .querySelectorAll(
-      "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
-    );
-    console.log("tappable", tabbableElements)
-
-    // TODO:
-    // https://stackoverflow.com/a/7329696
-
-    const currentFocused = document.activeElement;
-    const currentFocusedIndex = Array.from(tabbableElements).findIndex((a) => a === currentFocused);
-
-    let focusOn;
-    if (currentFocused) {
-      focusOn = nextCircular(tabbableElements, currentFocusedIndex);
-    } else {
-      focusOn = tabbableElements[0];
-    }
-
-    focusOn.focus();
-    */
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_UP].pressed) {
+    //console.log("dispatching", getCurrentFocusedElement())
+    // TODO: dispatch from the focused event
+    getCurrentFocusedElement().dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowUp'}));
+  }
+  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_DOWN].pressed) {
+    // TODO: dispatch from the focused event
+    getCurrentFocusedElement().dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowDown'}));
   }
 }
 
+// TODO: sometimes it returns the body
+function getCurrentFocusedElement() {
+  return document.activeElement;
+}
+
+/*
+ * Reimplement tabbing
+ * Notice that it follows only the DOM order
+ * Ie no positive tabIndex handling/disabled items
+ * Source: https://stackoverflow.com/a/7329696
+*/
 function handleTab(nextItemFn) {
     // Find all tablable elements
     const tabbableElements = document
     .querySelectorAll(
       "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
     );
-    console.log("tappable", tabbableElements)
-
-    // TODO:
-    // https://stackoverflow.com/a/7329696
 
     const currentFocused = document.activeElement;
     const currentFocusedIndex = Array.from(tabbableElements).findIndex((a) => a === currentFocused);

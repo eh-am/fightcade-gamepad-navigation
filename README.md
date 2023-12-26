@@ -28,3 +28,4 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] when focusing manually, set scroll into
 - [ ] handle asynchronousness, ex when a lobby is added to the sidebar
 - [ ] inject custom js, like the <script src="inject.js"/> in dev mode
+- [ ] handle stick (axis) https://developer.mozilla.org/en-US/docs/Web/API/Gamepad/axes
