@@ -1,19 +1,10 @@
-var observer = new MutationObserver(function (mutations) {
-  initialized.sidebar ? updateSidebar() : initSidebar();
-  initAbout();
-});
-
-const initialized = {
-  sidebar: false,
-  about: false,
-};
-
 function initSidebar() {
   const me = document.querySelector(".mainToolbar");
   if (!me) {
     // TODO: error?
     return;
   }
+  console.log("initializing sidebar...");
 
   // Query open lobbies and the search button
   // Then select the first item
@@ -40,7 +31,10 @@ function initSidebar() {
   me.addEventListener("keydown", (e) => {
     const currentFocused = document.activeElement;
 
-    console.log("pressed", e.key);
+    // Simulate a click event
+    if (e.key === "Enter") {
+      currentFocused.click();
+    }
     if (e.key === "ArrowRight") {
       e.preventDefault();
     } else if (e.key === "ArrowLeft") {
@@ -100,11 +94,16 @@ function circularList(array, index) {
   }
 
   i = i % array.length;
-  console.log("trying to access i");
   return array[i];
 }
 
 function initAbout() {
+  if (isHidden(document.querySelector(".aboutWrapper"))) {
+    return;
+  }
+
+  console.log("initializing about...");
+
   // We don't want to focus on any of the items
   const tabbableElements = document
     .querySelector(".aboutWrapper")
@@ -113,6 +112,7 @@ function initAbout() {
     );
 
   tabbableElements.forEach((el) => el.setAttribute("tabIndex", "-1"));
+  initialized.about = true;
 }
 
 function updateSidebar() {
@@ -138,7 +138,172 @@ function updateSidebar() {
 const addCSS = (css) =>
   (document.head.appendChild(document.createElement("style")).innerHTML = css);
 
-console.log("observing");
+function notify(msg) {
+  if (window.Notification) {
+    new window.Notification(msg, {
+      silent: true,
+    });
+  }
+}
+
+// A simple way to test against display: none
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetParent
+function isHidden(el) {
+  if (!el) {
+    return true;
+  }
+
+  return el.offsetParent === null;
+}
+
+function initSearch() {
+  if (isHidden(document.querySelector(".welcomeWrapper"))) {
+    return;
+  }
+
+  console.log("initializing search...");
+
+  // Get the first of each category and make that focusable
+  const firstItems = document.querySelectorAll(
+    ".welcomeListGrid .gridWrapper:first-of-type"
+  );
+  firstItems.forEach((el) => el.setAttribute("tabIndex", "0"));
+
+  // Find all categories
+  const categories = document.querySelectorAll(
+    ".welcomeWrapper .contentWrapper .welcomeListWrapper"
+  );
+
+  if (categories.length <= 0) {
+    throw new Error("No items found!");
+  }
+
+  //
+  // channelActions
+
+  // For each category
+  categories.forEach((el) => {
+    const items = el.querySelectorAll(".gridWrapper");
+
+    // In practice there's only a single div, but we use querySelectorAll
+    // to graciously fail
+    // Plus, it supports both games and events
+    const actionSel = ".channelActions, .eventActions, .categoryActions";
+    const setActionsOpacity = (ancestor, opacity) => {
+      ancestor.querySelectorAll(actionSel).forEach((el2) => {
+        el2.style.opacity = opacity;
+      });
+    };
+
+    // When it's focused, set up opacity the actions opacity
+    // We used 'focusin' since this event bubbles
+    el.addEventListener("focusin", (e) => {
+      setActionsOpacity(el, 0);
+
+      setActionsOpacity(e.target, 1);
+    });
+
+    // It's focusing on another thing, let's remove the opacity
+    el.addEventListener("focusout", (e) => {
+      setActionsOpacity(el, 0);
+    });
+
+    // Register handler
+    el.addEventListener("keydown", (e) => {
+      const currentFocused = document.activeElement;
+      console.log("current focused is", currentFocused);
+
+      // Simulate a click event
+      if (e.key === "Enter") {
+        currentFocused.click();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const myIndex = Array.from(items).findIndex(
+          (a) => a === currentFocused
+        );
+
+        const nextItem = nextCircular(items, myIndex);
+
+        // Roving tabindex
+        currentFocused.setAttribute("tabIndex", "-1");
+        nextItem.setAttribute("tabIndex", "0");
+        nextItem.focus();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+
+        // Find next element, focus that
+        const myIndex = Array.from(items).findIndex(
+          (a) => a === currentFocused
+        );
+
+        const nextItem = prevCircular(items, myIndex);
+        // Roving tabindex
+        currentFocused.setAttribute("tabIndex", "-1");
+        nextItem.setAttribute("tabIndex", "0");
+        nextItem.focus();
+      }
+    });
+  });
+
+  // For each category create its own listener
+  // TODO: it doesn't handle
+  initialized.search = true;
+}
+
+// alert("starting");
+// https://stackoverflow.com/a/61725416
+function isElectron() {
+  // Renderer process
+  if (
+    typeof window !== "undefined" &&
+    typeof window.process === "object" &&
+    window.process.type === "renderer"
+  ) {
+    return true;
+  }
+
+  // Main process
+  if (
+    typeof process !== "undefined" &&
+    typeof process.versions === "object" &&
+    !!process.versions.electron
+  ) {
+    return true;
+  }
+
+  // Detect the user agent when the `nodeIntegration` option is set to true
+  if (
+    typeof navigator === "object" &&
+    typeof navigator.userAgent === "string" &&
+    navigator.userAgent.indexOf("Electron") >= 0
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+if (isElectron()) {
+  notify("Starting Arcade Stick Support...");
+  alert("hold");
+}
+var observer = new MutationObserver(function (mutations) {
+  console.log("mutation observer", initialized);
+
+  initialized.sidebar ? updateSidebar() : initSidebar();
+  !initialized.about && initAbout();
+  !initialized.search && initSearch();
+
+  console.log("end mutation observer", initialized);
+});
+
+const initialized = {
+  sidebar: false,
+  about: false,
+  search: false,
+};
+
 observer.observe(document, {
   attributes: false,
   childList: true,

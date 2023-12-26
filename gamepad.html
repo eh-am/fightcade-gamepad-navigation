@@ -1,0 +1,123 @@
+<head>
+<style>
+div:focus {
+}
+</style>
+</head>
+<body>
+<div id="foo" tabindex="0">ITEM 1</div>
+<div id="bare" tabindex="0">ITEM 2</div>
+<div id="bare" tabindex="0">ITEM 3</div>
+<div id="bare" tabindex="0">ITEM 4</div>
+<div id="bare" tabindex="0">ITEM 5</div>
+<div id="bare" tabindex="0">ITEM 6</div>
+<div id="bare" tabindex="0">ITEM 7</div>
+<div id="bare" tabindex="0">ITEM 8</div>
+<script>
+const foo = document.getElementById('foo');
+
+window.addEventListener("gamepadconnected", (e) => {
+  const gp = navigator.getGamepads()[e.gamepad.index];
+
+  setInterval(function(){
+  gameLoop();
+  }, 100)
+});
+
+foo.addEventListener("keydown", (e) => {
+  console.log(`pressed ${e.key}`);
+})
+
+/*
+ * Finds the next item in a circular list
+ */
+function nextCircular(array, index) {
+  return circularList(array, index + 1);
+}
+
+/*
+ * Finds the previous item in a circular list
+ */
+function prevCircular(array, index) {
+  return circularList(array, index - 1);
+}
+
+function circularList(array, index) {
+  let i = index;
+
+  // Support negative values
+  if (i < 0) {
+    i = i + array.length;
+  }
+
+  i = i % array.length;
+  return array[i];
+}
+
+
+function gameLoop() {
+  const gamepads = navigator.getGamepads();
+  if (!gamepads) {
+    return;
+  }
+
+  const gp = gamepads[0];
+  if (gp.buttons[0].pressed) {
+    handleTab(prevCircular)
+  }
+  if (gp.buttons[1].pressed) {
+    handleTab(nextCircular)
+
+    /*
+    handleTab(nextCircular)
+    // Find all tablable elements
+    const tabbableElements = document
+    .querySelectorAll(
+      "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
+    );
+    console.log("tappable", tabbableElements)
+
+    // TODO:
+    // https://stackoverflow.com/a/7329696
+
+    const currentFocused = document.activeElement;
+    const currentFocusedIndex = Array.from(tabbableElements).findIndex((a) => a === currentFocused);
+
+    let focusOn;
+    if (currentFocused) {
+      focusOn = nextCircular(tabbableElements, currentFocusedIndex);
+    } else {
+      focusOn = tabbableElements[0];
+    }
+
+    focusOn.focus();
+    */
+  }
+}
+
+function handleTab(nextItemFn) {
+    // Find all tablable elements
+    const tabbableElements = document
+    .querySelectorAll(
+      "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
+    );
+    console.log("tappable", tabbableElements)
+
+    // TODO:
+    // https://stackoverflow.com/a/7329696
+
+    const currentFocused = document.activeElement;
+    const currentFocusedIndex = Array.from(tabbableElements).findIndex((a) => a === currentFocused);
+
+    let focusOn;
+    if (currentFocused) {
+      focusOn = nextItemFn(tabbableElements, currentFocusedIndex);
+    } else {
+      focusOn = tabbableElements[0];
+    }
+
+    focusOn.focus();
+}
+
+</script>
+</body>
