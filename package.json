@@ -4,13 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "live-server --port=5001 --host=localhost .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc src/inject.ts --outfile out/inject.js",
+    "watch": "tsc src/inject.ts --watch --preserveWatchOutput --outfile out/inject.js",
+    "live-reload": "live-server --port=5001 --no-browser --host=localhost --watch='out, *.html' .",
+    "start": "concurrently 'npm run watch' 'npm run live-reload'"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "live-server": "^1.2.2"
+    "concurrently": "^8.2.2",
+    "live-server": "^1.2.2",
+    "typescript": "^5.3.3"
   }
 }

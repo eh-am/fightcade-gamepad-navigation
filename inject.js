@@ -192,8 +192,15 @@ function initSearch() {
 
   // TODO: this triggers the mutation observer again
   // Make items scrollable
-  // Originally it had grid, but I could not figure it out how it's supposed to work
   addCSS(`
+  /* with this grid implementation, focusing doesn't scrollIntoView for some reason */
+  /*
+  .welcomeListGrid, .welcomeListGridBig {
+    overflow: auto !important;
+    grid-auto-flow: column;
+    grid-auto-columns: 200px;
+  }
+  */
   .welcomeListGrid, .welcomeListGridBig {
     display: flex !important;
     overflow: auto !important; /* show scrollbar if necessary */
