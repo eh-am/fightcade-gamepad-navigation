@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc src/inject.ts --outfile out/inject.js",
-    "watch": "tsc src/inject.ts --watch --preserveWatchOutput --outfile out/inject.js",
+    "build": "tsc --build tsconfig.json",
+    "type-check": "tsc --noEmit --p tsconfig.json",
+    "watch": "tsc --skipLibCheck --watch --preserveWatchOutput --p tsconfig.json",
     "live-reload": "live-server --port=5001 --no-browser --host=localhost --watch='out, *.html' .",
     "start": "concurrently 'npm run watch' 'npm run live-reload'"
   },
@@ -16,5 +17,8 @@
     "concurrently": "^8.2.2",
     "live-server": "^1.2.2",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5"
   }
 }
