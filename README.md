@@ -29,3 +29,4 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] handle asynchronousness, ex when a lobby is added to the sidebar
 - [ ] inject custom js, like the <script src="inject.js"/> in dev mode
 - [ ] handle stick (axis) https://developer.mozilla.org/en-US/docs/Web/API/Gamepad/axes
+- [ ] use flexbox instead of grid? .wrapper: { display: flex, flexwrap }, children: { flex: 1 0 6rem; }

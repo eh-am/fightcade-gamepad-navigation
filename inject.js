@@ -173,8 +173,10 @@ function initSearch() {
   console.log("initializing search...");
 
   // Get the first of each category and make that focusable
+  // .welcomeListGridBig refers to the "Hidden Gems" section
   const firstItems = document.querySelectorAll(
-    ".welcomeListGrid .gridWrapper:first-of-type"
+    `.welcomeListGrid .gridWrapper:first-of-type,
+    .welcomeListGridBig .gridWrapper:first-of-type`
   );
   firstItems.forEach((el) => el.setAttribute("tabIndex", "0"));
 
@@ -184,9 +186,22 @@ function initSearch() {
   );
 
   if (categories.length <= 0) {
-    throw new Error("No items found!");
+    console.warn("Search: No items found. Returning early");
+    return;
   }
 
+  // TODO: this triggers the mutation observer again
+  // Make items scrollable
+  // Originally it had grid, but I could not figure it out how it's supposed to work
+  addCSS(`
+  .welcomeListGrid, .welcomeListGridBig {
+    display: flex !important;
+    overflow: auto !important; /* show scrollbar if necessary */
+  }
+  .welcomeListGrid .gridWrapper, .welcomeListGridBig .gridWrapper {
+    flex: 1 0 200px;
+  }
+   `);
   //
   // channelActions
 
