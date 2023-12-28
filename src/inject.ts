@@ -40,5 +40,3 @@ observer.observe(document, {
   characterData: false,
   subtree: true,
 });
-
-alert("HEY");
