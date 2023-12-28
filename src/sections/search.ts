@@ -1,4 +1,9 @@
-import { addCSS, findFocusableElements, isHidden } from "../dom";
+import {
+  addCSS,
+  findFocusableElements,
+  isHidden,
+  rovingTabIndex,
+} from "../dom";
 import * as CL from "../circularList";
 import { log } from "../log";
 
@@ -141,11 +146,10 @@ function moveToNextCard(
   const myIndex = Array.from(cards).findIndex((a) => a === currentCardFocused);
   const nextItem = nextFn(cards, myIndex);
 
-  // Roving tabindex
-  currentCardFocused.setAttribute("tabIndex", "-1");
   currentCardFocused.setAttribute("aria-expanded", "false");
 
-  nextItem.setAttribute("tabIndex", "0");
+  rovingTabIndex(currentCardFocused, nextItem);
+
   // TODO: try https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded#browser_compatibility ?
   nextItem.scrollIntoView({
     // TODO: behavior: smooth will scroll in the center??
