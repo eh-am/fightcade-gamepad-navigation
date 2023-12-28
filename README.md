@@ -35,3 +35,5 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] handle mix and matching keyboard focus and hover
 - [ ] make circular list take an element, not an index
 - [ ] focus on join first
+- [ ] upon joining, also enter lobby
+- [ ] in search there's a bug where multiple items may ge tfocus
