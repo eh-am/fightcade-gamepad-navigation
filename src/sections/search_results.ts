@@ -2,6 +2,7 @@ import { log } from "../log";
 import { addCSS } from "../dom";
 import { Teardown } from "../types";
 import { setupGrid } from "./components/grid";
+import * as CL from "../circularList";
 
 function css() {
   addCSS(`
@@ -32,7 +33,7 @@ function css() {
   */
   `);
 }
-function setupFooter() {
+function setupFooter(section: HTMLElement) {
   moveFooterUpTheDOM();
 
   const footerButtons = document.querySelectorAll<HTMLElement>(
@@ -40,9 +41,47 @@ function setupFooter() {
   );
 
   // Make it tabbable
-  if (footerButtons && footerButtons[0]) {
-    footerButtons[0].setAttribute("tabIndex", "0");
+  // TODO: we should set tabindex=0 to the first non disabled button
+  Array.from(footerButtons).forEach((el, i) => {
+    el.setAttribute("tabIndex", i === 0 ? "0" : "-1");
+  });
+
+  const fn = function (e: Event) {
+    const currentFocused = document.activeElement as HTMLElement;
+    const footerButtons = document.querySelectorAll<HTMLElement>(
+      ".searchWrapper .paginationWrapper .button-alt"
+    );
+    const myIndex = Array.from(footerButtons).findIndex(
+      (a) => a === currentFocused
+    );
+
+    // TODO: figure out why setting KeyboardEvent in the event doesn't type check
+    const keyPressed = (e as KeyboardEvent).key;
+    if (keyPressed === "Enter") {
+      e.preventDefault();
+      currentFocused.click();
+    } else if (keyPressed === "ArrowLeft") {
+      e.preventDefault();
+      CL.prev(footerButtons, myIndex).focus();
+    } else if (keyPressed === "ArrowRight") {
+      e.preventDefault();
+      CL.next(footerButtons, myIndex).focus();
+    }
+  };
+
+  // Receive events
+  //searchResultsWrapper;
+  const footer = section.querySelector(".searchWrapper .paginationWrapper");
+  if (!footer) {
+    return () => {
+      log("noop teardown");
+    };
   }
+  footer.addEventListener("keydown", fn);
+
+  return () => {
+    footer.removeEventListener("keydown", fn);
+  };
 }
 
 /*
@@ -76,22 +115,27 @@ export function initSearchResults(): boolean {
   return true;
 }
 
-let teardown: Teardown;
+let teardown: Teardown[] = [];
 
 /**
  * update, should be idempotent
  */
 export function updateSearchResults() {
-  if (teardown) {
-    teardown();
-  }
-  const root = document.querySelector<HTMLElement>(
+  log("updating search results");
+
+  teardown.forEach((fn) => {
+    fn();
+  });
+  teardown = [];
+
+  const root = document.querySelector<HTMLElement>(".searchWrapper");
+  const rootGrid = document.querySelector<HTMLElement>(
     ".searchWrapper .searchResultsGrid"
   );
-  if (!root) {
+  if (!root || !rootGrid) {
     return () => {};
   }
 
-  teardown = setupGrid(root, ".channelWrapper");
-  setupFooter();
+  teardown.push(setupGrid(rootGrid, ".channelWrapper"));
+  teardown.push(setupFooter(root));
 }

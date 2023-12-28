@@ -39,9 +39,10 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] in search there's a bug where multiple items may ge tfocus
 - [ ] make outside links unclickable, or give a warning
 - [ ] upon clicking "JOIN" | "FAV", bring focus back
-- [ ] pressing scape should go to next tabbable parent?
+- [ ] pressing escape should go to next tabbable parent?
 - [X] prepare a teardown, so that dynamic movement works
-- [ ] TESTS: if upon changing the dom (to triggger delete an item), it still works
+- [ ] TESTS: if upon changing the dom (to trigger delete an item), it still works
+- [ ] DEV: add an easy way to kill an item (to trigger a DOM reload)
 
 # Pages
 

@@ -72,4 +72,4 @@ const PAGES = {
   SEARCH_RESULTS: ".searchWrapper",
 };
 
-const searchResultsObserver = new MutationObserver(() => updateSearchResults);
+const searchResultsObserver = new MutationObserver(() => updateSearchResults());

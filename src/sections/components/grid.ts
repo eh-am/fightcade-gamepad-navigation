@@ -12,7 +12,7 @@ function isActionButton(el: HTMLElement | null) {
 /**
  * Upon focusing out a card
  */
-function setupCardFocusOut(section: HTMLElement, cardQuery: string) {
+function setupCardFocusOut(section: HTMLElement, cardQuery: string): Teardown {
   // When focusing out of a card,
   section.querySelectorAll<HTMLElement>(cardQuery).forEach((card) => {
     card.addEventListener("focusout", (event) => {
@@ -31,13 +31,17 @@ function setupCardFocusOut(section: HTMLElement, cardQuery: string) {
       });
     });
   });
+
+  return () => {
+    log("should teardown this function");
+  };
 }
 
 /**
  * When it's focused, make the actions visible
  * We used 'focusin' since this event bubbles
  */
-function setupFocusIn(section: HTMLElement) {
+function setupFocusIn(section: HTMLElement): Teardown {
   section.addEventListener("focusin", (e) => {
     const focusingTo = e.target as HTMLElement | null;
     log("focusing in", focusingTo);
@@ -51,6 +55,10 @@ function setupFocusIn(section: HTMLElement) {
       return;
     }
   });
+
+  return () => {
+    log("should teardown this function");
+  };
 }
 
 function makeButtonsTappable(section: HTMLElement) {
@@ -275,5 +283,6 @@ export function setupGrid(section: HTMLElement, cardQuery: string): Teardown {
   makeButtonsTappable(section);
   setupFocusIn(section);
   setupCardFocusOut(section, cardQuery);
+
   return setupKeyDownListeners(section, cardQuery);
 }
