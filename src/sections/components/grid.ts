@@ -244,7 +244,6 @@ function setupKeyDownListeners(section: HTMLElement, cardQuery: string) {
           cardQuery,
           (array, index, numPerRow) => {
             const dest = index - numPerRow + 1;
-            log("current index", index, "should go to", dest);
             return CL.prev(array, dest);
           }
         );

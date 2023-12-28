@@ -59,3 +59,12 @@ export function isHidden(el: HTMLElement | null) {
 
   return el.offsetParent === null;
 }
+
+/**
+ * roving tabIndex technique
+ * https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex
+ */
+export function rovingTabIndex(oldEl: Element, newEl: Element) {
+  oldEl.setAttribute("tabIndex", "-1");
+  newEl.setAttribute("tabIndex", "0");
+}

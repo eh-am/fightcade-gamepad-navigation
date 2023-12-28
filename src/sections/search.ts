@@ -1,4 +1,9 @@
-import { addCSS, findFocusableElements, isHidden } from "../dom";
+import {
+  addCSS,
+  findFocusableElements,
+  isHidden,
+  rovingTabIndex,
+} from "../dom";
 import * as CL from "../circularList";
 import { log } from "../log";
 
@@ -125,30 +130,6 @@ function isActionButton(el: HTMLElement | null) {
   return el?.tagName === "A";
 }
 
-function moveToNextCardVertical(
-  section: HTMLElement,
-  currentFocused: HTMLElement,
-  cardQuery: string,
-  nextFn: typeof CL.next
-) {
-  // TODO:  move within grid
-  // https://stackoverflow.com/a/49090306
-  const gridItems = Array.from(
-    section.querySelectorAll<HTMLElement>(cardQuery)
-  );
-  const baseOffset = gridItems[0].offsetTop;
-  const breakIndex = gridItems.findIndex((item) => item.offsetTop > baseOffset);
-  const numPerRow = breakIndex === -1 ? gridItems.length : breakIndex;
-  log("i got ", numPerRow, "per row");
-
-  moveToNextCard(
-    section,
-    currentFocused,
-    (items: ListOfHTML, index: number) => nextFn(items, index + numPerRow - 1),
-    cardQuery
-  );
-}
-
 function moveToNextCard(
   section: HTMLElement,
   currentFocused: HTMLElement,
@@ -165,11 +146,10 @@ function moveToNextCard(
   const myIndex = Array.from(cards).findIndex((a) => a === currentCardFocused);
   const nextItem = nextFn(cards, myIndex);
 
-  // Roving tabindex
-  currentCardFocused.setAttribute("tabIndex", "-1");
   currentCardFocused.setAttribute("aria-expanded", "false");
 
-  nextItem.setAttribute("tabIndex", "0");
+  rovingTabIndex(currentCardFocused, nextItem);
+
   // TODO: try https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded#browser_compatibility ?
   nextItem.scrollIntoView({
     // TODO: behavior: smooth will scroll in the center??

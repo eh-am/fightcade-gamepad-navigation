@@ -1,5 +1,5 @@
 import { log } from "../log";
-import { addCSS } from "../dom";
+import { addCSS, rovingTabIndex } from "../dom";
 import { Teardown } from "../types";
 import { setupGrid } from "./components/grid";
 import * as CL from "../circularList";
@@ -33,7 +33,7 @@ function css() {
   */
   `);
 }
-function setupFooter(section: HTMLElement) {
+function setupFooter(section: HTMLElement): Teardown {
   moveFooterUpTheDOM();
 
   const footerButtons = document.querySelectorAll<HTMLElement>(
@@ -62,15 +62,19 @@ function setupFooter(section: HTMLElement) {
       currentFocused.click();
     } else if (keyPressed === "ArrowLeft") {
       e.preventDefault();
-      CL.prev(footerButtons, myIndex).focus();
+
+      const next = CL.prev(footerButtons, myIndex);
+      rovingTabIndex(currentFocused, next);
+      next.focus();
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();
-      CL.next(footerButtons, myIndex).focus();
+
+      const next = CL.next(footerButtons, myIndex);
+      rovingTabIndex(currentFocused, next);
+      next.focus();
     }
   };
 
-  // Receive events
-  //searchResultsWrapper;
   const footer = section.querySelector(".searchWrapper .paginationWrapper");
   if (!footer) {
     return () => {
