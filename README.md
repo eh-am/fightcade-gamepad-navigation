@@ -37,3 +37,4 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] focus on join first
 - [ ] upon joining, also enter lobby
 - [ ] in search there's a bug where multiple items may ge tfocus
+- [ ] make outside links unclickable, or give a warning

@@ -3,6 +3,80 @@ import * as CL from "../circularList";
 import { log } from "../log";
 import { ListOfHTML } from "../types";
 
+/**
+ * We can treat each card as a "submenu", ie.
+ * It has focus, and upon <Enter>,
+ * it expands its submenus (aka its Action Buttons)
+ */
+function handleGrid(section: HTMLElement) {
+  //  section.addEventListener("focusin", (e) => {
+  //    const focusingTo = e.target as HTMLElement | null;
+  //  });
+}
+
+function moveToNextCard(
+  section: HTMLElement,
+  currentFocused: HTMLElement,
+  nextFn: typeof CL.next
+) {
+  // Find current card focused, since we could be either focusing on the card already, or on its action buttons
+  const currentCardFocused = currentFocused.closest(".gridWrapper");
+  if (!currentCardFocused) {
+    return;
+  }
+  log("currentCardFocused", currentCardFocused);
+
+  // Find all cards under the same section
+  const cards = section.querySelectorAll<HTMLElement>(".gridWrapper");
+  const myIndex = Array.from(cards).findIndex((a) => a === currentCardFocused);
+  const nextItem = nextFn(cards, myIndex);
+  log("currentFocused", currentFocused);
+  log("cards", cards);
+  log("focusing on nextItem", nextItem);
+
+  // Roving tabindex
+  currentCardFocused.setAttribute("tabIndex", "-1");
+  nextItem.setAttribute("tabIndex", "0");
+  nextItem.focus();
+}
+
+// TODO: if there's a single action, hitting enter should click on it
+function handleEnter() {
+  log("Handling enter");
+  const currentFocused = document.activeElement as HTMLElement;
+  if (!currentFocused) {
+    return;
+  }
+
+  // TODO: this is a brittle selector, since it assumes action buttons are <a>
+  const actionSel = `.channelActions a, .eventActions a, .categoryActions a`;
+
+  // If it's focused the card,
+  // ie. it contains actions
+  // Let's focus on the first action
+  const actions = currentFocused.querySelectorAll<HTMLElement>(actionSel);
+  if (actions && actions[0]) {
+    actions[0].focus();
+    return;
+  }
+
+  // We are likely focused on the action button
+  // So let's click it
+  currentFocused.click();
+}
+
+// Get the first of each category and make that focusable
+// .welcomeListGridBig refers to the "Hidden Gems" section
+function makeFirstCardFocusable() {
+  const firstItems = document.querySelectorAll(
+    `.welcomeListGrid .gridWrapper:first-of-type,
+    .welcomeListGridBig .gridWrapper:first-of-type`
+  );
+  firstItems.forEach((firstAction) => {
+    firstAction.setAttribute("tabIndex", "0");
+  });
+}
+
 export function initSearch(): boolean {
   const rootElement = document.querySelector(".welcomeWrapper");
   if (isHidden(document.querySelector(".welcomeWrapper"))) {
@@ -20,7 +94,8 @@ export function initSearch(): boolean {
      .welcomeListGridBig .categoryActions a
     `;
 
-  // Make all action buttons non tabbable, since we will handle that manually
+  // By default <a> tags are tabbable, so let's disable it
+  // since we will handle that manually
   const actionsButtons = document.querySelectorAll<HTMLElement>(
     `.welcomeListGrid .channelActions a,
      .welcomeListGrid .eventActions a,
@@ -34,28 +109,31 @@ export function initSearch(): boolean {
     a.setAttribute("tabIndex", "-1");
   });
 
+  makeFirstCardFocusable();
+
   // Get the first of each category and make that focusable
   // .welcomeListGridBig refers to the "Hidden Gems" section
-  const firstItems = document.querySelectorAll(
-    `.welcomeListGrid .gridWrapper:first-of-type,
-    .welcomeListGridBig .gridWrapper:first-of-type`
-  );
-  firstItems.forEach((el) => {
-    // Find their actions
-    // TODO: this is naive since it assumes it's an <a> tag
-    const actions = el.querySelectorAll<HTMLElement>(
-      ".channelActions a, .eventActions a, .categoryActions a"
-    );
-
-    // TODO: prefer to focus on 'join' first
-    // let the first item to be focusable
-    const firstAction = actions[0];
-    if (firstAction) {
-      log("setting tabindex", firstAction);
-      firstAction.setAttribute("tabIndex", "0");
-    }
-  });
-
+  //  const firstItems = document.querySelectorAll(
+  //    `.welcomeListGrid .gridWrapper:first-of-type,
+  //    .welcomeListGridBig .gridWrapper:first-of-type`
+  //  );
+  //  firstItems.forEach((firstAction) => {
+  //    firstAction.setAttribute("tabIndex", "0");
+  //    // Find their actions
+  //    // TODO: this is naive since it assumes it's an <a> tag
+  //    //    const actions = el.querySelectorAll<HTMLElement>(
+  //    //      ".channelActions a, .eventActions a, .categoryActions a"
+  //    //    );
+  //    //
+  //    //    // TODO: prefer to focus on 'join' first
+  //    //    // let the first item to be focusable
+  //    //    const firstAction = actions[0];
+  //    //    if (firstAction) {
+  //    //      log("setting tabindex", firstAction);
+  //    //      firstAction.setAttribute("tabIndex", "0");
+  //    //    }
+  //  });
+  //
   // Find all categories
   const categories = document.querySelectorAll<HTMLElement>(
     ".welcomeWrapper .contentWrapper .welcomeListWrapper"
@@ -102,8 +180,8 @@ export function initSearch(): boolean {
 
   log("setting up categories...");
   // For each category
-  categories.forEach((el) => {
-    const items = el.querySelectorAll<HTMLElement>(".gridWrapper");
+  categories.forEach((category) => {
+    const items = category.querySelectorAll<HTMLElement>(".gridWrapper");
 
     // TODO: inline this
     const setActionsOpacity = (ancestor: HTMLElement, opacity: string) => {
@@ -118,7 +196,7 @@ export function initSearch(): boolean {
 
     // Actions are implemented as <A>
     // Which require a 'href' parameter to be focusable
-    el.querySelectorAll<HTMLElement>(actionSel).forEach((actions) => {
+    category.querySelectorAll<HTMLElement>(actionSel).forEach((actions) => {
       const buttons = Array.from(actions.querySelectorAll<HTMLElement>("a"));
 
       //      buttons.forEach((a) => {
@@ -136,7 +214,7 @@ export function initSearch(): boolean {
 
     // When it's focused, make the actions visible
     // We used 'focusin' since this event bubbles
-    el.addEventListener("focusin", (e) => {
+    category.addEventListener("focusin", (e) => {
       const focusingTo = e.target as HTMLElement | null;
 
       // If one of my children is being focused, leave my focus on
@@ -164,7 +242,7 @@ export function initSearch(): boolean {
     });
 
     // It's focusing on another thing, let's remove the opacity
-    el.addEventListener("focusout", (e) => {
+    category.addEventListener("focusout", (e) => {
       const currentFocused = e.target as HTMLElement | null;
       const focusingTo = e.relatedTarget;
 
@@ -219,11 +297,11 @@ export function initSearch(): boolean {
       //        return;
       //      }
 
-      setActionsOpacity(el, "0");
+      setActionsOpacity(category, "0");
     });
 
     // Register handler
-    el.addEventListener("keydown", (e) => {
+    category.addEventListener("keydown", (e) => {
       const currentFocused = document.activeElement as HTMLElement;
 
       if (!currentFocused) {
@@ -233,63 +311,14 @@ export function initSearch(): boolean {
       // TODO: figure out why setting KeyboardEvent in the event doesn't type check
       const keyPressed = (e as KeyboardEvent).key;
 
-      if (keyPressed === "ArrowRight" || keyPressed === "ArrowLeft") {
+      if (keyPressed === "ArrowLeft") {
         e.preventDefault();
-
-        // Find all buttons
-        // Find the current focused index
-        // Focus on the next
-        const parent = currentFocused.closest(".gridWrapper");
-        if (!parent) {
-          throw new Error("could not find parent");
-        }
-
-        let items: ListOfHTML | undefined = currentFocused
-          .closest(".welcomeListGrid, .welcomeListGridBig")
-          ?.querySelectorAll<HTMLElement>(actionsButtonQuery);
-
-        if (!items) {
-          log(items);
-          log(currentFocused);
-          throw new Error("could not find other items");
-        }
-        log();
-
-        // Remove the items from the same parent
-        // Except me
-        items = Array.from(items).filter((a) => {
-          if (currentFocused === a) {
-            return true;
-          }
-          return !parent.contains(a);
-        });
-
-        const myIndex = Array.from(items).findIndex(
-          (a) => a === currentFocused
-        );
-
-        // Make current unfocable
-        currentFocused.setAttribute("tabIndex", "-1");
-
-        if (keyPressed === "ArrowRight") {
-          // Find next action button
-          const nextItem = CL.next(items, myIndex);
-          nextItem.setAttribute("tabIndex", "0");
-          nextItem.focus();
-        } else if (keyPressed === "ArrowLeft") {
-          // Find next action button
-          const nextItem = CL.prev(items, myIndex);
-          nextItem.setAttribute("tabIndex", "0");
-          nextItem.focus();
-        }
-
-        // Find the Join button
-        //
-        //        // Roving tabindex
-        //        currentFocused.setAttribute("tabIndex", "-1");
-        //        nextItem.setAttribute("tabIndex", "0");
-        //        nextItem.focus();
+        moveToNextCard(category, currentFocused, CL.prev);
+      } else if (keyPressed === "ArrowRight") {
+        e.preventDefault();
+        moveToNextCard(category, currentFocused, CL.next);
       } else if (keyPressed === "Enter") {
+        handleEnter();
         // We don't even need to do anything here
         // TODO:
         //alert("Should Join");
@@ -339,8 +368,8 @@ export function initSearch(): boolean {
             keyPressed === "ArrowUp"
               ? CL.prev(buttons, myIndex)
               : CL.next(buttons, myIndex);
-          currentFocused.setAttribute("tabIndex", "-1");
-          next.setAttribute("tabIndex", "0");
+          //          currentFocused.setAttribute("tabIndex", "-1");
+          //          next.setAttribute("tabIndex", "0");
 
           next.focus();
         }
