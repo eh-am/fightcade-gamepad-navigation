@@ -43,6 +43,7 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [X] prepare a teardown, so that dynamic movement works
 - [ ] TESTS: if upon changing the dom (to trigger delete an item), it still works
 - [ ] DEV: add an easy way to kill an item (to trigger a DOM reload)
+- [ ] create a custom select, since we cant trigger it manually :(
 
 # Pages
 

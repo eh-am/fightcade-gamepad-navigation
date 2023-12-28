@@ -65,6 +65,10 @@ export function isHidden(el: HTMLElement | null) {
  * https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex
  */
 export function rovingTabIndex(oldEl: Element, newEl: Element) {
-  oldEl.setAttribute("tabIndex", "-1");
-  newEl.setAttribute("tabIndex", "0");
+  if (oldEl) {
+    oldEl.setAttribute("tabIndex", "-1");
+  }
+  if (newEl) {
+    newEl.setAttribute("tabIndex", "0");
+  }
 }

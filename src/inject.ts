@@ -10,6 +10,7 @@ import {
 } from "./sections/search_results";
 import { log } from "./log";
 import { Teardown } from "./types";
+import { initSearchHeader } from "./sections/search-header";
 
 if (isElectron()) {
   notify("Starting Arcade Stick Support...");
@@ -20,6 +21,7 @@ const initialized = {
   about: false,
   search: false,
   search_results: false,
+  search_header: false,
 };
 
 initGamepad();
@@ -41,6 +43,12 @@ const observer = new MutationObserver(function () {
 
   if (!initialized.search) {
     initialized.search = initSearch();
+  }
+  const searchHeaderRoot = document.querySelector<HTMLElement>(
+    ".welcomeWrapper > .contentWrapper > header"
+  );
+  if (!initialized.search_header && searchHeaderRoot) {
+    initialized.search_header = initSearchHeader(searchHeaderRoot);
   }
 
   const searchResultsRoot = document.querySelector(PAGES.SEARCH_RESULTS);
