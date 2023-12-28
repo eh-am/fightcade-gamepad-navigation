@@ -29,5 +29,9 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] handle asynchronousness, ex when a lobby is added to the sidebar
 - [ ] inject custom js, like the <script src="inject.js"/> in dev mode
 - [ ] handle stick (axis) https://developer.mozilla.org/en-US/docs/Web/API/Gamepad/axes
-- [ ] use flexbox instead of grid? .wrapper: { display: flex, flexwrap }, children: { flex: 1 0 6rem; }
-- [ ] add bundling
+- [x] use flexbox instead of grid? .wrapper: { display: flex, flexwrap }, children: { flex: 1 0 6rem; }
+- [x] add bundling
+- [ ] reduce number of event listeners, ideally one per category?
+- [ ] handle mix and matching keyboard focus and hover
+- [ ] make circular list take an element, not an index
+- [ ] focus on join first

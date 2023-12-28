@@ -5,10 +5,20 @@ export function getCurrentFocusedElement() {
   return document.activeElement;
 }
 
+/**
+ * Very naive implementation, since it doesn't deal with
+ * tabIndex, disabled/items etc
+ */
+export function findFocusableElements(e?: Element) {
+  const root = e ? e : document;
+
+  return root.querySelectorAll<HTMLElement>(
+    "a, audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
+  );
+}
 /*
- * Reimplement tabbing
+ * Reimplement tabbing naively
  * Notice that it follows only the DOM order
- * Ie no positive tabIndex handling/disabled items
  * Source: https://stackoverflow.com/a/7329696
  */
 export function handleTab(

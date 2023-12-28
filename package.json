@@ -1,12 +1,12 @@
 {
-  "name": "keyboard-navigation-playground",
+  "name": "fightcade-better-navigation",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild --bundle src/inject.ts --outfile=out/inject.js",
+    "build": "esbuild --define:FBN_DEBUG=false --bundle src/inject.ts --outfile=out/inject.js",
     "type-check": "tsc --noEmit --p tsconfig.json",
-    "watch": "esbuild --watch --bundle src=src/inject.ts --outfile=out/inject.js",
+    "watch": "esbuild --watch --define:FBN_DEBUG=true --bundle src=src/inject.ts --outfile=out/inject.js",
     "live-reload": "live-server --port=5001 --no-browser --host=localhost --watch='out, *.html' .",
     "start": "concurrently 'npm run watch' 'npm run live-reload'"
   },
