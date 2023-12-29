@@ -1,3 +1,5 @@
+//import "../vendor/controllerjs/unminified/Controller.js";
+
 import { initGamepad } from "./gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
 import { initAbout } from "./sections/about";
