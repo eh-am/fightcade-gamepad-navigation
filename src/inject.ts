@@ -24,9 +24,8 @@ const initialized = {
   search: false,
   search_results: false,
   search_header: false,
+  gamepad: false,
 };
-
-initGamepad();
 
 const observerOptions = {
   attributes: false,
@@ -37,9 +36,13 @@ const observerOptions = {
 
 /**
  * Observe every single DOM change
+ * TODO: ideally we should wait until the app is initialized
  */
 const observer = new MutationObserver(function () {
-  console.log("observing");
+  if (!initialized.gamepad) {
+    initGamepad();
+    initialized.gamepad = true;
+  }
   if (initialized.sidebar) {
     updateSidebar();
   } else {

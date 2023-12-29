@@ -864,7 +864,7 @@ Controller.search = function (options) {
         clearInterval(this.interval);
         return;
       }
-      for (var index in this.gamepads) {
+      for (var index in Array.from(this.gamepads)) {
         index = parseInt(index, 10);
         if (isNaN(index)) {
           return;
