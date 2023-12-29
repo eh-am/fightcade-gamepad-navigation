@@ -48,8 +48,10 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] BUG: welcome page stops working after doing a search :\
 - [ ] do tab roving for the filters, clear them and default to input when they are collapsed
 - [ ] implement escape
-- [ ] manual tabbing with the gamepad is kinda broken, it's focusing on the wrong thing
 - [ ] I had to export controller.js manually, ideally the bundler should be able to handle it
+- [ ] support left analog
+- [ ] support hold button
+- [ ] in search welcome page, allow navigating with arrowkeys instead of tab
 
 # Pages
 
