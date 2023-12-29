@@ -10,6 +10,7 @@ import {
 } from "./sections/search_results";
 import { log } from "./log";
 import { Teardown } from "./types";
+import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
 
 if (isElectron()) {
   notify("Starting Arcade Stick Support...");
@@ -20,9 +21,17 @@ const initialized = {
   about: false,
   search: false,
   search_results: false,
+  search_header: false,
 };
 
 initGamepad();
+
+const observerOptions = {
+  attributes: false,
+  childList: true,
+  characterData: false,
+  subtree: true,
+};
 
 /**
  * Observe every single DOM change
@@ -43,6 +52,26 @@ const observer = new MutationObserver(function () {
     initialized.search = initSearch();
   }
 
+  // There are multiple search headers lol
+  const searchHeaderInWelcomeRoot = document.querySelector<HTMLElement>(
+    ".welcomeWrapper > .contentWrapper > header"
+  );
+  const searchHeaderInSearchRoot = document.querySelector<HTMLElement>(
+    ".searchWrapper > .contentWrapper > header"
+  );
+
+  // There are 2 search headers, depending on the page
+  if (
+    !initialized.search_header &&
+    searchHeaderInWelcomeRoot &&
+    searchHeaderInSearchRoot
+  ) {
+    const init1 = initSearchHeader(searchHeaderInWelcomeRoot);
+    const init2 = initSearchHeader(searchHeaderInSearchRoot);
+
+    initialized.search_header = init1 && init2;
+  }
+
   const searchResultsRoot = document.querySelector(PAGES.SEARCH_RESULTS);
   if (!initialized.search_results && searchResultsRoot) {
     log("Initializing search results");
@@ -52,21 +81,11 @@ const observer = new MutationObserver(function () {
     // Trigger manually the first time
     updateSearchResults();
 
-    searchResultsObserver.observe(searchResultsRoot, {
-      attributes: false,
-      childList: true,
-      characterData: false,
-      subtree: true,
-    });
+    searchResultsObserver.observe(searchResultsRoot, observerOptions);
   }
 });
 
-observer.observe(document, {
-  attributes: false,
-  childList: true,
-  characterData: false,
-  subtree: true,
-});
+observer.observe(document, observerOptions);
 
 const PAGES = {
   SEARCH_RESULTS: ".searchWrapper",

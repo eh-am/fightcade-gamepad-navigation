@@ -43,6 +43,12 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [X] prepare a teardown, so that dynamic movement works
 - [ ] TESTS: if upon changing the dom (to trigger delete an item), it still works
 - [ ] DEV: add an easy way to kill an item (to trigger a DOM reload)
+- [ ] create a custom select, since we cant trigger it manually :(
+- [ ] bug: sometimes pagination gets two items with tabindex == 0
+- [ ] BUG: welcome page stops working after doing a search :\
+- [ ] do tab roving for the filters, clear them and default to input when they are collapsed
+- [ ] implement escape
+- [ ] manual tabbing with the gamepad is kinda broken, it's focusing on the wrong thing
 
 # Pages
 
@@ -50,3 +56,33 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - Search Result
 - All Games -> open when you search for an empty string
 - Lobby
+
+
+# Recipees
+
+## Debugging the application on deck
+
+1. Create a Fightcade_debug.desktop
+```
+!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=/home/deck/Documents/Fightcade/Fightcade2.sh --remote-debugging-port=8315
+Name=Fightcade Debug
+Comment=Fightcade
+Categories=Game;Emulator;ArcadeGame
+Icon=/home/deck/Documents/Fightcade/fc2-electron/resources/app/icon.png
+~
+```
+
+2. Open desktop mode, open fightcade_bebug
+
+3. Make a ssh tunnel (from your pc)
+
+```
+ssh -L 8315:localhost:8315 deck@steamdeck
+```
+
+4. Open `http://localhost:8315` in chrome

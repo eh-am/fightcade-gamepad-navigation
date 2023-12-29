@@ -125,8 +125,6 @@ let teardown: Teardown[] = [];
  * update, should be idempotent
  */
 export function updateSearchResults() {
-  log("updating search results");
-
   teardown.forEach((fn) => {
     fn();
   });
