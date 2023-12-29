@@ -1,7 +1,7 @@
 import { log } from "../../log";
 import * as CL from "../../circularList";
 import { findFocusableElements } from "../../dom";
-import { ListOfHTML, Teardown } from "../../types";
+import { Teardown } from "../../types";
 
 const actionSel = ".channelActions, .eventActions, .categoryActions";
 
@@ -83,9 +83,6 @@ function makeButtonsTappable(section: HTMLElement) {
 function makeFirstCardFocusable(section: HTMLElement, cardClassName: string) {
   const firstItems = section.querySelectorAll(`${cardClassName}:first-of-type`);
 
-  log("section", section);
-  log("fisrtItems", firstItems);
-
   firstItems.forEach((firstAction) => {
     firstAction.setAttribute("tabIndex", "0");
   });
@@ -103,7 +100,6 @@ function handleEnter(cardQuery: string) {
     return;
   }
 
-  log("setting aria expanded of", currentCardFocused);
   currentCardFocused.setAttribute("aria-expanded", "true");
 
   // TODO: this is a brittle selector, since it assumes action buttons are <a>

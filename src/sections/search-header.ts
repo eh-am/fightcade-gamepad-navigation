@@ -1,6 +1,7 @@
 import { rovingTabIndex } from "../dom";
 import * as CL from "../circularList";
 import { log } from "../log";
+import { Teardown } from "../types";
 
 export function initSearchHeader(root: HTMLElement): boolean {
   // Although <input> doesn't need it, it's a good idea to leave it explitly
@@ -16,13 +17,14 @@ export function initSearchHeader(root: HTMLElement): boolean {
   const selects = root.querySelectorAll<HTMLElement>("select");
   selects.forEach((el) => el.setAttribute("tabIndex", "-1"));
 
-  // TODO: if it ever changes, we will need a teardown setup
   setupKeyDownListeners(root);
   return true;
 }
 
-function setupKeyDownListeners(root: HTMLElement) {
-  root.addEventListener("keydown", (e) => {
+export function updateSearchHeader(root: HTMLElement) {}
+
+function setupKeyDownListeners(root: HTMLElement): Teardown {
+  const fn = (e: Event) => {
     const currentFocused = document.activeElement as HTMLElement;
 
     if (!currentFocused) {
@@ -31,6 +33,7 @@ function setupKeyDownListeners(root: HTMLElement) {
 
     // TODO: figure out why setting KeyboardEvent in the event doesn't type check
     const keyPressed = (e as KeyboardEvent).key;
+    log("keypressed", keyPressed);
 
     if (keyPressed === "ArrowLeft" || keyPressed === "ArrowRight") {
       e.preventDefault();
@@ -51,7 +54,14 @@ function setupKeyDownListeners(root: HTMLElement) {
       log("should move vertically");
       moveVertically(root, currentFocused);
     }
-  });
+  };
+
+  log("adding listener to", root);
+  root.addEventListener("keydown", fn);
+  return () => {
+    log("tearing down keydown");
+    root.removeEventListener("keydown", fn);
+  };
 }
 
 function getFirstRowItems(root: HTMLElement) {
