@@ -8,9 +8,13 @@ export function initSearchHeader(root: HTMLElement): boolean {
   const input = root.querySelector<HTMLElement>("input");
   input?.setAttribute("tabIndex", "0");
 
-  // The button needs this to be tabbable
+  // The filter button needs this to be tabbable
   const button = root.querySelector<HTMLElement>(".filtersButton");
   button?.setAttribute("tabIndex", "-1");
+
+  // The clear filters button needs this to be tabbable
+  const clearFiltersButton = getThirdRowItems(root);
+  clearFiltersButton.forEach((el) => el.setAttribute("tabIndex", "-1"));
 
   // The select filters are tabbable by default, but since we are going to manage
   // navigation manually, let's make them not tabbable
@@ -48,11 +52,12 @@ function setupKeyDownListeners(root: HTMLElement): Teardown {
       } else {
         currentFocused.click();
       }
-    } else if (keyPressed === "ArrowUp" || keyPressed === "ArrowDown") {
+    } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
-
-      log("should move vertically");
-      moveVertically(root, currentFocused);
+      moveVertically(root, currentFocused, "UP");
+    } else if (keyPressed === "ArrowDown") {
+      e.preventDefault();
+      moveVertically(root, currentFocused, "DOWN");
     }
   };
 
@@ -72,18 +77,34 @@ function getSecondRowItems(root: HTMLElement) {
   return root.querySelectorAll<HTMLElement>(".filtersList select");
 }
 
-function moveVertically(root: HTMLElement, currentFocused: HTMLElement) {
+function getThirdRowItems(root: HTMLElement) {
+  return root.querySelectorAll<HTMLElement>(".filtersWrapper > .button-alt");
+}
+
+function moveVertically(
+  root: HTMLElement,
+  currentFocused: HTMLElement,
+  direction: "UP" | "DOWN"
+) {
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
 
   switch (row) {
     case "FIRST": {
-      items = getSecondRowItems(root);
+      items =
+        direction === "UP" ? getThirdRowItems(root) : getSecondRowItems(root);
       break;
     }
 
     case "SECOND": {
-      items = getFirstRowItems(root);
+      items =
+        direction === "UP" ? getFirstRowItems(root) : getThirdRowItems(root);
+      break;
+    }
+
+    case "THIRD": {
+      items =
+        direction === "UP" ? getSecondRowItems(root) : getFirstRowItems(root);
       break;
     }
     default: {
@@ -120,6 +141,10 @@ function moveHorizontally(
       items = getSecondRowItems(root);
       break;
     }
+    case "THIRD": {
+      // Do nothing, since there's only a single item in this row
+      return;
+    }
     default: {
       throw new Error("Could not identify correct row");
     }
@@ -137,15 +162,22 @@ function moveHorizontally(
 }
 
 // TODO: kinda naive
-function identifyRow(el: HTMLElement): "FIRST" | "SECOND" {
+function identifyRow(el: HTMLElement): "FIRST" | "SECOND" | "THIRD" {
   const isFirstRow = el.closest(".inputWrapper");
   if (isFirstRow) {
     return "FIRST";
   }
 
-  const isSecondRow = el.closest(".filtersWrapper");
+  const isSecondRow = el.closest(".filtersList");
   if (isSecondRow) {
     return "SECOND";
+  }
+
+  // Notice this happens before .filtersList, since items in the second row
+  // Would also match here
+  const isThirdRow = el.closest(".filtersWrapper");
+  if (isThirdRow) {
+    return "THIRD";
   }
 
   throw new Error("could not figure out what row");

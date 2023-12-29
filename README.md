@@ -44,6 +44,10 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] TESTS: if upon changing the dom (to trigger delete an item), it still works
 - [ ] DEV: add an easy way to kill an item (to trigger a DOM reload)
 - [ ] create a custom select, since we cant trigger it manually :(
+- [ ] bug: sometimes pagination gets two items with tabindex == 0
+- [ ] BUG: welcome page stops working after doing a search :\
+- [ ] do tab roving for the filters, clear them and default to input when they are collapsed
+- [ ] implement escape
 
 # Pages
 
