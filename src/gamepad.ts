@@ -2,7 +2,7 @@ import { getCurrentFocusedElement } from "./dom";
 import { handleTab } from "./dom";
 import * as CL from "./circularList";
 import { Controller } from "../vendor/controllerjs/unminified/Controller.js";
-import "../vendor/controllerjs/unminified/Controller.layouts.js";
+//import "../vendor/controllerjs/unminified/Controller.layouts.js";
 import { notify } from "./notify";
 
 // TODO: fix type
