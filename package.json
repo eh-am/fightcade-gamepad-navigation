@@ -7,7 +7,7 @@
     "build": "esbuild --define:FBN_DEBUG=false --bundle src/inject.ts --outfile=out/inject.js",
     "type-check": "tsc --noEmit --p tsconfig.json",
     "watch": "esbuild --watch --define:FBN_DEBUG=true --bundle src=src/inject.ts --outfile=out/inject.js",
-    "live-reload": "live-server --port=5001 --no-browser --host=localhost --watch='out, *.html' .",
+    "live-reload": "live-server --port=5001 --no-browser --host=0.0.0.0 --watch='out, *.html' .",
     "start": "concurrently 'npm run watch' 'npm run live-reload'"
   },
   "keywords": [],

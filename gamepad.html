@@ -3,127 +3,75 @@
 div:focus {
 }
 </style>
+
+<style>
+.axes {
+  padding: 1em;
+}
+
+.buttons {
+  margin-left: 1em;
+}
+
+/*meter*/.axis {
+  min-width: 200px;
+  margin: 1em;
+}
+
+.button {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+  padding: 1em;
+  border-radius: 20px;
+  border: 1px solid black;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAAxJREFUCNdjYPjPAAACAgEAqiqeJwAAAABJRU5ErkJggg==);
+  background-size: 0% 0%;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+.pressed {
+  border: 1px solid red;
+}
+
+.touched::after {
+  content: "touch";
+  display: block;
+  position: absolute;
+  margin-top: -0.2em;
+  margin-left: -0.5em;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+</style>
+  <script src="/vendor/controllerjs/unminified/controller.js"></script>
+  <script src="/vendor/controllerjs/unminified/controller.layouts.js"></script>
 </head>
 <body>
-<div id="foo" tabindex="0">ITEM 1</div>
-<div id="bare" tabindex="0">ITEM 2</div>
-<div id="bare" tabindex="0">ITEM 3</div>
-<div id="bare" tabindex="0">ITEM 4</div>
-<div id="bare" tabindex="0">ITEM 5</div>
-<div id="bare" tabindex="0">ITEM 6</div>
-<div id="bare" tabindex="0">ITEM 7</div>
-<div id="bare" tabindex="0">ITEM 8</div>
-<script>
-window.addEventListener("gamepadconnected", (e) => {
-  const gp = navigator.getGamepads()[e.gamepad.index];
+  <script>
 
-  setInterval(function(){
-  gameLoop();
-  }, 100)
-});
+  Controller.search();
 
-document.body.addEventListener("keydown", (e) => {
-  console.log("pressed", e.key);
-})
+  window.addEventListener('gc.controller.found', function(event) {
+      var controller = event.detail.controller;
+      console.log("Controller found at index " + controller.index + ".");
+      console.log("'" + controller.name + "' is ready!");
+  }, false);
 
-const ARCADE_STICK_MAPPINGS = {
-  DPAD_UP: 12,
-  DPAD_DOWN: 13,
-  DPAD_LEFT: 14,
-  DPAD_RIGHT: 15,
-  BUTTON_A: 0,
-  BUTTON_B: 1,
-}
+  window.addEventListener('gc.controller.lost', function(event) {
+    console.log("The controller at index " + event.detail.index + " has been disconnected.");
+    console.log(Controller.getController(0));
+}, false);
 
-/*
- * Finds the next item in a circular list
- */
-function nextCircular(array, index) {
-  return circularList(array, index + 1);
-}
+  window.addEventListener('gc.button.press', function(event) {
+	console.log(event.detail);
+}, false);
 
-/*
- * Finds the previous item in a circular list
- */
-function prevCircular(array, index) {
-  return circularList(array, index - 1);
-}
+  window.addEventListener('gc.button.hold', function(event) {
+	console.log("HOLDING", event.detail);
+}, false);
 
-function circularList(array, index) {
-  let i = index;
+  </script>
 
-  // Support negative values
-  if (i < 0) {
-    i = i + array.length;
-  }
-
-  i = i % array.length;
-  return array[i];
-}
-
-
-function gameLoop() {
-  const gamepads = navigator.getGamepads();
-  if (!gamepads) {
-    return;
-  }
-
-  const gp = gamepads[0];
-  /*
-  for ([index, button] of gp.buttons.entries()) {
-    if (button.pressed) {
-      console.log('button pressed', button, index)
-    }
-  }*/
-
-//  console.log("gp buttons 0", gp.buttons[0])
-  if (gp.buttons[ARCADE_STICK_MAPPINGS.BUTTON_A].pressed) {
-    handleTab(prevCircular)
-  }
-  if (gp.buttons[ARCADE_STICK_MAPPINGS.BUTTON_B].pressed) {
-    handleTab(nextCircular)
-  }
-  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_UP].pressed) {
-    //console.log("dispatching", getCurrentFocusedElement())
-    // TODO: dispatch from the focused event
-    getCurrentFocusedElement().dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowUp'}));
-  }
-  if (gp.buttons[ARCADE_STICK_MAPPINGS.DPAD_DOWN].pressed) {
-    // TODO: dispatch from the focused event
-    getCurrentFocusedElement().dispatchEvent(new KeyboardEvent('keydown',{'key':'ArrowDown'}));
-  }
-}
-
-// TODO: sometimes it returns the body
-function getCurrentFocusedElement() {
-  return document.activeElement;
-}
-
-/*
- * Reimplement tabbing
- * Notice that it follows only the DOM order
- * Ie no positive tabIndex handling/disabled items
- * Source: https://stackoverflow.com/a/7329696
-*/
-function handleTab(nextItemFn) {
-    // Find all tablable elements
-    const tabbableElements = document
-    .querySelectorAll(
-      "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
-    );
-
-    const currentFocused = document.activeElement;
-    const currentFocusedIndex = Array.from(tabbableElements).findIndex((a) => a === currentFocused);
-
-    let focusOn;
-    if (currentFocused) {
-      focusOn = nextItemFn(tabbableElements, currentFocusedIndex);
-    } else {
-      focusOn = tabbableElements[0];
-    }
-
-    focusOn.focus();
-}
-
-</script>
 </body>
