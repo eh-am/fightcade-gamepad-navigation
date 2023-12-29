@@ -26,6 +26,7 @@ const initialized = {
   search_header: false,
   gamepad: false,
 };
+alert("hold");
 
 const observerOptions = {
   attributes: false,

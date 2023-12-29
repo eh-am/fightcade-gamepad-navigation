@@ -3,6 +3,20 @@ import * as CL from "../circularList";
 import { log } from "../log";
 import { Teardown } from "../types";
 
+function copyStylesFrom(origin: HTMLElement, dest: HTMLElement) {
+  const styles = window.getComputedStyle(origin);
+  if (styles.cssText !== "") {
+    dest.style.cssText = styles.cssText;
+  } else {
+    const cssText = Array.from(styles).reduce(
+      (css, propertyName) =>
+        `${css}${propertyName}:${styles.getPropertyValue(propertyName)};`
+    );
+
+    dest.style.cssText = cssText;
+  }
+}
+
 export function initSearchHeader(root: HTMLElement): boolean {
   // Although <input> doesn't need it, it's a good idea to leave it explitly
   const input = root.querySelector<HTMLElement>("input");
@@ -19,10 +33,204 @@ export function initSearchHeader(root: HTMLElement): boolean {
   // The select filters are tabbable by default, but since we are going to manage
   // navigation manually, let's make them not tabbable
   const selects = root.querySelectorAll<HTMLElement>("select");
-  selects.forEach((el) => el.setAttribute("tabIndex", "-1"));
+  selects.forEach((el) => {
+    el.setAttribute("tabIndex", "-1");
+    //   el.style.visibility = "hidden";
+
+    // Create a fake <select> that we can programatically open
+    //
+    // Create a wrapper so that our select will have the same size
+    const wrapper = document.createElement("div");
+    const newSelect = document.createElement("div");
+
+    // Couldn't find an well supported way to do that, hint: we want to use fill-available
+    const normalHeight = el.offsetHeight;
+
+    console.log(
+      "found all these optiosn",
+      Array.from(el.querySelectorAll("option"))
+    );
+    const options = Array.from(el.querySelectorAll("option")).map((opt) => {
+      const clone = document.createElement("div");
+      const content = (opt.textContent || "").trim();
+
+      clone.innerText = content;
+      clone.style.padding = ".25rem";
+      clone.style.pointerEvents = "none";
+      // Cancel out the scrollbar
+      clone.style.marginRight = "-8px";
+
+      // TODO: i eyeballed this
+      // clone.style.marginTop = "-6px";
+      //      height: 100%;
+      //    display: flex;
+      //    justify-content: center;
+      //    align-items: center;
+
+      clone.addEventListener("click", (e) => {
+        console.log("clicked on child");
+
+        const allOptions = newSelect.querySelectorAll<HTMLElement>("*");
+        allOptions.forEach((el) => (el.style.pointerEvents = "none"));
+
+        e.preventDefault();
+        // Since the parent focus back on the first item
+        e.stopPropagation();
+
+        // looks weird but it's correct
+        opt.value = opt.value;
+        opt.dispatchEvent(new Event("change"));
+
+        const parent = clone.parentNode as HTMLElement;
+        parent.style.height = `${normalHeight}px`;
+        parent.focus();
+
+        clone.scrollIntoView();
+
+        // TODO: make all parent's styles go back to initial state
+        parent.style.overflowY = "hidden";
+      });
+
+      //      clone.addEventListener("focusout", (e) => {
+      //        const target = e.relatedTarget;
+      //        console.log("currentTarget", e.currentTarget);
+      //        console.log("target", e.target);
+      //        console.log("relatedTarget", e.relatedTarget);
+      //
+      //        const siblings = clone.parentNode?.querySelectorAll<HTMLElement>("*");
+      //        const isSibling =
+      //          Array.from(siblings || []).findIndex((el) => el === target) !== -1;
+      //        console.log("is sibling", isSibling);
+      //        if (isSibling) {
+      //          return;
+      //        }
+      //        // TODO: check it's going to another item
+      //
+      //        if (clone.parentNode) {
+      //          // TODO: not sure this is supported
+      //          (clone.parentNode as HTMLElement).style.height = `${normalHeight}px`;
+      //        }
+      //
+      //        clone?.removeAttribute("tabIndex");
+      //      });
+
+      return clone;
+    });
+
+    options.forEach((opt) => {
+      opt.addEventListener("keydown", (e) => {
+        console.log("pressed ");
+        e.preventDefault();
+        const keyPressed = (e as KeyboardEvent).key;
+
+        switch (keyPressed) {
+          case "Enter": {
+            console.log("clickingon", opt);
+            opt.click();
+            return;
+          }
+          case "ArrowUp": {
+            moveToNextOption(options, opt, CL.prev);
+            return;
+          }
+          case "ArrowDown": {
+            moveToNextOption(options, opt, CL.next);
+            return;
+          }
+        }
+      });
+    });
+
+    newSelect.className += "fbn-custom-select";
+
+    newSelect.addEventListener("focusout", (e) => {
+      //      console.log("focusing out");
+      //      console.log("currentTarget", e.currentTarget);
+      //      console.log("target", e.target);
+      //      console.log("relatedTarget", e.relatedTarget);
+    });
+    wrapper.style.position = "relative";
+    // For some reason I could not do absolute
+    //    el.style.position = "absolute";
+
+    // Copied from the original select
+    newSelect.style.backgroundColor = "var(--mainColor)";
+    newSelect.style.border = "2px solid var(--mainColor-light)";
+    newSelect.style.borderRadius = "4px";
+    newSelect.style.outline = "none";
+    newSelect.style.color = "#fff";
+    //    newSelect.style.fontSize = ".8rem";
+    // newSelect.style.padding = ".25rem";
+
+    // Custom
+    //newSelect.style.width = "max-content";
+    newSelect.style.width = "100%";
+    //    newSelect.style.minWidth = "100%";
+    newSelect.style.height = "100%";
+    newSelect.style.top = "0";
+    newSelect.style.left = "0";
+    newSelect.style.position = "absolute";
+    //newSelect.style.overflowY = "auto";
+    //newSelect.style.overflowX = "hidden";
+    newSelect.style.zIndex = "2"; // To be bigger than the section below
+    // we don't want a scrollbar
+    newSelect.style.overflow = "hidden";
+    newSelect.style.scrollbarGutter = "stable";
+    // Only doing this to fit everything, if i use width: max-content
+    // Then the father won't know about this increased size, making spacing between elements all funky
+    newSelect.style.fontSize = "0.8rem";
+
+    newSelect.addEventListener("click", (e) => {
+      console.log("clicked on parent", e);
+      // TODO: ideally we would figure out a better value
+      newSelect.style.height = "200px";
+      newSelect.style.overflow = "auto";
+
+      const allOptions = Array.from(
+        newSelect.querySelectorAll<HTMLElement>("*")
+      );
+      for (let option of allOptions) {
+        option.style.pointerEvents = "initial";
+      }
+
+      const option = newSelect.querySelector<HTMLElement>("*");
+      if (option) {
+        option.setAttribute("tabIndex", "-1");
+        option.focus();
+      }
+      // TODO: focus first item
+    });
+
+    el.style.inset = "0";
+    el.style.visibility = "hidden";
+
+    el.parentNode?.appendChild(wrapper);
+    newSelect.append(...options);
+    wrapper.appendChild(el);
+    wrapper.appendChild(newSelect);
+
+    //document.querySelector('.welcomeWrapper .filtersList .filterItem select').value = "2"
+    // document.querySelector('.welcomeWrapper .filtersList .filterItem select').dispatchEvent(new Event("change"))
+    //el.parentNode?.appendChild(newSelect);
+  });
 
   setupKeyDownListeners(root);
   return true;
+}
+
+function moveToNextOption(
+  array: HTMLElement[],
+  myself: HTMLElement,
+  nextFn: typeof CL.next
+) {
+  myself.removeAttribute("tabIndex");
+
+  const myIndex = array.findIndex((el) => el === myself);
+  const next = nextFn(array, myIndex);
+
+  // So that it's focusable
+  next.setAttribute("tabIndex", "-1");
+  next.focus();
 }
 
 export function updateSearchHeader(root: HTMLElement) {}
@@ -62,7 +270,7 @@ function setupKeyDownListeners(root: HTMLElement): Teardown {
   };
 
   log("adding listener to", root);
-  root.addEventListener("keydown", fn);
+  //  root.addEventListener("keydown", fn);
   return () => {
     log("tearing down keydown");
     root.removeEventListener("keydown", fn);
