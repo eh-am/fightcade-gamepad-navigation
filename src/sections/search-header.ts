@@ -3,46 +3,6 @@ import * as CL from "../circularList";
 import { log } from "../log";
 import { Teardown } from "../types";
 
-// kinda ugly, but we need to make sure other instances have the same content, otherwise when changing views (eg welcome -> search), data will be out of sync
-function syncMirrorSelect(
-  originalSelect: HTMLSelectElement,
-  value: string,
-  text: string
-) {
-  // Also since selects don't have any identifiable way
-  const getClosestTitle = (el: HTMLElement) =>
-    el.closest(".filterItem")?.querySelector(".title")?.textContent;
-  const title = getClosestTitle(originalSelect);
-
-  const mirror = Array.from(
-    document.querySelectorAll<HTMLSelectElement>("select")
-  )
-    .filter((el) => getClosestTitle(el) === title)
-    .find((el) => el !== originalSelect);
-
-  if (mirror) {
-    mirror.value = value;
-
-    console.log("found mirror", mirror);
-    // TODO: we also need to scroll our fake select
-    const candidates = mirror
-      .closest(".filterItem")
-      ?.querySelectorAll<HTMLElement>(".fbn-custom-select > *");
-    console.log("candidates", candidates);
-    if (!candidates || candidates.length <= 0) {
-      debugger;
-    }
-    const c = Array.from(candidates || []).find((el) => {
-      console.log("el textcontent", el.textContent);
-      return el.textContent === text;
-    });
-    if (c) {
-      console.log("scrolling into view", c);
-      c.scrollIntoView();
-    }
-  }
-}
-
 function findSelectedFakeOption(el: HTMLSelectElement) {
   return el
     .closest(".filterItem")
@@ -89,37 +49,6 @@ function syncToMirror(originalSelect: HTMLSelectElement) {
   mirrorOption.scrollIntoView();
 }
 
-function scrollParentToChild(parent, child) {
-  // Where is the parent on page
-  var parentRect = parent.getBoundingClientRect();
-  // What can you see?
-  var parentViewableArea = {
-    height: parent.clientHeight,
-    width: parent.clientWidth,
-  };
-
-  // Where is the child
-  var childRect = child.getBoundingClientRect();
-  // Is the child viewable?
-  var isViewable =
-    childRect.top >= parentRect.top &&
-    childRect.bottom <= parentRect.top + parentViewableArea.height;
-
-  // if you can't see the child try to scroll parent
-  if (!isViewable) {
-    // Should we scroll using top or bottom? Find the smaller ABS adjustment
-    const scrollTop = childRect.top - parentRect.top;
-    const scrollBot = childRect.bottom - parentRect.bottom;
-    if (Math.abs(scrollTop) < Math.abs(scrollBot)) {
-      // we're near the top of the list
-      parent.scrollTop += scrollTop;
-    } else {
-      // we're near the bottom of the list
-      parent.scrollTop += scrollBot;
-    }
-  }
-}
-
 function syncFromMirror(target: HTMLSelectElement) {
   const mirror = findMirrorSelect(target);
   console.log("syncing from mirror. original", target, "mirror", mirror);
@@ -152,24 +81,6 @@ function syncFromMirror(target: HTMLSelectElement) {
     wrapper.classList.add("active");
     option.scrollIntoView();
     wrapper.classList.remove("active");
-  }
-}
-
-// TODO: when first navigating from welcome -> search
-// search has not been initialized yet (i know wierd)
-// so this mirror sync won't work properly
-
-function copyStylesFrom(origin: HTMLElement, dest: HTMLElement) {
-  const styles = window.getComputedStyle(origin);
-  if (styles.cssText !== "") {
-    dest.style.cssText = styles.cssText;
-  } else {
-    const cssText = Array.from(styles).reduce(
-      (css, propertyName) =>
-        `${css}${propertyName}:${styles.getPropertyValue(propertyName)};`
-    );
-
-    dest.style.cssText = cssText;
   }
 }
 
@@ -344,10 +255,8 @@ function createFakeOption(
     const allOptions = parent.querySelectorAll<HTMLElement>("*");
     allOptions.forEach((el) => (el.style.pointerEvents = "none"));
 
-    // TODO: kinda ugly, but we need to make sure other instances have the same content, otherwise when changing views (eg welcome -> search), data will be out of sync
-    // Also since selects don't have any identifiable
-    //syncMirrorSelect(originalSelect, el.value, el.textContent || "");
-    //originalSelect.closest(".title");
+    // TODO: kinda ugly, but we need to make sure other instances have the same content
+    // otherwise when changing views (eg welcome -> search), data will be out of sync
     syncToMirror(originalSelect);
 
     originalSelect.value = el.value;
