@@ -3,6 +3,162 @@ import * as CL from "../circularList";
 import { log } from "../log";
 import { Teardown } from "../types";
 
+// kinda ugly, but we need to make sure other instances have the same content, otherwise when changing views (eg welcome -> search), data will be out of sync
+function syncMirrorSelect(
+  originalSelect: HTMLSelectElement,
+  value: string,
+  text: string
+) {
+  // Also since selects don't have any identifiable way
+  const getClosestTitle = (el: HTMLElement) =>
+    el.closest(".filterItem")?.querySelector(".title")?.textContent;
+  const title = getClosestTitle(originalSelect);
+
+  const mirror = Array.from(
+    document.querySelectorAll<HTMLSelectElement>("select")
+  )
+    .filter((el) => getClosestTitle(el) === title)
+    .find((el) => el !== originalSelect);
+
+  if (mirror) {
+    mirror.value = value;
+
+    console.log("found mirror", mirror);
+    // TODO: we also need to scroll our fake select
+    const candidates = mirror
+      .closest(".filterItem")
+      ?.querySelectorAll<HTMLElement>(".fbn-custom-select > *");
+    console.log("candidates", candidates);
+    if (!candidates || candidates.length <= 0) {
+      debugger;
+    }
+    const c = Array.from(candidates || []).find((el) => {
+      console.log("el textcontent", el.textContent);
+      return el.textContent === text;
+    });
+    if (c) {
+      console.log("scrolling into view", c);
+      c.scrollIntoView();
+    }
+  }
+}
+
+function findSelectedFakeOption(el: HTMLSelectElement) {
+  return el
+    .closest(".filterItem")
+    ?.querySelector<HTMLElement>(
+      `.fbn-custom-select > [data-value="${el.value}"]`
+    );
+}
+function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
+  const mirror = findMirrorSelect(originalSelect);
+  if (!mirror) {
+    return;
+  }
+
+  return findSelectedFakeOption(mirror);
+}
+
+function findMirrorSelect(originalSelect: HTMLSelectElement) {
+  const getClosestTitle = (el: HTMLElement) =>
+    el.closest(".filterItem")?.querySelector(".title")?.textContent;
+
+  const title = getClosestTitle(originalSelect);
+  const mirror = Array.from(
+    document.querySelectorAll<HTMLSelectElement>("select")
+  )
+    .filter((el) => getClosestTitle(el) === title)
+    .find((el) => el !== originalSelect);
+
+  return mirror;
+}
+
+function syncToMirror(originalSelect: HTMLSelectElement) {
+  const mirror = findMirrorSelect(originalSelect);
+  if (!mirror) {
+    return;
+  }
+
+  mirror.value = originalSelect.value;
+
+  const mirrorOption = findMirrorSelectedFakeOption(originalSelect);
+  if (!mirrorOption) {
+    return;
+  }
+
+  mirrorOption.scrollIntoView();
+}
+
+function scrollParentToChild(parent, child) {
+  // Where is the parent on page
+  var parentRect = parent.getBoundingClientRect();
+  // What can you see?
+  var parentViewableArea = {
+    height: parent.clientHeight,
+    width: parent.clientWidth,
+  };
+
+  // Where is the child
+  var childRect = child.getBoundingClientRect();
+  // Is the child viewable?
+  var isViewable =
+    childRect.top >= parentRect.top &&
+    childRect.bottom <= parentRect.top + parentViewableArea.height;
+
+  // if you can't see the child try to scroll parent
+  if (!isViewable) {
+    // Should we scroll using top or bottom? Find the smaller ABS adjustment
+    const scrollTop = childRect.top - parentRect.top;
+    const scrollBot = childRect.bottom - parentRect.bottom;
+    if (Math.abs(scrollTop) < Math.abs(scrollBot)) {
+      // we're near the top of the list
+      parent.scrollTop += scrollTop;
+    } else {
+      // we're near the bottom of the list
+      parent.scrollTop += scrollBot;
+    }
+  }
+}
+
+function syncFromMirror(target: HTMLSelectElement) {
+  const mirror = findMirrorSelect(target);
+  console.log("syncing from mirror. original", target, "mirror", mirror);
+
+  if (!mirror) {
+    return;
+  }
+
+  target.value = mirror.value;
+
+  // Find the mirror of the option of the mirror
+  // Aka my own option
+  const option = findMirrorSelectedFakeOption(mirror);
+  if (!option) {
+    return;
+  }
+
+  // Crazy trick
+  // scrollIntoView will only work if it's visible, aka not display: none
+  // Therefore we expand the wrapper, then expand it back again
+  const wrapper = target.closest(".filtersWrapper");
+  if (!wrapper) {
+    return;
+  }
+
+  // It's possible it's already have
+  if (wrapper.classList.contains("active")) {
+    option.scrollIntoView();
+  } else {
+    wrapper.classList.add("active");
+    option.scrollIntoView();
+    wrapper.classList.remove("active");
+  }
+}
+
+// TODO: when first navigating from welcome -> search
+// search has not been initialized yet (i know wierd)
+// so this mirror sync won't work properly
+
 function copyStylesFrom(origin: HTMLElement, dest: HTMLElement) {
   const styles = window.getComputedStyle(origin);
   if (styles.cssText !== "") {
@@ -17,12 +173,17 @@ function copyStylesFrom(origin: HTMLElement, dest: HTMLElement) {
   }
 }
 
-//function updateSearchHeader() {
-//  // Instead of remove all event listeners and such
-//  // We just delete the root node of the custom select
-//  // TODO: apparently the listeners continue existing?
-//  // https://stackoverflow.com/a/76239226
-//}
+export function updateSearchHeader(root: HTMLElement) {
+  // Instead of remove all event listeners and such
+  // We just delete the root node of the custom select
+  // TODO: apparently the listeners continue existing?
+  // https://stackoverflow.com/a/76239226
+  const fakeSelects = root.querySelectorAll<HTMLElement>(".fbn-custom-select");
+  fakeSelects.forEach((el) => el.remove());
+
+  const selects = root.querySelectorAll<HTMLSelectElement>("select");
+  selects.forEach((select) => setupSelect(select));
+}
 
 /**
  * For each select we find
@@ -31,28 +192,143 @@ function copyStylesFrom(origin: HTMLElement, dest: HTMLElement) {
  * which the default one does not
  * source: https://chromestatus.com/feature/5718803933560832
  */
-//function setupSelect(el: HTMLSelectElement) {
-//  el.setAttribute("tabIndex", "-1");
-//
-//  // TODO: create wrapper, newSelect etc
-//  //
-//  const optionsTeardown = Array.from(el.querySelectorAll("option")).map(
-//    (opt) => {
-//      return setupOption(opt);
-//    }
-//  );
-//
-//  // TODO: add more
-//  return optionsTeardown;
-//}
+function setupSelect(el: HTMLSelectElement) {
+  el.setAttribute("tabIndex", "-1");
 
+  const wrapper = document.createElement("div");
+  //    const newSelect = document.createElement("div");
+
+  const realOptions = Array.from(el.querySelectorAll("option"));
+  // For some reason it hasn't been initialized yet
+  if (!realOptions.length) {
+    return;
+  }
+
+  el.addEventListener("change", (e: Event) => {
+    // TODO: fix this type
+    const value = (e?.target as any)?.value;
+
+    console.log("it changed to", value);
+    // TODO: scroll HEREEEEEEEEEEEEEE
+    console.log("i should be scrolling");
+    findSelectedFakeOption(el)?.scrollIntoView();
+  });
+
+  // Setup the fake options
+  const options = realOptions.map(createFakeOption.bind(null, el));
+
+  options.forEach((opt) => {
+    setupFakeOptionsKeydownListeners(options, opt);
+  });
+
+  wrapper.style.position = "relative";
+  // For some reason I could not do absolute
+  //    el.style.position = "absolute";
+  const newSelect = newFakeSelectFrom();
+
+  el.style.inset = "0";
+  el.style.visibility = "hidden";
+
+  el.parentNode?.appendChild(wrapper);
+  newSelect.append(...options);
+  wrapper.appendChild(el);
+  wrapper.appendChild(newSelect);
+
+  syncFromMirror(el);
+}
+//
+//
+function newFakeSelectFrom(): HTMLElement {
+  const newSelect = document.createElement("div");
+  newSelect.className += "fbn-custom-select";
+
+  // Copied from the original select
+  newSelect.style.backgroundColor = "var(--mainColor)";
+  newSelect.style.border = "2px solid var(--mainColor-light)";
+  newSelect.style.borderRadius = "4px";
+  newSelect.style.outline = "none";
+  newSelect.style.color = "#fff";
+
+  // Custom
+  //newSelect.style.width = "max-content";
+  newSelect.style.width = "100%";
+  //    newSelect.style.minWidth = "100%";
+  newSelect.style.height = "100%";
+  newSelect.style.top = "0";
+  newSelect.style.left = "0";
+  newSelect.style.position = "absolute";
+  //newSelect.style.overflowY = "auto";
+  //newSelect.style.overflowX = "hidden";
+  newSelect.style.zIndex = "2"; // To be bigger than the section below
+  // we don't want a scrollbar
+  newSelect.style.overflow = "hidden";
+  newSelect.style.scrollbarGutter = "stable";
+  // Only doing this to fit everything, if i use width: max-content
+  // Then the father won't know about this increased size, making spacing between elements all funky
+  newSelect.style.fontSize = "0.8rem";
+
+  // Add listener
+  newSelect.addEventListener("click", (e) => {
+    console.log("clicked on parent", e);
+    // TODO: ideally we would figure out a better value
+    newSelect.style.height = "200px";
+    newSelect.style.overflowY = "auto";
+    newSelect.style.overflowX = "hidden";
+
+    // TODO: receive this as an argument
+    const allOptions = Array.from(newSelect.querySelectorAll<HTMLElement>("*"));
+    for (let option of allOptions) {
+      option.style.pointerEvents = "initial";
+    }
+
+    const option = newSelect.querySelector<HTMLElement>("*");
+    if (option) {
+      option.setAttribute("tabIndex", "-1");
+      option.focus();
+    }
+    // TODO: focus first item
+  });
+
+  return newSelect;
+}
+
+function setupFakeOptionsKeydownListeners(
+  allOptions: HTMLElement[],
+  el: HTMLElement
+) {
+  el.addEventListener("keydown", (e) => {
+    console.log("pressed ");
+    e.preventDefault();
+    const keyPressed = (e as KeyboardEvent).key;
+
+    switch (keyPressed) {
+      case "Enter": {
+        console.log("clickingon", el);
+        el.click();
+        return;
+      }
+      case "ArrowUp": {
+        moveToNextOption(allOptions, el, CL.prev);
+        return;
+      }
+      case "ArrowDown": {
+        moveToNextOption(allOptions, el, CL.next);
+        return;
+      }
+    }
+  });
+}
 /**
  * Create a fake option
  */
-function setupOption(originalSelect: HTMLSelectElement, el: HTMLOptionElement) {
+function createFakeOption(
+  originalSelect: HTMLSelectElement,
+  el: HTMLOptionElement
+) {
   const clone = document.createElement("div");
   const content = (el.textContent || "").trim();
 
+  clone.setAttribute("data-value", el.value);
   clone.innerText = content;
   clone.style.padding = ".25rem";
   clone.style.pointerEvents = "none";
@@ -60,29 +336,34 @@ function setupOption(originalSelect: HTMLSelectElement, el: HTMLOptionElement) {
   clone.style.marginRight = "-8px";
 
   const onClick = function (e: Event) {
-    console.log("clicked on child");
+    e.preventDefault();
+    // Since the parent tends focus back on the first item
+    e.stopPropagation();
 
     const parent = clone.parentNode as HTMLElement;
     const allOptions = parent.querySelectorAll<HTMLElement>("*");
     allOptions.forEach((el) => (el.style.pointerEvents = "none"));
 
-    e.preventDefault();
-    // Since the parent focus back on the first item
-    e.stopPropagation();
+    // TODO: kinda ugly, but we need to make sure other instances have the same content, otherwise when changing views (eg welcome -> search), data will be out of sync
+    // Also since selects don't have any identifiable
+    //syncMirrorSelect(originalSelect, el.value, el.textContent || "");
+    //originalSelect.closest(".title");
+    syncToMirror(originalSelect);
 
-    // looks weird but it's correct
     originalSelect.value = el.value;
     originalSelect.dispatchEvent(new Event("change"));
 
     // Couldn't find an well supported way to do that, hint: we want to use fill-available
-    const normalHeight = el.offsetHeight;
+    const normalHeight = originalSelect.offsetHeight;
     parent.style.height = `${normalHeight}px`;
+
+    console.log("should be focusing on parent now", parent);
     parent.focus();
 
     clone.scrollIntoView();
 
     // TODO: make all parent's styles go back to initial state
-    parent.style.overflowY = "hidden";
+    parent.style.overflow = "hidden";
   };
 
   clone.addEventListener("click", onClick);
@@ -102,172 +383,21 @@ export function initSearchHeader(root: HTMLElement): boolean {
   const clearFiltersButton = getThirdRowItems(root);
   clearFiltersButton.forEach((el) => el.setAttribute("tabIndex", "-1"));
 
-  // The select filters are tabbable by default, but since we are going to manage
-  // navigation manually, let's make them not tabbable
-  const selects = root.querySelectorAll<HTMLSelectElement>("select");
-  selects.forEach((el) => {
-    el.setAttribute("tabIndex", "-1");
-    //   el.style.visibility = "hidden";
+  clearFiltersButton.forEach((el) => {
+    el.addEventListener("click", () => {
+      // Set up the form
+      const selects = el
+        .closest(".filtersWrapper")
+        ?.querySelectorAll<HTMLSelectElement>("select");
 
-    // Create a fake <select> that we can programatically open
-    //
-    // Create a wrapper so that our select will have the same size
-    const wrapper = document.createElement("div");
-    const newSelect = document.createElement("div");
-
-    // Couldn't find an well supported way to do that, hint: we want to use fill-available
-    const normalHeight = el.offsetHeight;
-
-    console.log(
-      "found all these optiosn",
-      Array.from(el.querySelectorAll("option"))
-    );
-
-    const options = Array.from(el.querySelectorAll("option")).map((option) => {
-      return setupOption(el, option);
-    });
-    // TODO: create these when options change!
-    // since they happen asynchronously, we have to watch them :\
-    //    const options = Array.from(el.querySelectorAll("option")).map((opt) => {
-    //      const clone = document.createElement("div");
-    //      const content = (opt.textContent || "").trim();
-    //
-    //      clone.innerText = content;
-    //      clone.style.padding = ".25rem";
-    //      clone.style.pointerEvents = "none";
-    //      // Cancel out the scrollbar
-    //      clone.style.marginRight = "-8px";
-    //
-    //      // TODO: i eyeballed this
-    //      // clone.style.marginTop = "-6px";
-    //      //      height: 100%;
-    //      //    display: flex;
-    //      //    justify-content: center;
-    //      //    align-items: center;
-    //
-    //      clone.addEventListener("click", (e) => {
-    //        console.log("clicked on child");
-    //
-    //        const allOptions = newSelect.querySelectorAll<HTMLElement>("*");
-    //        allOptions.forEach((el) => (el.style.pointerEvents = "none"));
-    //
-    //        e.preventDefault();
-    //        // Since the parent focus back on the first item
-    //        e.stopPropagation();
-    //
-    //        // looks weird but it's correct
-    //        opt.value = opt.value;
-    //        opt.dispatchEvent(new Event("change"));
-    //
-    //        const parent = clone.parentNode as HTMLElement;
-    //        parent.style.height = `${normalHeight}px`;
-    //        parent.focus();
-    //
-    //        clone.scrollIntoView();
-    //
-    //        // TODO: make all parent's styles go back to initial state
-    //        parent.style.overflowY = "hidden";
-    //      });
-    //
-    //      return clone;
-    //    });
-    //
-    options.forEach((opt) => {
-      opt.addEventListener("keydown", (e) => {
-        console.log("pressed ");
-        e.preventDefault();
-        const keyPressed = (e as KeyboardEvent).key;
-
-        switch (keyPressed) {
-          case "Enter": {
-            console.log("clickingon", opt);
-            opt.click();
-            return;
-          }
-          case "ArrowUp": {
-            moveToNextOption(options, opt, CL.prev);
-            return;
-          }
-          case "ArrowDown": {
-            moveToNextOption(options, opt, CL.next);
-            return;
-          }
-        }
+      selects?.forEach((sel) => {
+        sel.selectedIndex = 0;
+        sel.dispatchEvent(new Event("change"));
       });
     });
-
-    newSelect.className += "fbn-custom-select";
-
-    newSelect.addEventListener("focusout", (e) => {
-      //      console.log("focusing out");
-      //      console.log("currentTarget", e.currentTarget);
-      //      console.log("target", e.target);
-      //      console.log("relatedTarget", e.relatedTarget);
-    });
-    wrapper.style.position = "relative";
-    // For some reason I could not do absolute
-    //    el.style.position = "absolute";
-
-    // Copied from the original select
-    newSelect.style.backgroundColor = "var(--mainColor)";
-    newSelect.style.border = "2px solid var(--mainColor-light)";
-    newSelect.style.borderRadius = "4px";
-    newSelect.style.outline = "none";
-    newSelect.style.color = "#fff";
-    //    newSelect.style.fontSize = ".8rem";
-    // newSelect.style.padding = ".25rem";
-
-    // Custom
-    //newSelect.style.width = "max-content";
-    newSelect.style.width = "100%";
-    //    newSelect.style.minWidth = "100%";
-    newSelect.style.height = "100%";
-    newSelect.style.top = "0";
-    newSelect.style.left = "0";
-    newSelect.style.position = "absolute";
-    //newSelect.style.overflowY = "auto";
-    //newSelect.style.overflowX = "hidden";
-    newSelect.style.zIndex = "2"; // To be bigger than the section below
-    // we don't want a scrollbar
-    newSelect.style.overflow = "hidden";
-    newSelect.style.scrollbarGutter = "stable";
-    // Only doing this to fit everything, if i use width: max-content
-    // Then the father won't know about this increased size, making spacing between elements all funky
-    newSelect.style.fontSize = "0.8rem";
-
-    newSelect.addEventListener("click", (e) => {
-      console.log("clicked on parent", e);
-      // TODO: ideally we would figure out a better value
-      newSelect.style.height = "200px";
-      newSelect.style.overflow = "auto";
-
-      const allOptions = Array.from(
-        newSelect.querySelectorAll<HTMLElement>("*")
-      );
-      for (let option of allOptions) {
-        option.style.pointerEvents = "initial";
-      }
-
-      const option = newSelect.querySelector<HTMLElement>("*");
-      if (option) {
-        option.setAttribute("tabIndex", "-1");
-        option.focus();
-      }
-      // TODO: focus first item
-    });
-
-    el.style.inset = "0";
-    el.style.visibility = "hidden";
-
-    el.parentNode?.appendChild(wrapper);
-    newSelect.append(...options);
-    wrapper.appendChild(el);
-    wrapper.appendChild(newSelect);
-
-    //document.querySelector('.welcomeWrapper .filtersList .filterItem select').value = "2"
-    // document.querySelector('.welcomeWrapper .filtersList .filterItem select').dispatchEvent(new Event("change"))
-    //el.parentNode?.appendChild(newSelect);
   });
+
+  updateSearchHeader(root);
 
   setupKeyDownListeners(root);
   return true;
@@ -287,8 +417,6 @@ function moveToNextOption(
   next.setAttribute("tabIndex", "-1");
   next.focus();
 }
-
-export function updateSearchHeader(root: HTMLElement) {}
 
 function setupKeyDownListeners(root: HTMLElement): Teardown {
   const fn = (e: Event) => {
