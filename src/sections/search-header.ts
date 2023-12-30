@@ -152,12 +152,13 @@ function setupSelect(el: HTMLSelectElement) {
 function newFakeSelectFrom(): HTMLElement {
   const newSelect = document.createElement("div");
   newSelect.className += "fbn-custom-select";
+  newSelect.setAttribute("tabIndex", "-1");
 
   // Copied from the original select
   newSelect.style.backgroundColor = "var(--mainColor)";
   newSelect.style.border = "2px solid var(--mainColor-light)";
   newSelect.style.borderRadius = "4px";
-  newSelect.style.outline = "none";
+  //  newSelect.style.outline = "none";
   newSelect.style.color = "#fff";
 
   // Custom
@@ -180,7 +181,6 @@ function newFakeSelectFrom(): HTMLElement {
 
   // Add listener
   newSelect.addEventListener("click", (e) => {
-    console.log("clicked on parent", e);
     // TODO: ideally we would figure out a better value
     newSelect.style.height = "200px";
     newSelect.style.overflowY = "auto";
@@ -195,6 +195,7 @@ function newFakeSelectFrom(): HTMLElement {
     const option = newSelect.querySelector<HTMLElement>("*");
     if (option) {
       option.setAttribute("tabIndex", "-1");
+      console.log("focusing on first item which should be", option);
       option.focus();
     }
     // TODO: focus first item
@@ -208,21 +209,23 @@ function setupFakeOptionsKeydownListeners(
   el: HTMLElement
 ) {
   el.addEventListener("keydown", (e) => {
-    console.log("pressed ");
     e.preventDefault();
+
     const keyPressed = (e as KeyboardEvent).key;
 
     switch (keyPressed) {
       case "Enter": {
-        console.log("clickingon", el);
+        e.stopPropagation();
         el.click();
         return;
       }
       case "ArrowUp": {
+        e.stopPropagation();
         moveToNextOption(allOptions, el, CL.prev);
         return;
       }
       case "ArrowDown": {
+        e.stopPropagation();
         moveToNextOption(allOptions, el, CL.next);
         return;
       }
@@ -287,6 +290,9 @@ export function initSearchHeader(root: HTMLElement): boolean {
   // The filter button needs this to be tabbable
   const button = root.querySelector<HTMLElement>(".filtersButton");
   button?.setAttribute("tabIndex", "-1");
+  // To be accessible
+  button?.setAttribute("role", "button");
+  button?.setAttribute("aria-label", "filters");
 
   // The clear filters button needs this to be tabbable
   const clearFiltersButton = getThirdRowItems(root);
@@ -362,7 +368,7 @@ function setupKeyDownListeners(root: HTMLElement): Teardown {
   };
 
   log("adding listener to", root);
-  //  root.addEventListener("keydown", fn);
+  root.addEventListener("keydown", fn);
   return () => {
     log("tearing down keydown");
     root.removeEventListener("keydown", fn);
@@ -374,7 +380,7 @@ function getFirstRowItems(root: HTMLElement) {
 }
 
 function getSecondRowItems(root: HTMLElement) {
-  return root.querySelectorAll<HTMLElement>(".filtersList select");
+  return root.querySelectorAll<HTMLElement>(".filtersList .fbn-custom-select");
 }
 
 function getThirdRowItems(root: HTMLElement) {
@@ -388,6 +394,7 @@ function moveVertically(
 ) {
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
+  console.log("move vertically, found row", row);
 
   switch (row) {
     case "FIRST": {
@@ -416,6 +423,7 @@ function moveVertically(
 
   if (items.length > 0) {
     const next = items[0];
+    console.log("focusing on", next);
     // Notice we don't do the roving tabindex trick here
     // since we always want users to easily go to the input
     //    rovingTabIndex(currentFocused, next);
@@ -428,6 +436,7 @@ function moveHorizontally(
   currentFocused: HTMLElement,
   nextFn: typeof CL.next
 ) {
+  console.log("should move horizontally");
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
 

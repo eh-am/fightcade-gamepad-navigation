@@ -22,6 +22,7 @@ export function initSidebar(): boolean {
     return false;
   }
 
+  sidebarItems.forEach((el) => el.setAttribute("tabIndex", "-1"));
   first.setAttribute("tabIndex", "0");
 
   // Make leave lobby/mute channel items always visible
