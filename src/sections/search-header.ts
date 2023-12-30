@@ -17,6 +17,78 @@ function copyStylesFrom(origin: HTMLElement, dest: HTMLElement) {
   }
 }
 
+//function updateSearchHeader() {
+//  // Instead of remove all event listeners and such
+//  // We just delete the root node of the custom select
+//  // TODO: apparently the listeners continue existing?
+//  // https://stackoverflow.com/a/76239226
+//}
+
+/**
+ * For each select we find
+ * Create a new, custom one.
+ * Main motivation is to be able to control it via programatically
+ * which the default one does not
+ * source: https://chromestatus.com/feature/5718803933560832
+ */
+//function setupSelect(el: HTMLSelectElement) {
+//  el.setAttribute("tabIndex", "-1");
+//
+//  // TODO: create wrapper, newSelect etc
+//  //
+//  const optionsTeardown = Array.from(el.querySelectorAll("option")).map(
+//    (opt) => {
+//      return setupOption(opt);
+//    }
+//  );
+//
+//  // TODO: add more
+//  return optionsTeardown;
+//}
+
+/**
+ * Create a fake option
+ */
+function setupOption(originalSelect: HTMLSelectElement, el: HTMLOptionElement) {
+  const clone = document.createElement("div");
+  const content = (el.textContent || "").trim();
+
+  clone.innerText = content;
+  clone.style.padding = ".25rem";
+  clone.style.pointerEvents = "none";
+  // Cancel out the scrollbar
+  clone.style.marginRight = "-8px";
+
+  const onClick = function (e: Event) {
+    console.log("clicked on child");
+
+    const parent = clone.parentNode as HTMLElement;
+    const allOptions = parent.querySelectorAll<HTMLElement>("*");
+    allOptions.forEach((el) => (el.style.pointerEvents = "none"));
+
+    e.preventDefault();
+    // Since the parent focus back on the first item
+    e.stopPropagation();
+
+    // looks weird but it's correct
+    originalSelect.value = el.value;
+    originalSelect.dispatchEvent(new Event("change"));
+
+    // Couldn't find an well supported way to do that, hint: we want to use fill-available
+    const normalHeight = el.offsetHeight;
+    parent.style.height = `${normalHeight}px`;
+    parent.focus();
+
+    clone.scrollIntoView();
+
+    // TODO: make all parent's styles go back to initial state
+    parent.style.overflowY = "hidden";
+  };
+
+  clone.addEventListener("click", onClick);
+  return clone;
+}
+
 export function initSearchHeader(root: HTMLElement): boolean {
   // Although <input> doesn't need it, it's a good idea to leave it explitly
   const input = root.querySelector<HTMLElement>("input");
@@ -32,7 +104,7 @@ export function initSearchHeader(root: HTMLElement): boolean {
 
   // The select filters are tabbable by default, but since we are going to manage
   // navigation manually, let's make them not tabbable
-  const selects = root.querySelectorAll<HTMLElement>("select");
+  const selects = root.querySelectorAll<HTMLSelectElement>("select");
   selects.forEach((el) => {
     el.setAttribute("tabIndex", "-1");
     //   el.style.visibility = "hidden";
@@ -50,73 +122,56 @@ export function initSearchHeader(root: HTMLElement): boolean {
       "found all these optiosn",
       Array.from(el.querySelectorAll("option"))
     );
-    const options = Array.from(el.querySelectorAll("option")).map((opt) => {
-      const clone = document.createElement("div");
-      const content = (opt.textContent || "").trim();
 
-      clone.innerText = content;
-      clone.style.padding = ".25rem";
-      clone.style.pointerEvents = "none";
-      // Cancel out the scrollbar
-      clone.style.marginRight = "-8px";
-
-      // TODO: i eyeballed this
-      // clone.style.marginTop = "-6px";
-      //      height: 100%;
-      //    display: flex;
-      //    justify-content: center;
-      //    align-items: center;
-
-      clone.addEventListener("click", (e) => {
-        console.log("clicked on child");
-
-        const allOptions = newSelect.querySelectorAll<HTMLElement>("*");
-        allOptions.forEach((el) => (el.style.pointerEvents = "none"));
-
-        e.preventDefault();
-        // Since the parent focus back on the first item
-        e.stopPropagation();
-
-        // looks weird but it's correct
-        opt.value = opt.value;
-        opt.dispatchEvent(new Event("change"));
-
-        const parent = clone.parentNode as HTMLElement;
-        parent.style.height = `${normalHeight}px`;
-        parent.focus();
-
-        clone.scrollIntoView();
-
-        // TODO: make all parent's styles go back to initial state
-        parent.style.overflowY = "hidden";
-      });
-
-      //      clone.addEventListener("focusout", (e) => {
-      //        const target = e.relatedTarget;
-      //        console.log("currentTarget", e.currentTarget);
-      //        console.log("target", e.target);
-      //        console.log("relatedTarget", e.relatedTarget);
-      //
-      //        const siblings = clone.parentNode?.querySelectorAll<HTMLElement>("*");
-      //        const isSibling =
-      //          Array.from(siblings || []).findIndex((el) => el === target) !== -1;
-      //        console.log("is sibling", isSibling);
-      //        if (isSibling) {
-      //          return;
-      //        }
-      //        // TODO: check it's going to another item
-      //
-      //        if (clone.parentNode) {
-      //          // TODO: not sure this is supported
-      //          (clone.parentNode as HTMLElement).style.height = `${normalHeight}px`;
-      //        }
-      //
-      //        clone?.removeAttribute("tabIndex");
-      //      });
-
-      return clone;
+    const options = Array.from(el.querySelectorAll("option")).map((option) => {
+      return setupOption(el, option);
     });
-
+    // TODO: create these when options change!
+    // since they happen asynchronously, we have to watch them :\
+    //    const options = Array.from(el.querySelectorAll("option")).map((opt) => {
+    //      const clone = document.createElement("div");
+    //      const content = (opt.textContent || "").trim();
+    //
+    //      clone.innerText = content;
+    //      clone.style.padding = ".25rem";
+    //      clone.style.pointerEvents = "none";
+    //      // Cancel out the scrollbar
+    //      clone.style.marginRight = "-8px";
+    //
+    //      // TODO: i eyeballed this
+    //      // clone.style.marginTop = "-6px";
+    //      //      height: 100%;
+    //      //    display: flex;
+    //      //    justify-content: center;
+    //      //    align-items: center;
+    //
+    //      clone.addEventListener("click", (e) => {
+    //        console.log("clicked on child");
+    //
+    //        const allOptions = newSelect.querySelectorAll<HTMLElement>("*");
+    //        allOptions.forEach((el) => (el.style.pointerEvents = "none"));
+    //
+    //        e.preventDefault();
+    //        // Since the parent focus back on the first item
+    //        e.stopPropagation();
+    //
+    //        // looks weird but it's correct
+    //        opt.value = opt.value;
+    //        opt.dispatchEvent(new Event("change"));
+    //
+    //        const parent = clone.parentNode as HTMLElement;
+    //        parent.style.height = `${normalHeight}px`;
+    //        parent.focus();
+    //
+    //        clone.scrollIntoView();
+    //
+    //        // TODO: make all parent's styles go back to initial state
+    //        parent.style.overflowY = "hidden";
+    //      });
+    //
+    //      return clone;
+    //    });
+    //
     options.forEach((opt) => {
       opt.addEventListener("keydown", (e) => {
         console.log("pressed ");
