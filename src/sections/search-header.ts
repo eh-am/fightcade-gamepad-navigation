@@ -18,11 +18,11 @@ function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
 
   return findSelectedFakeOption(mirror);
 }
+function getClosestTitle(el: HTMLSelectElement) {
+  return el.closest(".filterItem")?.querySelector(".title")?.textContent;
+}
 
 function findMirrorSelect(originalSelect: HTMLSelectElement) {
-  const getClosestTitle = (el: HTMLElement) =>
-    el.closest(".filterItem")?.querySelector(".title")?.textContent;
-
   const title = getClosestTitle(originalSelect);
   const mirror = Array.from(
     document.querySelectorAll<HTMLSelectElement>("select")
@@ -107,7 +107,6 @@ function setupSelect(el: HTMLSelectElement) {
   el.setAttribute("tabIndex", "-1");
 
   const wrapper = document.createElement("div");
-  //    const newSelect = document.createElement("div");
 
   const realOptions = Array.from(el.querySelectorAll("option"));
   // For some reason it hasn't been initialized yet
@@ -117,11 +116,6 @@ function setupSelect(el: HTMLSelectElement) {
 
   el.addEventListener("change", (e: Event) => {
     // TODO: fix this type
-    const value = (e?.target as any)?.value;
-
-    console.log("it changed to", value);
-    // TODO: scroll HEREEEEEEEEEEEEEE
-    console.log("i should be scrolling");
     findSelectedFakeOption(el)?.scrollIntoView();
   });
 
@@ -135,8 +129,14 @@ function setupSelect(el: HTMLSelectElement) {
   wrapper.style.position = "relative";
   // For some reason I could not do absolute
   //    el.style.position = "absolute";
-  const newSelect = newFakeSelectFrom();
+  const newSelect = newFakeSelect();
+  newSelect.setAttribute("role", "select");
+  newSelect.setAttribute("aria-label", getClosestTitle(el) || "");
 
+  el.setAttribute(
+    "data-testid",
+    `select-${getClosestTitle(el)?.toLowerCase() || ""}`
+  );
   el.style.inset = "0";
   el.style.visibility = "hidden";
 
@@ -149,7 +149,7 @@ function setupSelect(el: HTMLSelectElement) {
 }
 //
 //
-function newFakeSelectFrom(): HTMLElement {
+function newFakeSelect(): HTMLElement {
   const newSelect = document.createElement("div");
   newSelect.className += "fbn-custom-select";
   newSelect.setAttribute("tabIndex", "-1");
@@ -195,10 +195,8 @@ function newFakeSelectFrom(): HTMLElement {
     const option = newSelect.querySelector<HTMLElement>("*");
     if (option) {
       option.setAttribute("tabIndex", "-1");
-      console.log("focusing on first item which should be", option);
       option.focus();
     }
-    // TODO: focus first item
   });
 
   return newSelect;
@@ -296,7 +294,11 @@ export function initSearchHeader(root: HTMLElement): boolean {
 
   // The clear filters button needs this to be tabbable
   const clearFiltersButton = getThirdRowItems(root);
-  clearFiltersButton.forEach((el) => el.setAttribute("tabIndex", "-1"));
+  clearFiltersButton.forEach((el) => {
+    el.setAttribute("tabIndex", "-1");
+    el.setAttribute("role", "button");
+    el.setAttribute("label", "Clear Filters");
+  });
 
   clearFiltersButton.forEach((el) => {
     el.addEventListener("click", () => {
