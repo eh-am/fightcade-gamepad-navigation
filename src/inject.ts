@@ -12,6 +12,7 @@ import {
 } from "./sections/search_results";
 import { log } from "./log";
 import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
+const tabSequence = require("ally.js/query/tabsequence");
 
 if (isElectron()) {
   notify("Starting Arcade Stick Support...");
@@ -112,6 +113,15 @@ const observer = new MutationObserver(function () {
 
     searchResultsObserver.observe(searchResultsRoot, observerOptions);
   }
+
+  const seq = tabSequence({
+    strategy: "quick",
+    includeContext: false,
+    includeOnlyTabbable: true,
+    context: document,
+  });
+
+  console.log("tabSequence", seq);
 });
 
 observer.observe(document, observerOptions);

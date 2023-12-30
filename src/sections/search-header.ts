@@ -10,6 +10,14 @@ function findSelectedFakeOption(el: HTMLSelectElement) {
       `.fbn-custom-select > [data-value="${el.value}"]`
     );
 }
+
+function findSelectedFakeOptionFrom(root: HTMLElement, value: string) {
+  return root
+    .closest(".filterItem")
+    ?.querySelector<HTMLElement>(
+      `.fbn-custom-select > [data-value="${value}"]`
+    );
+}
 function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
   const mirror = findMirrorSelect(originalSelect);
   if (!mirror) {
@@ -18,11 +26,11 @@ function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
 
   return findSelectedFakeOption(mirror);
 }
+function getClosestTitle(el: HTMLSelectElement) {
+  return el.closest(".filterItem")?.querySelector(".title")?.textContent;
+}
 
 function findMirrorSelect(originalSelect: HTMLSelectElement) {
-  const getClosestTitle = (el: HTMLElement) =>
-    el.closest(".filterItem")?.querySelector(".title")?.textContent;
-
   const title = getClosestTitle(originalSelect);
   const mirror = Array.from(
     document.querySelectorAll<HTMLSelectElement>("select")
@@ -107,7 +115,6 @@ function setupSelect(el: HTMLSelectElement) {
   el.setAttribute("tabIndex", "-1");
 
   const wrapper = document.createElement("div");
-  //    const newSelect = document.createElement("div");
 
   const realOptions = Array.from(el.querySelectorAll("option"));
   // For some reason it hasn't been initialized yet
@@ -117,11 +124,6 @@ function setupSelect(el: HTMLSelectElement) {
 
   el.addEventListener("change", (e: Event) => {
     // TODO: fix this type
-    const value = (e?.target as any)?.value;
-
-    console.log("it changed to", value);
-    // TODO: scroll HEREEEEEEEEEEEEEE
-    console.log("i should be scrolling");
     findSelectedFakeOption(el)?.scrollIntoView();
   });
 
@@ -135,8 +137,28 @@ function setupSelect(el: HTMLSelectElement) {
   wrapper.style.position = "relative";
   // For some reason I could not do absolute
   //    el.style.position = "absolute";
-  const newSelect = newFakeSelectFrom();
+  const newSelect = newFakeSelect();
+  newSelect.setAttribute("role", "select");
+  newSelect.setAttribute("aria-label", getClosestTitle(el) || "");
 
+  newSelect.addEventListener("focusout", (ev) => {
+    const to = ev.relatedTarget as HTMLElement;
+    if (to && newSelect.contains(to)) {
+      return;
+    }
+
+    // TODO: unify with another place where we set back to the initial state
+    const normalHeight = el.offsetHeight;
+    newSelect.style.height = `${normalHeight}px`;
+    newSelect.style.overflowY = "hidden";
+    const allOptions = newSelect.querySelectorAll<HTMLElement>("*");
+    allOptions.forEach((el) => (el.style.pointerEvents = "none"));
+  });
+
+  el.setAttribute(
+    "data-testid",
+    `select-${getClosestTitle(el)?.toLowerCase() || ""}`
+  );
   el.style.inset = "0";
   el.style.visibility = "hidden";
 
@@ -149,15 +171,16 @@ function setupSelect(el: HTMLSelectElement) {
 }
 //
 //
-function newFakeSelectFrom(): HTMLElement {
+function newFakeSelect(): HTMLElement {
   const newSelect = document.createElement("div");
   newSelect.className += "fbn-custom-select";
+  newSelect.setAttribute("tabIndex", "-1");
 
   // Copied from the original select
   newSelect.style.backgroundColor = "var(--mainColor)";
   newSelect.style.border = "2px solid var(--mainColor-light)";
   newSelect.style.borderRadius = "4px";
-  newSelect.style.outline = "none";
+  //  newSelect.style.outline = "none";
   newSelect.style.color = "#fff";
 
   // Custom
@@ -180,8 +203,8 @@ function newFakeSelectFrom(): HTMLElement {
 
   // Add listener
   newSelect.addEventListener("click", (e) => {
-    console.log("clicked on parent", e);
     // TODO: ideally we would figure out a better value
+    // downside is that for smaller selects it still shows an empty space
     newSelect.style.height = "200px";
     newSelect.style.overflowY = "auto";
     newSelect.style.overflowX = "hidden";
@@ -194,10 +217,9 @@ function newFakeSelectFrom(): HTMLElement {
 
     const option = newSelect.querySelector<HTMLElement>("*");
     if (option) {
-      option.setAttribute("tabIndex", "-1");
+      // TODO: this doesn't seem to be working
       option.focus();
     }
-    // TODO: focus first item
   });
 
   return newSelect;
@@ -208,21 +230,25 @@ function setupFakeOptionsKeydownListeners(
   el: HTMLElement
 ) {
   el.addEventListener("keydown", (e) => {
-    console.log("pressed ");
-    e.preventDefault();
     const keyPressed = (e as KeyboardEvent).key;
+    console.log("received key", keyPressed);
 
     switch (keyPressed) {
       case "Enter": {
-        console.log("clickingon", el);
+        e.preventDefault();
+        e.stopPropagation();
         el.click();
         return;
       }
       case "ArrowUp": {
+        e.preventDefault();
+        e.stopPropagation();
         moveToNextOption(allOptions, el, CL.prev);
         return;
       }
       case "ArrowDown": {
+        e.preventDefault();
+        e.stopPropagation();
         moveToNextOption(allOptions, el, CL.next);
         return;
       }
@@ -239,12 +265,21 @@ function createFakeOption(
   const clone = document.createElement("div");
   const content = (el.textContent || "").trim();
 
+  clone.setAttribute("tabIndex", "-1");
   clone.setAttribute("data-value", el.value);
+  clone.setAttribute("aria-label", content);
   clone.innerText = content;
   clone.style.padding = ".25rem";
   clone.style.pointerEvents = "none";
   // Cancel out the scrollbar
   clone.style.marginRight = "-8px";
+  // Eyeballed it
+  clone.style.paddingTop = "5px";
+
+  // Copied from the original
+  //  clone.style.boxShadow =
+  //    "inset 0 0 12px var(--accentColor),0 0 12px var(--accentColor)";
+  //  clone.style.borderColor = "var(--accentColor)";
 
   const onClick = function (e: Event) {
     e.preventDefault();
@@ -287,10 +322,17 @@ export function initSearchHeader(root: HTMLElement): boolean {
   // The filter button needs this to be tabbable
   const button = root.querySelector<HTMLElement>(".filtersButton");
   button?.setAttribute("tabIndex", "-1");
+  // To be accessible
+  button?.setAttribute("role", "button");
+  button?.setAttribute("aria-label", "filters");
 
   // The clear filters button needs this to be tabbable
   const clearFiltersButton = getThirdRowItems(root);
-  clearFiltersButton.forEach((el) => el.setAttribute("tabIndex", "-1"));
+  clearFiltersButton.forEach((el) => {
+    el.setAttribute("tabIndex", "-1");
+    el.setAttribute("role", "button");
+    el.setAttribute("label", "Clear Filters");
+  });
 
   clearFiltersButton.forEach((el) => {
     el.addEventListener("click", () => {
@@ -317,7 +359,8 @@ function moveToNextOption(
   myself: HTMLElement,
   nextFn: typeof CL.next
 ) {
-  myself.removeAttribute("tabIndex");
+  // TODO: make all have tabIndex -1
+  //  myself.removeAttribute("tabIndex");
 
   const myIndex = array.findIndex((el) => el === myself);
   const next = nextFn(array, myIndex);
@@ -362,7 +405,7 @@ function setupKeyDownListeners(root: HTMLElement): Teardown {
   };
 
   log("adding listener to", root);
-  //  root.addEventListener("keydown", fn);
+  root.addEventListener("keydown", fn);
   return () => {
     log("tearing down keydown");
     root.removeEventListener("keydown", fn);
@@ -374,7 +417,7 @@ function getFirstRowItems(root: HTMLElement) {
 }
 
 function getSecondRowItems(root: HTMLElement) {
-  return root.querySelectorAll<HTMLElement>(".filtersList select");
+  return root.querySelectorAll<HTMLElement>(".filtersList .fbn-custom-select");
 }
 
 function getThirdRowItems(root: HTMLElement) {
@@ -388,6 +431,7 @@ function moveVertically(
 ) {
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
+  console.log("move vertically, found row", row);
 
   switch (row) {
     case "FIRST": {
@@ -416,6 +460,7 @@ function moveVertically(
 
   if (items.length > 0) {
     const next = items[0];
+    console.log("focusing on", next);
     // Notice we don't do the roving tabindex trick here
     // since we always want users to easily go to the input
     //    rovingTabIndex(currentFocused, next);
@@ -438,6 +483,8 @@ function moveHorizontally(
     }
 
     case "SECOND": {
+      currentFocused =
+        currentFocused.closest(".fbn-custom-select") || currentFocused;
       items = getSecondRowItems(root);
       break;
     }
