@@ -52,6 +52,7 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] support left analog
 - [ ] support hold button
 - [ ] in search welcome page, allow navigating with arrowkeys instead of tab
+- [ ] add arrow to filter select
 
 # Pages
 

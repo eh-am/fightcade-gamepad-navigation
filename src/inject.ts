@@ -11,7 +11,6 @@ import {
   updateSearchResults,
 } from "./sections/search_results";
 import { log } from "./log";
-import { Teardown } from "./types";
 import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
 
 if (isElectron()) {
@@ -74,7 +73,32 @@ const observer = new MutationObserver(function () {
     const init1 = initSearchHeader(searchHeaderInWelcomeRoot);
     const init2 = initSearchHeader(searchHeaderInSearchRoot);
 
+    // TODO: does this make any sense?
     initialized.search_header = init1 && init2;
+    //    x
+    //    initialized.search_header = true;
+    if (initialized.search_header) {
+      [searchHeaderInSearchRoot, searchHeaderInWelcomeRoot].forEach((root) => {
+        // Kinda naive but does the job
+        // Only run when options are added
+        // Otherwise, when we create our fake options, it will trigger an infinite loop
+        const observer = new MutationObserver((mr) => {
+          const addedOptions = mr.some((m) => {
+            return (
+              m.type === "childList" &&
+              (m.target as HTMLElement).tagName === "SELECT"
+            );
+          });
+          console.log("updating because", addedOptions);
+
+          if (addedOptions) {
+            updateSearchHeader(root);
+          }
+        });
+
+        observer.observe(root, observerOptions);
+      });
+    }
   }
 
   const searchResultsRoot = document.querySelector(PAGES.SEARCH_RESULTS);
@@ -96,4 +120,6 @@ const PAGES = {
   SEARCH_RESULTS: ".searchWrapper",
 };
 
-const searchResultsObserver = new MutationObserver(() => updateSearchResults());
+const searchResultsObserver = new MutationObserver(() => {
+  updateSearchResults();
+});
