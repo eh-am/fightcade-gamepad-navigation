@@ -103,4 +103,17 @@ test("selects items", async ({ page }) => {
   await expect(page.getByTestId("select-ranked").nth(1)).toHaveValue("0");
 });
 
-// TODO: when hitting right from an option it should focus the next option
+// TODO:
+test("upon clicking it should focus on the first item", async ({ page }) => {});
+
+test("it escapes to next item when pressing right arrow in an open select", async ({
+  page,
+}) => {
+  await page.goto("/testdata/search-filter/");
+
+  await page.getByLabel("Genre").nth(1).focus();
+  await page.getByLabel("Genre").nth(1).click();
+
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByLabel("Release year").nth(1)).toBeFocused();
+});

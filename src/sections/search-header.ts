@@ -10,6 +10,14 @@ function findSelectedFakeOption(el: HTMLSelectElement) {
       `.fbn-custom-select > [data-value="${el.value}"]`
     );
 }
+
+function findSelectedFakeOptionFrom(root: HTMLElement, value: string) {
+  return root
+    .closest(".filterItem")
+    ?.querySelector<HTMLElement>(
+      `.fbn-custom-select > [data-value="${value}"]`
+    );
+}
 function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
   const mirror = findMirrorSelect(originalSelect);
   if (!mirror) {
@@ -133,6 +141,20 @@ function setupSelect(el: HTMLSelectElement) {
   newSelect.setAttribute("role", "select");
   newSelect.setAttribute("aria-label", getClosestTitle(el) || "");
 
+  newSelect.addEventListener("focusout", (ev) => {
+    const to = ev.relatedTarget as HTMLElement;
+    if (to && newSelect.contains(to)) {
+      return;
+    }
+
+    // TODO: unify with another place where we set back to the initial state
+    const normalHeight = el.offsetHeight;
+    newSelect.style.height = `${normalHeight}px`;
+    newSelect.style.overflowY = "hidden";
+    const allOptions = newSelect.querySelectorAll<HTMLElement>("*");
+    allOptions.forEach((el) => (el.style.pointerEvents = "none"));
+  });
+
   el.setAttribute(
     "data-testid",
     `select-${getClosestTitle(el)?.toLowerCase() || ""}`
@@ -182,6 +204,7 @@ function newFakeSelect(): HTMLElement {
   // Add listener
   newSelect.addEventListener("click", (e) => {
     // TODO: ideally we would figure out a better value
+    // downside is that for smaller selects it still shows an empty space
     newSelect.style.height = "200px";
     newSelect.style.overflowY = "auto";
     newSelect.style.overflowX = "hidden";
@@ -194,7 +217,7 @@ function newFakeSelect(): HTMLElement {
 
     const option = newSelect.querySelector<HTMLElement>("*");
     if (option) {
-      option.setAttribute("tabIndex", "-1");
+      // TODO: this doesn't seem to be working
       option.focus();
     }
   });
@@ -207,22 +230,24 @@ function setupFakeOptionsKeydownListeners(
   el: HTMLElement
 ) {
   el.addEventListener("keydown", (e) => {
-    e.preventDefault();
-
     const keyPressed = (e as KeyboardEvent).key;
+    console.log("received key", keyPressed);
 
     switch (keyPressed) {
       case "Enter": {
+        e.preventDefault();
         e.stopPropagation();
         el.click();
         return;
       }
       case "ArrowUp": {
+        e.preventDefault();
         e.stopPropagation();
         moveToNextOption(allOptions, el, CL.prev);
         return;
       }
       case "ArrowDown": {
+        e.preventDefault();
         e.stopPropagation();
         moveToNextOption(allOptions, el, CL.next);
         return;
@@ -240,12 +265,21 @@ function createFakeOption(
   const clone = document.createElement("div");
   const content = (el.textContent || "").trim();
 
+  clone.setAttribute("tabIndex", "-1");
   clone.setAttribute("data-value", el.value);
+  clone.setAttribute("aria-label", content);
   clone.innerText = content;
   clone.style.padding = ".25rem";
   clone.style.pointerEvents = "none";
   // Cancel out the scrollbar
   clone.style.marginRight = "-8px";
+  // Eyeballed it
+  clone.style.paddingTop = "5px";
+
+  // Copied from the original
+  //  clone.style.boxShadow =
+  //    "inset 0 0 12px var(--accentColor),0 0 12px var(--accentColor)";
+  //  clone.style.borderColor = "var(--accentColor)";
 
   const onClick = function (e: Event) {
     e.preventDefault();
@@ -325,7 +359,8 @@ function moveToNextOption(
   myself: HTMLElement,
   nextFn: typeof CL.next
 ) {
-  myself.removeAttribute("tabIndex");
+  // TODO: make all have tabIndex -1
+  //  myself.removeAttribute("tabIndex");
 
   const myIndex = array.findIndex((el) => el === myself);
   const next = nextFn(array, myIndex);
@@ -438,7 +473,6 @@ function moveHorizontally(
   currentFocused: HTMLElement,
   nextFn: typeof CL.next
 ) {
-  console.log("should move horizontally");
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
 
@@ -449,6 +483,8 @@ function moveHorizontally(
     }
 
     case "SECOND": {
+      currentFocused =
+        currentFocused.closest(".fbn-custom-select") || currentFocused;
       items = getSecondRowItems(root);
       break;
     }
