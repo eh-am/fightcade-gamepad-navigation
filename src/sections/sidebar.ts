@@ -1,6 +1,5 @@
 import * as CL from "../circularList";
 import { addCSS } from "../dom";
-import { Teardown } from "../types";
 import isVisible from "ally.js/src/is/visible";
 
 // TODO: take a root node

@@ -1,7 +1,6 @@
 import { rovingTabIndex } from "../dom";
 import * as CL from "../circularList";
 import { log } from "../log";
-import { Teardown } from "../types";
 
 function findSelectedFakeOption(el: HTMLSelectElement) {
   return el

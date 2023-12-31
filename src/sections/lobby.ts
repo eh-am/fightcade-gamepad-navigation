@@ -1,4 +1,3 @@
-import { Teardown } from "../types";
 import * as CL from "../circularList";
 
 export function initLobby(root: HTMLElement) {}

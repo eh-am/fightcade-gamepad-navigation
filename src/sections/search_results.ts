@@ -1,6 +1,5 @@
 import { log } from "../log";
 import { addCSS, rovingTabIndex } from "../dom";
-import { Teardown } from "../types";
 import { setupGrid } from "./components/grid";
 import * as CL from "../circularList";
 

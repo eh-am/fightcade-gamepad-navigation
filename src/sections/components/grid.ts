@@ -1,7 +1,6 @@
 import { log } from "../../log";
 import * as CL from "../../circularList";
 import { findFocusableElements } from "../../dom";
-import { Teardown } from "../../types";
 
 const actionSel = ".channelActions, .eventActions, .categoryActions";
 
