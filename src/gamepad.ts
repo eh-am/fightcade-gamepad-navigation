@@ -1,7 +1,8 @@
 import { getCurrentFocusedElement } from "./dom";
-import { handleTab } from "./dom";
+import { tabNext, tabPrev } from "./dom";
 import * as CL from "./circularList";
 import { Controller } from "../vendor/controllerjs/unminified/Controller.js";
+//import tabsequence from "ally.js/src/query/tabsequence";
 //import "../vendor/controllerjs/unminified/Controller.layouts.js";
 import { notify } from "./notify";
 
@@ -122,11 +123,12 @@ export function initGamepad() {
         break;
       }
       case "FACE_3": {
-        handleTab(CL.prev);
+        tabPrev();
+        //        handleTab(CL.prev);
         break;
       }
       case "FACE_4": {
-        handleTab(CL.next);
+        tabNext();
         break;
       }
     }

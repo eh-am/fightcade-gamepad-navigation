@@ -3,8 +3,6 @@
 import { initGamepad } from "./gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
 import { initAbout } from "./sections/about";
-import { notify } from "./notify";
-import { isElectron } from "./electron";
 import { initSearch } from "./sections/search";
 import {
   initSearchResults,
@@ -12,11 +10,7 @@ import {
 } from "./sections/search_results";
 import { log } from "./log";
 import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
-const tabSequence = require("ally.js/query/tabsequence");
-
-if (isElectron()) {
-  notify("Starting Arcade Stick Support...");
-}
+import "./devOnly";
 
 const initialized = {
   sidebar: false,
@@ -43,6 +37,22 @@ const observer = new MutationObserver(function () {
     initGamepad();
     initialized.gamepad = true;
   }
+  if (!initialized.sidebar) {
+    initialized.sidebar = initSidebar();
+    updateSidebar();
+
+    if (initialized.sidebar) {
+      const observer = new MutationObserver((mr) => {
+        updateSidebar();
+      });
+
+      const root = document.querySelector(".mainToolbarWrapper");
+      if (root) {
+        observer.observe(root, observerOptions);
+      }
+    }
+  }
+
   if (initialized.sidebar) {
     updateSidebar();
   } else {
@@ -90,7 +100,6 @@ const observer = new MutationObserver(function () {
               (m.target as HTMLElement).tagName === "SELECT"
             );
           });
-          console.log("updating because", addedOptions);
 
           if (addedOptions) {
             updateSearchHeader(root);
@@ -113,15 +122,6 @@ const observer = new MutationObserver(function () {
 
     searchResultsObserver.observe(searchResultsRoot, observerOptions);
   }
-
-  const seq = tabSequence({
-    strategy: "quick",
-    includeContext: false,
-    includeOnlyTabbable: true,
-    context: document,
-  });
-
-  console.log("tabSequence", seq);
 });
 
 observer.observe(document, observerOptions);
