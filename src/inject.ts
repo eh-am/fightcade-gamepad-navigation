@@ -43,12 +43,15 @@ function makeExternalLinksNotFocusable() {
   });
 }
 
+const lobbiesObservers: MutationObserver[] = [];
+
 /**
  * Observe every single DOM change
  * TODO: ideally we should wait until the app is initialized
  */
-const observer = new MutationObserver(function () {
+const observer = new MutationObserver(function (mr: MutationRecord[]) {
   //  if (!initialized.global_css) {
+  //  TODO: only do this if gamepad is detected
   makeExternalLinksNotFocusable();
   //    initialized.global_css = true;
   //  }
@@ -73,19 +76,24 @@ const observer = new MutationObserver(function () {
     }
   }
 
-  const lobbyRoot = document.querySelector<HTMLElement>(".channelWrapper");
-  if (!initialized.lobby && lobbyRoot) {
-    initLobby(lobbyRoot);
-    initialized.lobby = true;
-
-    if (initialized.lobby) {
-      const observer = new MutationObserver((mr) => {
-        updateLobby(lobbyRoot);
+  // Lobbies (.channelWrapper) are added asynchronously (upon load, and upon joining)
+  // Instead of keep tracking of what lobby we are watching
+  // We take the easy approach and ALWAYS disconnect/reconnect for every DOM change
+  // TODO: this is not very peformant
+  lobbiesObservers.forEach((lo) => lo.disconnect());
+  const lobbies = document.querySelectorAll<HTMLElement>(".channelWrapper");
+  lobbiesObservers.push(
+    ...Array.from(lobbies).map((l) => {
+      const observer = new MutationObserver(() => {
+        updateLobby(l);
       });
 
-      observer.observe(lobbyRoot, observerOptions);
-    }
-  }
+      observer.observe(l, observerOptions);
+
+      updateLobby(l);
+      return observer;
+    })
+  );
 
   if (initialized.sidebar) {
     updateSidebar();

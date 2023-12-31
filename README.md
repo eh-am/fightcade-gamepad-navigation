@@ -58,6 +58,7 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] user button not working when clicked
 - [ ] support navigating with only arrow keys
 - [ ] outline of joined lobby on sidebar is not clear
+- [ ] upon clicking the search icon, it should clear the filters?
 
 # Pages
 
