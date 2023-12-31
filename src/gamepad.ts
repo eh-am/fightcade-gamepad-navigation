@@ -62,7 +62,7 @@ export function initGamepad() {
     function (event) {
       var controller = event.detail.controller;
       notify(
-        `CONNECTED: Controller ${controller.name} recognized at index ${controller.index}`
+        `[CONNECTED]: Controller ${controller.name} recognized at index ${controller.index}`
       );
       console.log("Controller found at index " + controller.index + ".");
       console.log("'" + controller.name + "' is ready!");
@@ -72,9 +72,7 @@ export function initGamepad() {
   window.addEventListener(
     "gc.controller.lost",
     function (event) {
-      notify(
-        `[DISCONNECTED]: Controller ${event.detail.name} recognized at index ${event.detail.index}`
-      );
+      notify(`[DISCONNECTED]: Controller at index ${event.detail.index}`);
       console.log(
         "The controller at index " +
           event.detail.index +
@@ -87,7 +85,7 @@ export function initGamepad() {
 
   window.addEventListener("gc.button.press", function (event) {
     console.log(event.detail);
-    notify(JSON.stringify(event.detail));
+    //notify(JSON.stringify(event.detail));
     // TODO: ideally these mappings should be able to be set by the user
 
     switch (event.detail.name) {
