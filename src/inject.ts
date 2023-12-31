@@ -11,6 +11,8 @@ import {
 import { log } from "./log";
 import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
 import "./devOnly";
+import { addCSS } from "./dom";
+import { initLobby, updateLobby } from "./sections/lobby";
 
 const initialized = {
   sidebar: false,
@@ -19,6 +21,9 @@ const initialized = {
   search_results: false,
   search_header: false,
   gamepad: false,
+
+  global_css: false,
+  lobby: false,
 };
 
 const observerOptions = {
@@ -29,10 +34,25 @@ const observerOptions = {
 };
 
 /**
+ * Since we don't want to leave the application
+ * the downside here is that keyboard users won't be able to tab to external links
+ */
+function makeExternalLinksNotFocusable() {
+  document.querySelectorAll('a[href^="http"]').forEach((el) => {
+    el.setAttribute("tabindex", "-1");
+  });
+}
+
+/**
  * Observe every single DOM change
  * TODO: ideally we should wait until the app is initialized
  */
 const observer = new MutationObserver(function () {
+  //  if (!initialized.global_css) {
+  makeExternalLinksNotFocusable();
+  //    initialized.global_css = true;
+  //  }
+
   if (!initialized.gamepad) {
     initGamepad();
     initialized.gamepad = true;
@@ -50,6 +70,20 @@ const observer = new MutationObserver(function () {
       if (root) {
         observer.observe(root, observerOptions);
       }
+    }
+  }
+
+  const lobbyRoot = document.querySelector<HTMLElement>(".channelWrapper");
+  if (!initialized.lobby && lobbyRoot) {
+    initLobby(lobbyRoot);
+    initialized.lobby = true;
+
+    if (initialized.lobby) {
+      const observer = new MutationObserver((mr) => {
+        updateLobby(lobbyRoot);
+      });
+
+      observer.observe(lobbyRoot, observerOptions);
     }
   }
 

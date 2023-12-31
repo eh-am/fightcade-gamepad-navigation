@@ -25,3 +25,15 @@ function circularList(array: ListOfHTML, index: number) {
   i = i % array.length;
   return array[i];
 }
+
+export function next2(array: ListOfHTML, el: HTMLElement) {
+  const index = Array.from(array).findIndex((a) => a === el);
+
+  return next(array, index);
+}
+
+export function prev2(array: ListOfHTML, el: HTMLElement) {
+  const index = Array.from(array).findIndex((a) => a === el);
+
+  return prev(array, index);
+}
