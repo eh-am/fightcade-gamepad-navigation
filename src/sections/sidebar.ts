@@ -50,15 +50,16 @@ position: relative !important;
   outline: none !important;
 }
 
+/* By default the browser will focus on the entire tree, which is bigger than the button 
+ * To deal with that, we cancel out the outline and reenable */
 .userButton:focus {
   outline: none !important;
 }
-
 .userButton:focus .userAvatarWrapper {
-        outline: 1px dotted #212121;
+  outline: 1px dotted #212121;
   outline: 5px auto -webkit-focus-ring-color;
 }
-    `);
+`);
 
   setupUserButton();
 

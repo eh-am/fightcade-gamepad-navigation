@@ -53,7 +53,9 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] support hold button
 - [ ] in search welcome page, allow navigating with arrowkeys instead of tab
 - [ ] add arrow to filter select
+- [ ] react to spacebar in select filter
 - [ ] disable all external links
+- [ ] user button not working when clicked
 
 # Pages
 

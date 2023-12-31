@@ -1,4 +1,6 @@
 import type { ListOfHTML } from "./types";
+import * as CL from "./circularList";
+import tabsequence from "ally.js/src/query/tabsequence";
 
 // TODO: sometimes it returns the body
 export function getCurrentFocusedElement() {
@@ -16,6 +18,28 @@ export function findFocusableElements(e?: Element) {
     "a, audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
   );
 }
+
+function tab(nextFn: typeof CL.next) {
+  const tabbableElements = tabsequence({
+    context: document,
+    includeContext: true,
+    strategy: "quick",
+  });
+  const currentFocused = document.activeElement;
+  const currentFocusedIndex = Array.from(tabbableElements).findIndex(
+    (a) => a === currentFocused
+  );
+
+  nextFn(tabbableElements, currentFocusedIndex).focus();
+}
+export function tabNext() {
+  tab(CL.next);
+}
+
+export function tabPrev() {
+  tab(CL.prev);
+}
+
 /*
  * Reimplement tabbing naively
  * Notice that it follows only the DOM order
