@@ -1,7 +1,7 @@
 import * as CL from "../circularList";
 import { addCSS } from "../dom";
 import isVisible from "ally.js/src/is/visible";
-import * as list from "@app/list";
+import * as list from "@app/ds/list";
 
 // TODO: take a root node
 export function initSidebar(): boolean {

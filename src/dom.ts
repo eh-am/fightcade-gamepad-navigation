@@ -1,4 +1,3 @@
-import type { ListOfHTML } from "./types";
 import * as CL from "./circularList";
 import tabsequence from "ally.js/src/query/tabsequence";
 

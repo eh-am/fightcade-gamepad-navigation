@@ -1,6 +1,6 @@
 import { getCurrentFocusedElement } from "./dom";
 import { tabNext, tabPrev } from "./dom";
-import { Controller } from "../vendor/controllerjs/unminified/Controller.js";
+import { Controller } from "@controllerjs";
 import { notify } from "./notify";
 
 // Source: https://github.com/microsoft/TypeScript/issues/28357#issuecomment-748550734
