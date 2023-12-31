@@ -56,6 +56,11 @@ ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applicat
 - [ ] react to spacebar in select filter
 - [ ] disable all external links
 - [ ] user button not working when clicked
+- [ ] support navigating with only arrow keys
+- [ ] outline of joined lobby on sidebar is not clear
+- [ ] upon clicking the search icon, it should clear the filters?
+- [ ] support navigating notifications
+- [ ] support "right clicking" a user and ignore her
 
 # Pages
 

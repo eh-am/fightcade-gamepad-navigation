@@ -19,6 +19,22 @@ export function findFocusableElements(e?: Element) {
   );
 }
 
+export function findTabbableElements(e?: Element) {
+  const root = e ? e : document;
+
+  const tabbableElements = tabsequence({
+    context: root,
+    includeContext: true,
+    strategy: "quick",
+  });
+
+  return tabbableElements;
+
+  //  return root.querySelectorAll<HTMLElement>(
+  //    "a, audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
+  //  );
+}
+
 function tab(nextFn: typeof CL.next) {
   const tabbableElements = tabsequence({
     context: document,
