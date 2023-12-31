@@ -1,6 +1,7 @@
 import * as CL from "../circularList";
 import { addCSS } from "../dom";
 import isVisible from "ally.js/src/is/visible";
+import * as list from "@app/list";
 
 // TODO: take a root node
 export function initSidebar(): boolean {
@@ -410,50 +411,6 @@ function setupRegularButtonsKeydown(): Teardown {
   };
 }
 
-function next(
-  items: HTMLElement[],
-  current: HTMLElement
-): ReturnType<typeof list> {
-  return list(items, current, 1);
-}
-
-function prev(
-  items: HTMLElement[],
-  current: HTMLElement
-): ReturnType<typeof list> {
-  return list(items, current, -1);
-}
-
-function list(
-  items: HTMLElement[],
-  current: HTMLElement,
-  addIndex: number
-): HTMLElement | "OOB_START" | "OOB_END" {
-  const myIndex = Array.from(items).findIndex((a) => a === current);
-
-  if (myIndex === -1) {
-    throw new Error(`Element ${current} could not be found`);
-  }
-
-  if (items.length <= 0) {
-    throw new Error(`Array of elements is empty, nothing to iterate`);
-  }
-
-  const nextIndex = myIndex + addIndex;
-
-  console.log({ myIndex, nextIndex });
-  // TODO: it may be possible to go outside by multiple items
-  if (nextIndex < 0) {
-    return "OOB_START";
-  }
-
-  if (nextIndex >= items.length) {
-    return "OOB_END";
-  }
-
-  return items[nextIndex];
-}
-
 /**
  * Expects to be run after Roles
  */
@@ -497,7 +454,7 @@ function setupUserMenuKeydown(): Teardown {
         e.preventDefault();
         e.stopPropagation();
 
-        const n = prev(order, activeElement);
+        const n = list.prev(order, activeElement);
         if (n === "OOB_START" || n === "OOB_END") {
           el.focus();
         } else {
@@ -507,7 +464,7 @@ function setupUserMenuKeydown(): Teardown {
         e.preventDefault();
         e.stopPropagation();
 
-        const n = next(order, activeElement);
+        const n = list.next(order, activeElement);
         if (n === "OOB_END") {
           userButton?.click();
           focusBackWhenTransitionEnds(userButton);

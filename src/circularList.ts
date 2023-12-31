@@ -1,5 +1,3 @@
-import { ListOfHTML } from "./types";
-
 /*
  * Finds the next item in a circular list
  */
