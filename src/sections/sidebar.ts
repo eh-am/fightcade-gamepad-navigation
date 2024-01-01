@@ -1,4 +1,4 @@
-import * as CL from "../circularList";
+import * as cl from "@app/ds/circularList";
 import { addCSS } from "../dom";
 import isVisible from "ally.js/src/is/visible";
 import * as list from "@app/ds/list";
@@ -122,8 +122,7 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowDown") {
       // Go outside
       const items = getHighLevelVerticalItems();
-      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      CL.next(items, myIndex).focus();
+      cl.next(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowLeft") {
       joinLobbyButton.focus();
     }
@@ -158,13 +157,11 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
       const items = getHighLevelVerticalItems();
-      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      CL.prev(items, myIndex).focus();
+      cl.prev(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
       const items = getHighLevelVerticalItems();
-      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      const next = CL.next(items, myIndex);
+      const next = cl.next(items, joinLobbyButton);
       next.focus();
     } else if (keyPressed === "ArrowRight") {
       leaveChannelButton.focus();
@@ -197,13 +194,10 @@ function getHighLevelVerticalItems() {
 }
 
 function moveVertically(el: HTMLElement, keyPressed: string) {
-  const nextFn = keyPressed === "ArrowUp" ? CL.prev : CL.next;
+  const nextFn = keyPressed === "ArrowUp" ? cl.prev : cl.next;
 
   const items = getHighLevelVerticalItems();
-  const myIndex = Array.from(items).findIndex((a) => a === el);
-  const nextItem = nextFn(items, myIndex);
-
-  console.log({ items, myIndex, nextItem, el });
+  const nextItem = nextFn(items, el);
 
   el.setAttribute("tabIndex", "-1");
   nextItem.setAttribute("tabIndex", "0");

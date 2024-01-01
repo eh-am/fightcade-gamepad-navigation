@@ -1,4 +1,4 @@
-function circularList(array: ListOfHTML, index: number) {
+export function to(array: ListOfHTML, index: number) {
   let i = index;
 
   // Support negative values
@@ -16,7 +16,7 @@ function circularList(array: ListOfHTML, index: number) {
 export function prev(array: ListOfHTML, el: Element) {
   const index = Array.from(array).findIndex((a) => a === el);
 
-  return circularList(array, index - 1);
+  return to(array, index - 1);
 }
 
 /*
@@ -25,5 +25,5 @@ export function prev(array: ListOfHTML, el: Element) {
 export function next(array: ListOfHTML, el: Element) {
   const index = Array.from(array).findIndex((a) => a === el);
 
-  return circularList(array, index + 1);
+  return to(array, index + 1);
 }

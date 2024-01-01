@@ -1,5 +1,4 @@
-import { rovingTabIndex } from "../dom";
-import * as CL from "../circularList";
+import * as cl from "@app/ds/circularList";
 import { log } from "../log";
 
 function findSelectedFakeOption(el: HTMLSelectElement) {
@@ -10,13 +9,6 @@ function findSelectedFakeOption(el: HTMLSelectElement) {
     );
 }
 
-function findSelectedFakeOptionFrom(root: HTMLElement, value: string) {
-  return root
-    .closest(".filterItem")
-    ?.querySelector<HTMLElement>(
-      `.fbn-custom-select > [data-value="${value}"]`
-    );
-}
 function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
   const mirror = findMirrorSelect(originalSelect);
   if (!mirror) {
@@ -121,7 +113,7 @@ function setupSelect(el: HTMLSelectElement) {
     return;
   }
 
-  el.addEventListener("change", (e: Event) => {
+  el.addEventListener("change", () => {
     // TODO: fix this type
     findSelectedFakeOption(el)?.scrollIntoView();
   });
@@ -201,7 +193,7 @@ function newFakeSelect(): HTMLElement {
   newSelect.style.fontSize = "0.8rem";
 
   // Add listener
-  newSelect.addEventListener("click", (e) => {
+  newSelect.addEventListener("click", () => {
     // TODO: ideally we would figure out a better value
     // downside is that for smaller selects it still shows an empty space
     newSelect.style.height = "200px";
@@ -242,13 +234,13 @@ function setupFakeOptionsKeydownListeners(
       case "ArrowUp": {
         e.preventDefault();
         e.stopPropagation();
-        moveToNextOption(allOptions, el, CL.prev);
+        moveToNextOption(allOptions, el, cl.prev);
         return;
       }
       case "ArrowDown": {
         e.preventDefault();
         e.stopPropagation();
-        moveToNextOption(allOptions, el, CL.next);
+        moveToNextOption(allOptions, el, cl.next);
         return;
       }
     }
@@ -356,13 +348,12 @@ export function initSearchHeader(root: HTMLElement): boolean {
 function moveToNextOption(
   array: HTMLElement[],
   myself: HTMLElement,
-  nextFn: typeof CL.next
+  nextFn: typeof cl.next
 ) {
   // TODO: make all have tabIndex -1
   //  myself.removeAttribute("tabIndex");
 
-  const myIndex = array.findIndex((el) => el === myself);
-  const next = nextFn(array, myIndex);
+  const next = nextFn(array, myself);
 
   // So that it's focusable
   next.setAttribute("tabIndex", "-1");
@@ -384,7 +375,7 @@ function setupKeyDownListeners(root: HTMLElement): Teardown {
     if (keyPressed === "ArrowLeft" || keyPressed === "ArrowRight") {
       e.preventDefault();
 
-      const nextFn = keyPressed === "ArrowLeft" ? CL.prev : CL.next;
+      const nextFn = keyPressed === "ArrowLeft" ? cl.prev : cl.next;
       moveHorizontally(root, currentFocused, nextFn);
     } else if (keyPressed === "Enter") {
       e.preventDefault();
@@ -470,7 +461,7 @@ function moveVertically(
 function moveHorizontally(
   root: HTMLElement,
   currentFocused: HTMLElement,
-  nextFn: typeof CL.next
+  nextFn: typeof cl.next
 ) {
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
@@ -497,9 +488,7 @@ function moveHorizontally(
   }
 
   if (items.length > 0) {
-    const myIndex = Array.from(items).findIndex((a) => a === currentFocused);
-
-    const next = nextFn(items, myIndex);
+    const next = nextFn(items, currentFocused);
     // Notice we don't do the roving tabindex trick here
     // since we always want users to easily go to the input
     //    rovingTabIndex(currentFocused, next);

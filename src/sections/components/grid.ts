@@ -1,5 +1,5 @@
 import { log } from "../../log";
-import * as CL from "../../circularList";
+import * as CL from "@app/ds/circularList";
 import { findFocusableElements } from "../../dom";
 
 const actionSel = ".channelActions, .eventActions, .categoryActions";
@@ -137,8 +137,7 @@ function moveToNextCard(
 
   // Find all cards under the same section
   const cards = section.querySelectorAll<HTMLElement>(cardQuery);
-  const myIndex = Array.from(cards).findIndex((a) => a === currentCardFocused);
-  const nextItem = nextFn(cards, myIndex);
+  const nextItem = nextFn(cards, currentCardFocused);
 
   // Roving tabindex
   currentCardFocused.setAttribute("tabIndex", "-1");
@@ -172,10 +171,8 @@ function moveToNextActionButton(nextFn: typeof CL.prev, cardQuery: string) {
 
     const actions = parent.querySelectorAll<HTMLElement>(actionSel);
     const buttons = findFocusableElements(actions[0]);
-    const myIndex = Array.from(buttons).findIndex((a) => a === currentFocused);
 
-    const next = nextFn(buttons, myIndex);
-
+    const next = nextFn(buttons, currentFocused);
     next.focus();
   }
 }
@@ -239,7 +236,7 @@ function setupKeyDownListeners(section: HTMLElement, cardQuery: string) {
           cardQuery,
           (array, index, numPerRow) => {
             const dest = index - numPerRow + 1;
-            return CL.prev(array, dest);
+            return CL.to(array, dest);
           }
         );
       }
@@ -259,7 +256,7 @@ function setupKeyDownListeners(section: HTMLElement, cardQuery: string) {
             log("per row", numPerRow);
             const dest = index + numPerRow + 1;
             log("current index", index, "should go to", dest);
-            return CL.prev(array, dest);
+            return CL.to(array, dest);
           }
         );
       }
