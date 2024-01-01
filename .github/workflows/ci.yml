@@ -16,7 +16,7 @@ jobs:
           node-version: 'latest'
       - run: npm ci
       - run: npm run type-check
-      - run: npm run build
+      - run: npm run build:test
       # https://github.com/microsoft/playwright/issues/7249#issuecomment-1385567519
       - name: Store Playwright's Version
         run: |

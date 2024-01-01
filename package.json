@@ -8,6 +8,7 @@
     "test:ui": "npx playwright test --ui --project=chromium",
     "test:watch": "PWTEST_WATCH=1 npx playwright test --project=chromium",
     "build": "esbuild --define:FBN_DEBUG=false --bundle src/inject.ts --outfile=out/inject.js",
+    "build:test": "esbuild --define:FBN_DEBUG=true --bundle src/inject.ts --outfile=out/inject.js",
     "type-check": "tsc --noEmit --p tsconfig.json",
     "watch": "esbuild --watch --define:FBN_DEBUG=true --bundle src=src/inject.ts --outfile=out/inject.js",
     "live-reload": "live-server --port=5001 --no-browser --host=0.0.0.0 --quiet --watch='out, *.html' .",

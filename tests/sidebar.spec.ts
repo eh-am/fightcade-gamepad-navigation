@@ -56,7 +56,7 @@ test("it opens the User Menu correctly", async ({ page }) => {
   await page.getByRole("button", { name: "User" }).focus();
 
   // TODO: this enter is not working
-  //  await page.keyboard.press("Enter");
+  // await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "User" }).click();
 
   await expect(page.locator(".userStateMenu")).toHaveClass(/active/);
