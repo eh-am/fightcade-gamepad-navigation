@@ -13,7 +13,7 @@ function circularList(array: ListOfHTML, index: number) {
 /*
  * Finds the previous item in a circular list
  */
-export function prev2(array: ListOfHTML, el: HTMLElement) {
+export function prev(array: ListOfHTML, el: Element) {
   const index = Array.from(array).findIndex((a) => a === el);
 
   return circularList(array, index - 1);
@@ -22,7 +22,7 @@ export function prev2(array: ListOfHTML, el: HTMLElement) {
 /*
  * Finds the next item in a circular list
  */
-export function next2(array: ListOfHTML, el: HTMLElement) {
+export function next(array: ListOfHTML, el: Element) {
   const index = Array.from(array).findIndex((a) => a === el);
 
   return circularList(array, index + 1);

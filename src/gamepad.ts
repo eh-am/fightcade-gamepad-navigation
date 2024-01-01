@@ -1,4 +1,3 @@
-import { getCurrentFocusedElement } from "./dom";
 import { tabNext, tabPrev } from "./dom";
 import { Controller } from "@controllerjs";
 import { notify } from "./notify";
@@ -70,35 +69,36 @@ export function initGamepad() {
   );
 
   window.addEventListener("gc.button.press", function (event) {
+    const focusedElement = document.activeElement;
     // TODO: ideally these mappings should be able to be set by the user
     switch (event.detail.name) {
       case "FACE_1": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
         );
         break;
       }
 
       case "DPAD_UP": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true })
         );
         break;
       }
       case "DPAD_RIGHT": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
         );
         break;
       }
       case "DPAD_DOWN": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
         );
         break;
       }
       case "DPAD_LEFT": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })
         );
         break;
