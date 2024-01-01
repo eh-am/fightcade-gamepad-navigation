@@ -1,13 +1,15 @@
-import { getCurrentFocusedElement } from "./dom";
 import { tabNext, tabPrev } from "./dom";
-import * as CL from "./circularList";
-import { Controller } from "../vendor/controllerjs/unminified/Controller.js";
-//import tabsequence from "ally.js/src/query/tabsequence";
-//import "../vendor/controllerjs/unminified/Controller.layouts.js";
+import { Controller } from "@controllerjs";
 import { notify } from "./notify";
 
-// TODO: fix type
-declare var Controller: any;
+// Source: https://github.com/microsoft/TypeScript/issues/28357#issuecomment-748550734
+declare global {
+  interface GlobalEventHandlersEventMap {
+    "gc.controller.found": ControllerConnectEvent;
+    "gc.controller.lost": ControllerDisconnectEvent;
+    "gc.button.press": ControllerButtonPressed;
+  }
+}
 
 type ControllerConnectEvent = CustomEvent<{
   index: number;
@@ -45,15 +47,6 @@ type ControllerButtonPressed = CustomEvent<{
   time: number;
 }>;
 
-// Source: https://github.com/microsoft/TypeScript/issues/28357#issuecomment-748550734
-declare global {
-  interface GlobalEventHandlersEventMap {
-    "gc.controller.found": ControllerConnectEvent;
-    "gc.controller.lost": ControllerDisconnectEvent;
-    "gc.button.press": ControllerButtonPressed;
-  }
-}
-
 export function initGamepad() {
   Controller.search();
 
@@ -64,8 +57,6 @@ export function initGamepad() {
       notify(
         `[CONNECTED]: Controller ${controller.name} recognized at index ${controller.index}`
       );
-      console.log("Controller found at index " + controller.index + ".");
-      console.log("'" + controller.name + "' is ready!");
     },
     false
   );
@@ -73,56 +64,47 @@ export function initGamepad() {
     "gc.controller.lost",
     function (event) {
       notify(`[DISCONNECTED]: Controller at index ${event.detail.index}`);
-      console.log(
-        "The controller at index " +
-          event.detail.index +
-          " has been disconnected."
-      );
-      console.log(Controller.getController(0));
     },
     false
   );
 
   window.addEventListener("gc.button.press", function (event) {
-    console.log(event.detail);
-    //notify(JSON.stringify(event.detail));
+    const focusedElement = document.activeElement;
     // TODO: ideally these mappings should be able to be set by the user
-
     switch (event.detail.name) {
       case "FACE_1": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
         );
         break;
       }
 
       case "DPAD_UP": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true })
         );
         break;
       }
       case "DPAD_RIGHT": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
         );
         break;
       }
       case "DPAD_DOWN": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
         );
         break;
       }
       case "DPAD_LEFT": {
-        getCurrentFocusedElement()?.dispatchEvent(
+        focusedElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })
         );
         break;
       }
       case "FACE_3": {
         tabPrev();
-        //        handleTab(CL.prev);
         break;
       }
       case "FACE_4": {

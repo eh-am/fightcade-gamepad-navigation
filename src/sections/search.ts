@@ -4,10 +4,10 @@ import {
   isHidden,
   rovingTabIndex,
 } from "../dom";
-import * as CL from "../circularList";
+import * as cl from "@app/ds/circularList";
 import { log } from "../log";
 
-function moveToNextActionButton(nextFn: typeof CL.prev) {
+function moveToNextActionButton(nextFn: typeof cl.prev) {
   const currentFocused = document.activeElement as HTMLElement;
   if (!currentFocused) {
     return;
@@ -24,10 +24,8 @@ function moveToNextActionButton(nextFn: typeof CL.prev) {
 
     const actions = parent.querySelectorAll<HTMLElement>(actionSel);
     const buttons = findFocusableElements(actions[0]);
-    const myIndex = Array.from(buttons).findIndex((a) => a === currentFocused);
 
-    const next = nextFn(buttons, myIndex);
-
+    const next = nextFn(buttons, currentFocused);
     next.focus();
   }
 }
@@ -133,7 +131,7 @@ function isActionButton(el: HTMLElement | null) {
 function moveToNextCard(
   section: HTMLElement,
   currentFocused: HTMLElement,
-  nextFn: typeof CL.next
+  nextFn: typeof cl.next
 ) {
   // Find current card focused, since we could be either focusing on the card already, or on its action buttons
   const currentCardFocused = currentFocused.closest(".gridWrapper");
@@ -143,8 +141,7 @@ function moveToNextCard(
 
   // Find all cards under the same section
   const cards = section.querySelectorAll<HTMLElement>(".gridWrapper");
-  const myIndex = Array.from(cards).findIndex((a) => a === currentCardFocused);
-  const nextItem = nextFn(cards, myIndex);
+  const nextItem = nextFn(cards, currentCardFocused);
 
   currentCardFocused.setAttribute("aria-expanded", "false");
 
@@ -223,18 +220,18 @@ function setupKeyDownListeners(section: HTMLElement) {
 
     if (keyPressed === "ArrowLeft") {
       e.preventDefault();
-      moveToNextCard(section, currentFocused, CL.prev);
+      moveToNextCard(section, currentFocused, cl.prev);
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();
-      moveToNextCard(section, currentFocused, CL.next);
+      moveToNextCard(section, currentFocused, cl.next);
     } else if (keyPressed === "Enter") {
       handleEnter();
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
-      moveToNextActionButton(CL.prev);
+      moveToNextActionButton(cl.prev);
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
-      moveToNextActionButton(CL.next);
+      moveToNextActionButton(cl.next);
     }
   });
 }

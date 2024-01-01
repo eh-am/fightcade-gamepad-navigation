@@ -1,11 +1,5 @@
-import type { ListOfHTML } from "./types";
-import * as CL from "./circularList";
+import * as cl from "@app/ds/circularList";
 import tabsequence from "ally.js/src/query/tabsequence";
-
-// TODO: sometimes it returns the body
-export function getCurrentFocusedElement() {
-  return document.activeElement;
-}
 
 /**
  * Very naive implementation, since it doesn't deal with
@@ -19,71 +13,23 @@ export function findFocusableElements(e?: Element) {
   );
 }
 
-export function findTabbableElements(e?: Element) {
-  const root = e ? e : document;
-
-  const tabbableElements = tabsequence({
-    context: root,
-    includeContext: true,
-    strategy: "quick",
-  });
-
-  return tabbableElements;
-
-  //  return root.querySelectorAll<HTMLElement>(
-  //    "a, audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
-  //  );
-}
-
-function tab(nextFn: typeof CL.next) {
+function tab(nextFn: typeof cl.next) {
   const tabbableElements = tabsequence({
     context: document,
     includeContext: true,
     strategy: "quick",
   });
   const currentFocused = document.activeElement;
-  const currentFocusedIndex = Array.from(tabbableElements).findIndex(
-    (a) => a === currentFocused
-  );
-
-  nextFn(tabbableElements, currentFocusedIndex).focus();
+  if (currentFocused) {
+    nextFn(tabbableElements, currentFocused).focus();
+  }
 }
 export function tabNext() {
-  tab(CL.next);
+  tab(cl.next);
 }
 
 export function tabPrev() {
-  tab(CL.prev);
-}
-
-/*
- * Reimplement tabbing naively
- * Notice that it follows only the DOM order
- * Source: https://stackoverflow.com/a/7329696
- */
-export function handleTab(
-  nextItemFn: (a: ListOfHTML, i: number) => HTMLElement
-) {
-  // Find all tablable elements
-  const tabbableElements = Array.from(
-    document.querySelectorAll<HTMLElement>(
-      "audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]"
-    )
-  ).filter((a) => a.getAttribute("tabindex") !== "-1");
-
-  const currentFocused = document.activeElement;
-  const currentFocusedIndex = Array.from(tabbableElements).findIndex(
-    (a) => a === currentFocused
-  );
-
-  let focusOn: HTMLElement;
-  if (currentFocused) {
-    focusOn = nextItemFn(tabbableElements, currentFocusedIndex);
-  } else {
-    focusOn = tabbableElements[0];
-  }
-
-  focusOn.focus();
+  tab(cl.prev);
 }
 
 export const addCSS = (css: string) =>

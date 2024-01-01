@@ -1,8 +1,7 @@
 import { log } from "../log";
 import { addCSS, rovingTabIndex } from "../dom";
-import { Teardown } from "../types";
 import { setupGrid } from "./components/grid";
-import * as CL from "../circularList";
+import * as cl from "@app/ds/circularList";
 
 function css() {
   addCSS(`
@@ -51,9 +50,6 @@ function setupFooter(section: HTMLElement): Teardown {
     const footerButtons = document.querySelectorAll<HTMLElement>(
       ".searchWrapper .paginationWrapper .button-alt"
     );
-    const myIndex = Array.from(footerButtons).findIndex(
-      (a) => a === currentFocused
-    );
 
     // TODO: figure out why setting KeyboardEvent in the event doesn't type check
     const keyPressed = (e as KeyboardEvent).key;
@@ -63,13 +59,13 @@ function setupFooter(section: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowLeft") {
       e.preventDefault();
 
-      const next = CL.prev(footerButtons, myIndex);
+      const next = cl.prev(footerButtons, currentFocused);
       rovingTabIndex(currentFocused, next);
       next.focus();
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();
 
-      const next = CL.next(footerButtons, myIndex);
+      const next = cl.next(footerButtons, currentFocused);
       rovingTabIndex(currentFocused, next);
       next.focus();
     }

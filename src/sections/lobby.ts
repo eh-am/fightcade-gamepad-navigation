@@ -1,7 +1,6 @@
-import { Teardown } from "../types";
-import * as CL from "../circularList";
+import * as cl from "@app/ds/circularList";
 
-export function initLobby(root: HTMLElement) {}
+export function initLobby() {}
 
 function setupToolbar(root: HTMLElement): Teardown {
   const buttons = root.querySelectorAll<HTMLElement>(".channelActions > *");
@@ -21,12 +20,12 @@ function setupToolbar(root: HTMLElement): Teardown {
       focusedElement?.click();
     } else if (pressed === "ArrowRight") {
       e.preventDefault();
-      const next = CL.next2(buttons, focusedElement);
+      const next = cl.next(buttons, focusedElement);
       console.log("focusing on", next);
       next.focus();
     } else if (pressed === "ArrowLeft") {
       e.preventDefault();
-      const next = CL.prev2(buttons, focusedElement);
+      const next = cl.prev(buttons, focusedElement);
       next.focus();
     }
   }
@@ -72,12 +71,12 @@ function setupUserList(root: HTMLElement): Teardown {
       focusedElement?.click();
     } else if (pressed === "ArrowDown") {
       e.preventDefault();
-      const next = CL.next2(allUsers, focusedElement);
+      const next = cl.next(allUsers, focusedElement);
       console.log("focusing on", next);
       next.focus();
     } else if (pressed === "ArrowUp") {
       e.preventDefault();
-      const next = CL.prev2(allUsers, focusedElement);
+      const next = cl.prev(allUsers, focusedElement);
       next.focus();
     }
   }
@@ -148,11 +147,11 @@ function setupBeenChallenged(root: HTMLElement): Teardown {
       focusedElement?.click();
     } else if (pressed === "ArrowRight") {
       e.preventDefault();
-      const next = CL.next2(buttons, focusedElement);
+      const next = cl.next(buttons, focusedElement);
       next.focus();
     } else if (pressed === "ArrowLeft") {
       e.preventDefault();
-      const next = CL.prev2(buttons, focusedElement);
+      const next = cl.prev(buttons, focusedElement);
       next.focus();
     }
   };

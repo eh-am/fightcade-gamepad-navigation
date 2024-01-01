@@ -1,7 +1,7 @@
-import * as CL from "../circularList";
+import * as cl from "@app/ds/circularList";
 import { addCSS } from "../dom";
-import { Teardown } from "../types";
 import isVisible from "ally.js/src/is/visible";
+import * as list from "@app/ds/list";
 
 // TODO: take a root node
 export function initSidebar(): boolean {
@@ -122,8 +122,7 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowDown") {
       // Go outside
       const items = getHighLevelVerticalItems();
-      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      CL.next(items, myIndex).focus();
+      cl.next(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowLeft") {
       joinLobbyButton.focus();
     }
@@ -158,13 +157,11 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
       const items = getHighLevelVerticalItems();
-      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      CL.prev(items, myIndex).focus();
+      cl.prev(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
       const items = getHighLevelVerticalItems();
-      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      const next = CL.next(items, myIndex);
+      const next = cl.next(items, joinLobbyButton);
       next.focus();
     } else if (keyPressed === "ArrowRight") {
       leaveChannelButton.focus();
@@ -197,13 +194,10 @@ function getHighLevelVerticalItems() {
 }
 
 function moveVertically(el: HTMLElement, keyPressed: string) {
-  const nextFn = keyPressed === "ArrowUp" ? CL.prev : CL.next;
+  const nextFn = keyPressed === "ArrowUp" ? cl.prev : cl.next;
 
   const items = getHighLevelVerticalItems();
-  const myIndex = Array.from(items).findIndex((a) => a === el);
-  const nextItem = nextFn(items, myIndex);
-
-  console.log({ items, myIndex, nextItem, el });
+  const nextItem = nextFn(items, el);
 
   el.setAttribute("tabIndex", "-1");
   nextItem.setAttribute("tabIndex", "0");
@@ -411,50 +405,6 @@ function setupRegularButtonsKeydown(): Teardown {
   };
 }
 
-function next(
-  items: HTMLElement[],
-  current: HTMLElement
-): ReturnType<typeof list> {
-  return list(items, current, 1);
-}
-
-function prev(
-  items: HTMLElement[],
-  current: HTMLElement
-): ReturnType<typeof list> {
-  return list(items, current, -1);
-}
-
-function list(
-  items: HTMLElement[],
-  current: HTMLElement,
-  addIndex: number
-): HTMLElement | "OOB_START" | "OOB_END" {
-  const myIndex = Array.from(items).findIndex((a) => a === current);
-
-  if (myIndex === -1) {
-    throw new Error(`Element ${current} could not be found`);
-  }
-
-  if (items.length <= 0) {
-    throw new Error(`Array of elements is empty, nothing to iterate`);
-  }
-
-  const nextIndex = myIndex + addIndex;
-
-  console.log({ myIndex, nextIndex });
-  // TODO: it may be possible to go outside by multiple items
-  if (nextIndex < 0) {
-    return "OOB_START";
-  }
-
-  if (nextIndex >= items.length) {
-    return "OOB_END";
-  }
-
-  return items[nextIndex];
-}
-
 /**
  * Expects to be run after Roles
  */
@@ -498,7 +448,7 @@ function setupUserMenuKeydown(): Teardown {
         e.preventDefault();
         e.stopPropagation();
 
-        const n = prev(order, activeElement);
+        const n = list.prev(order, activeElement);
         if (n === "OOB_START" || n === "OOB_END") {
           el.focus();
         } else {
@@ -508,7 +458,7 @@ function setupUserMenuKeydown(): Teardown {
         e.preventDefault();
         e.stopPropagation();
 
-        const n = next(order, activeElement);
+        const n = list.next(order, activeElement);
         if (n === "OOB_END") {
           userButton?.click();
           focusBackWhenTransitionEnds(userButton);
