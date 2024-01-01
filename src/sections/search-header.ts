@@ -137,7 +137,7 @@ function setupSelect(el: HTMLSelectElement) {
   // For some reason I could not do absolute
   //    el.style.position = "absolute";
   const newSelect = newFakeSelect();
-  newSelect.setAttribute("role", "select");
+  newSelect.setAttribute("role", "listbox");
   newSelect.setAttribute("aria-label", getClosestTitle(el) || "");
 
   newSelect.addEventListener("focusout", (ev) => {

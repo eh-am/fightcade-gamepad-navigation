@@ -6,6 +6,7 @@
   "scripts": {
     "test": "npx playwright test --project=chromium",
     "test:ui": "npx playwright test --ui --project=chromium",
+    "test:watch": "PWTEST_WATCH=1 npx playwright test --project=chromium",
     "build": "esbuild --define:FBN_DEBUG=false --bundle src/inject.ts --outfile=out/inject.js",
     "type-check": "tsc --noEmit --p tsconfig.json",
     "watch": "esbuild --watch --define:FBN_DEBUG=true --bundle src=src/inject.ts --outfile=out/inject.js",
