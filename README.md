@@ -2,7 +2,7 @@
 
 Control the [Fightcade](https://www.fightcade.com/) frontend with a gamepad (or a keyboard).
 
-[![Watch the video]()](./docs/demo.mp4)
+<video src="./docs/demo.mp4" width="400" />
 
 # Motivation
 I have Steam Deck docked and plugged to a TV and an [Arcade Stick](https://www.8bitdo.com/arcade-stick/),
