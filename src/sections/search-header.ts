@@ -5,7 +5,7 @@ function findSelectedFakeOption(el: HTMLSelectElement) {
   return el
     .closest(".filterItem")
     ?.querySelector<HTMLElement>(
-      `.fbn-custom-select > [data-value="${el.value}"]`
+      `.fgn-custom-select > [data-value="${el.value}"]`
     );
 }
 
@@ -88,7 +88,7 @@ export function updateSearchHeader(root: HTMLElement) {
   // We just delete the root node of the custom select
   // TODO: apparently the listeners continue existing?
   // https://stackoverflow.com/a/76239226
-  const fakeSelects = root.querySelectorAll<HTMLElement>(".fbn-custom-select");
+  const fakeSelects = root.querySelectorAll<HTMLElement>(".fgn-custom-select");
   fakeSelects.forEach((el) => el.remove());
 
   const selects = root.querySelectorAll<HTMLSelectElement>("select");
@@ -164,7 +164,7 @@ function setupSelect(el: HTMLSelectElement) {
 //
 function newFakeSelect(): HTMLElement {
   const newSelect = document.createElement("div");
-  newSelect.className += "fbn-custom-select";
+  newSelect.className += "fgn-custom-select";
   newSelect.setAttribute("tabIndex", "-1");
 
   // Copied from the original select
@@ -407,7 +407,7 @@ function getFirstRowItems(root: HTMLElement) {
 }
 
 function getSecondRowItems(root: HTMLElement) {
-  return root.querySelectorAll<HTMLElement>(".filtersList .fbn-custom-select");
+  return root.querySelectorAll<HTMLElement>(".filtersList .fgn-custom-select");
 }
 
 function getThirdRowItems(root: HTMLElement) {
@@ -474,7 +474,7 @@ function moveHorizontally(
 
     case "SECOND": {
       currentFocused =
-        currentFocused.closest(".fbn-custom-select") || currentFocused;
+        currentFocused.closest(".fgn-custom-select") || currentFocused;
       items = getSecondRowItems(root);
       break;
     }
