@@ -4,7 +4,6 @@ let timer: ReturnType<typeof setTimeout>;
 
 // TODO: in dev mode show an inintrusive modal
 export function notify(msg: string) {
-  console.log("notifying", msg);
   if (isElectron()) {
     // Notice that if doesn't work, you need to:
     // Enable it. For ex, on mac it's under System Preferences -> Notifications
@@ -16,12 +15,11 @@ export function notify(msg: string) {
     }
   } else {
     // Very naive solution, but since it only applies to local dev it should be fine
-    let snackbar = document.getElementById("#fbn-snackbar");
+    let snackbar = document.getElementById("#fgn-snackbar");
 
-    console.log("snackbar", snackbar);
     if (!snackbar) {
       snackbar = document.createElement("div");
-      snackbar.setAttribute("id", "#fbn-snackbar");
+      snackbar.setAttribute("id", "#fgn-snackbar");
       document.body.appendChild(snackbar);
     }
 

@@ -1,4 +1,4 @@
-declare var FBN_DEBUG: boolean;
+declare var FGN_DEBUG: boolean;
 
 /**
  * dev only stuff, so that I can test locally easier
@@ -33,8 +33,6 @@ function init() {
   });
 }
 
-//debugger;
-console.log("FBN_DEBUG", FBN_DEBUG);
-if (FBN_DEBUG) {
+if (FGN_DEBUG) {
   init();
 }

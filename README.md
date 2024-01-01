@@ -1,100 +1,38 @@
-# Fightcade Keyboard Navigation
+# Fightcade Gamepad Navigation
 
-The objective is to be able to control the FightCade frontend (not the emulator part,
-like setting Inputs, since that's too hard),
-entirely with a Arcade Stick.
+Control the [Fightcade](https://www.fightcade.com/) frontend with a gamepad (or a keyboard).
 
-The approach is to make everything more keyboard accessible, and then translate the stick
-controls into keyboard events.
+[![Watch the video]()](./docs/demo.mp4)
 
-# Meta
-To run Fightcade2 (an Electron app) and be able to run the developer tools, run:
-```
-/Applications/FightCade2.app/Contents/MacOS/Fightcade2  --remote-debugging-port=8315
-```
+# Motivation
+I have Steam Deck docked and plugged to a TV and an [Arcade Stick](https://www.8bitdo.com/arcade-stick/),
+so I wanted to control the Fightcade frontend with only the stick, without requiring a keyboard/mouse.
 
-I downloaded all the pages manually, so that developing is faster.
-Also added an import to `inject.js`, ideally we would use https://github.com/tapio/live-server/issues/338 instead
+# How to use
+## Installation
+Download the latest Release.
 
-To test I symlink
-```
-ln -s /Users/eduardo/projects/keyboard-navigation-playground/inject.js /Applications/FightCade2.app/Contents/Resources/app/inject/inject.js
-```
+Then copy the `inject.js` app to "INJECT_JS_PATH", which depends on the OS/way of installation:
+* On steam deck (no flatpak), it's under `/home/deck/Documents/Fightcade/fc2-electron/resources/app/inject/`
+* On a mac, it's under `/home/deck/Documents/Fightcade/fc2-electron/resources/app/inject/`
 
+## Running
+Open Fightcade, then press any button for the plugin to recognize the controller,
+a notification message should tell the controller has been recognized.
 
-# TODO:
-- [ ] login page
-- [ ] search page, hidden gems is not working
-- [ ] when focusing manually, set scroll into
-- [ ] handle asynchronousness, ex when a lobby is added to the sidebar
-- [ ] inject custom js, like the <script src="inject.js"/> in dev mode
-- [ ] handle stick (axis) https://developer.mozilla.org/en-US/docs/Web/API/Gamepad/axes
-- [x] use flexbox instead of grid? .wrapper: { display: flex, flexwrap }, children: { flex: 1 0 6rem; }
-- [x] add bundling
-- [ ] reduce number of event listeners, ideally one per category?
-- [ ] handle mix and matching keyboard focus and hover
-- [ ] make circular list take an element, not an index
-- [ ] focus on join first
-- [ ] upon joining, also enter lobby
-- [ ] in search there's a bug where multiple items may ge tfocus
-- [ ] make outside links unclickable, or give a warning
-- [ ] upon clicking "JOIN" | "FAV", bring focus back
-- [ ] pressing escape should go to next tabbable parent?
-- [X] prepare a teardown, so that dynamic movement works
-- [ ] TESTS: if upon changing the dom (to trigger delete an item), it still works
-- [ ] DEV: add an easy way to kill an item (to trigger a DOM reload)
-- [ ] create a custom select, since we cant trigger it manually :(
-- [ ] bug: sometimes pagination gets two items with tabindex == 0
-- [ ] BUG: welcome page stops working after doing a search :\
-- [ ] do tab roving for the filters, clear them and default to input when they are collapsed
-- [ ] implement escape
-- [ ] I had to export controller.js manually, ideally the bundler should be able to handle it
-- [ ] support left analog
-- [ ] support hold button
-- [ ] in search welcome page, allow navigating with arrowkeys instead of tab
-- [ ] add arrow to filter select
-- [ ] react to spacebar in select filter
-- [ ] disable all external links
-- [ ] user button not working when clicked
-- [ ] support navigating with only arrow keys
-- [ ] outline of joined lobby on sidebar is not clear
-- [ ] upon clicking the search icon, it should clear the filters?
-- [ ] support navigating notifications
-- [ ] support "right clicking" a user and ignore her
+Then navigate with the D-pad (or equivalent).
+By default, BUTTON_1 is translated to "Enter", and BUTTON_3 and BUTTON_4 as 
+Shift+Tab and Tab, respectively.
 
-# Pages
+# Caveats
+* It only handles the frontend, ie not the emulators part. So initial setup for the inputs still requires a mouse/keyboard.
+* It relies on the DOM structure, so if it ever changes, it will break this plugin and will require updates. PRs welcome :)
 
-- Search
-- Search Result
-- All Games -> open when you search for an empty string
-- Lobby
+# Strategy
+The approach is to make everything more keyboard accessible, and then translate gamepad
+inputs to keyboard events.
 
-
-# Recipees
-
-## Debugging the application on deck
-
-1. Create a Fightcade_debug.desktop
-```
-!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Type=Application
-Terminal=false
-Exec=/home/deck/Documents/Fightcade/Fightcade2.sh --remote-debugging-port=8315
-Name=Fightcade Debug
-Comment=Fightcade
-Categories=Game;Emulator;ArcadeGame
-Icon=/home/deck/Documents/Fightcade/fc2-electron/resources/app/icon.png
-~
-```
-
-2. Open desktop mode, open fightcade_bebug
-
-3. Make a ssh tunnel (from your pc)
-
-```
-ssh -L 8315:localhost:8315 deck@steamdeck
-```
-
-4. Open `http://localhost:8315` in chrome
+# Acknowledgments
+* [blueminder/fightcade-joystick-kb-controls](https://github.com/blueminder/fightcade-joystick-kb-controls/tree/main), for the initial inspiratino
+* [Controller.js](https://samiare.github.io/Controller.js/), for handling the gamepad inputs
+* [ally.js](https://allyjs.io/), for helping handling tab navigation and debugging focusable elements
