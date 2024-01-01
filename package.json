@@ -1,6 +1,6 @@
 {
   "name": "fightcade-better-navigation",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,6 @@
   "dependencies": {
     "ally.js": "^1.4.1",
     "concurrently": "^8.2.2",
-    "gamepad.js": "github:neogeek/gamepad.js",
     "live-server": "^1.2.2",
     "typescript": "^5.3.3"
   },
