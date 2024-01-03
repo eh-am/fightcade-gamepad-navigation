@@ -48,6 +48,7 @@ type ControllerButtonPressed = CustomEvent<{
 }>;
 
 export function initGamepad() {
+  Controller.globalSettings.useAnalogAsDpad = "left";
   Controller.search();
 
   window.addEventListener(
