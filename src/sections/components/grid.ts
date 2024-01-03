@@ -177,6 +177,22 @@ function moveToNextActionButton(nextFn: typeof CL.prev, cardQuery: string) {
   }
 }
 
+function setupRole(section: HTMLElement, cardQuery: string) {
+  const cards = section.querySelectorAll<HTMLElement>(cardQuery);
+
+  cards.forEach((el) => {
+    console.log("el", el);
+    el.setAttribute("role", "gridcell");
+
+    const title =
+      el
+        .querySelector<HTMLElement>(".channelPreviewWrapper")
+        ?.getAttribute("title") || "";
+
+    el.setAttribute("aria-label", title);
+  });
+}
+
 function moveToNextCardVertical(
   section: HTMLElement,
   currentFocused: HTMLElement,
@@ -274,6 +290,7 @@ export function setupGrid(section: HTMLElement, cardQuery: string): Teardown {
   makeButtonsTappable(section);
   setupFocusIn(section);
   setupCardFocusOut(section, cardQuery);
+  setupRole(section, cardQuery);
 
   return setupKeyDownListeners(section, cardQuery);
 }

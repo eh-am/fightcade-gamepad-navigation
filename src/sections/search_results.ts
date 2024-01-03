@@ -133,6 +133,7 @@ export function updateSearchResults() {
   if (!root || !rootGrid) {
     return () => {};
   }
+  rootGrid.setAttribute("role", "grid");
 
   teardown.push(setupGrid(rootGrid, ".channelWrapper"));
   teardown.push(setupFooter(root));
