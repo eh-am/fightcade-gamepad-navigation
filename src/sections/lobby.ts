@@ -9,7 +9,6 @@ function setupToolbar(root: HTMLElement): Teardown {
     return () => {};
   }
 
-  console.log("adding listeners to channel actions", channelActions);
   function onKeydown(e: KeyboardEvent) {
     const pressed = e.key;
     const focusedElement = document.activeElement as HTMLElement;

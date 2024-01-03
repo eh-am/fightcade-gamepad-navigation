@@ -43,7 +43,6 @@ function setupCardFocusOut(section: HTMLElement, cardQuery: string): Teardown {
 function setupFocusIn(section: HTMLElement): Teardown {
   section.addEventListener("focusin", (e) => {
     const focusingTo = e.target as HTMLElement | null;
-    log("focusing in", focusingTo);
 
     // If focusing on button, let's make the whole action group visible
     if (isActionButton(focusingTo)) {
@@ -177,6 +176,21 @@ function moveToNextActionButton(nextFn: typeof CL.prev, cardQuery: string) {
   }
 }
 
+function setupRole(section: HTMLElement, cardQuery: string) {
+  const cards = section.querySelectorAll<HTMLElement>(cardQuery);
+
+  cards.forEach((el) => {
+    el.setAttribute("role", "gridcell");
+
+    const title =
+      el
+        .querySelector<HTMLElement>(".channelPreviewWrapper")
+        ?.getAttribute("title") || "";
+
+    el.setAttribute("aria-label", title);
+  });
+}
+
 function moveToNextCardVertical(
   section: HTMLElement,
   currentFocused: HTMLElement,
@@ -235,7 +249,7 @@ function setupKeyDownListeners(section: HTMLElement, cardQuery: string) {
           currentFocused,
           cardQuery,
           (array, index, numPerRow) => {
-            const dest = index - numPerRow + 1;
+            const dest = index - numPerRow;
             return CL.to(array, dest);
           }
         );
@@ -253,9 +267,7 @@ function setupKeyDownListeners(section: HTMLElement, cardQuery: string) {
           cardQuery,
 
           (array, index, numPerRow) => {
-            log("per row", numPerRow);
-            const dest = index + numPerRow + 1;
-            log("current index", index, "should go to", dest);
+            const dest = index + numPerRow;
             return CL.to(array, dest);
           }
         );
@@ -274,6 +286,7 @@ export function setupGrid(section: HTMLElement, cardQuery: string): Teardown {
   makeButtonsTappable(section);
   setupFocusIn(section);
   setupCardFocusOut(section, cardQuery);
+  setupRole(section, cardQuery);
 
   return setupKeyDownListeners(section, cardQuery);
 }
