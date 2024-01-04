@@ -53,3 +53,10 @@ ssh -L 8315:localhost:8315 deck@steamdeck
 ```
 
 4. Open `http://localhost:8315` in chrome
+
+## Debugging playwright
+Use
+
+`PWDEBUG=1 npm run test:ui`
+
+to open Playwright Inspector

@@ -84,6 +84,8 @@ test("it opens the User Menu correctly", async ({ page }) => {
   // Out of bounds downwards, focus on the user button and uncollapse
   // Ideally we would check "User" is focused, but I couldn't make it work
   // TODO: make this work :(
-  //await page.keyboard.press("ArrowDown");
-  // await expect(page.getByRole("button", { name: "Logout" })).not.toBeFocused();
+  await page.keyboard.press("ArrowDown");
+
+  // This is super buggy, since .toBeFocused() returns true, but it says it's not visible
+  await expect(page.getByRole("button", { name: "Logout" })).not.toBeVisible();
 });

@@ -12,11 +12,6 @@ export function initSidebar(): boolean {
   }
   console.log("initializing sidebar...");
 
-  //  // Technically there should be always an item
-  //  if (!first) {
-  //    return false;
-  //  }
-
   // Make leave lobby/mute channel items always visible
   addCSS(`
   /* Copied from the hover status */
@@ -61,8 +56,6 @@ position: relative !important;
 }
 `);
 
-  setupUserButton();
-
   return true;
 }
 
@@ -88,9 +81,6 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     channelItemWrapper.querySelector<HTMLElement>(".leaveChannelItem");
   const joinLobbyButton =
     channelItemWrapper.querySelector<HTMLElement>(".channelItem");
-
-  //  const joinLobbyButton =
-  //    channelItemWrapper.querySelector<HTMLElement>(".channelItem");
 
   if (!muteChannelButton || !leaveChannelButton || !joinLobbyButton) {
     return () => {};
@@ -136,9 +126,6 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowUp") {
       // Out of bounds
       e.preventDefault();
-      //      const items = getHighLevelVerticalItems();
-      //      const myIndex = Array.from(items).findIndex((a) => a === joinLobbyButton);
-      //      CL.prev(items, myIndex).focus();
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
       muteChannelButton.focus();
@@ -220,24 +207,24 @@ function setupUserButton(): Teardown {
 
   function onKeydown(el: HTMLElement, e: KeyboardEvent) {
     const keyPressed = e.key;
-    console.log("key pressed", keyPressed);
+    // TODO: we should only trigger a click
+    // then the click would handle focus automatically
     if (keyPressed === "Enter") {
       const logoutButton = document.querySelector<HTMLElement>(
         '[role="button"][aria-label="Logout"]'
       );
-      const isActive = isVisible(logoutButton);
 
       // TODO: make this better
-      // The event listener upstream is listening for clicks on the img
       e.preventDefault();
 
-      // TODO: we should only trigger a click
-      // then the click would handle focus automatically
-      //
-      // TODO: figure out the state
-      //      el.querySelector<HTMLElement>(".userAvatarWrapper")?.click();
-      el.click();
+      findClickableUserButtonEl(el)?.click();
 
+      if (!logoutButton) {
+        console.warn("could not find the logout button in the DOM");
+        return;
+      }
+      const isActive = isVisible(logoutButton);
+      // It's open, we are now closing it
       if (isActive) {
         // Focus back on itself
         el.focus();
@@ -255,16 +242,6 @@ function setupUserButton(): Teardown {
       moveVertically(el, keyPressed);
     }
   }
-
-  console.log("adding listeners to buootns", buttons);
-  Array.from(buttons).map((el) => {
-    el.addEventListener("focusin", () => {
-      console.log(el, "is getting focus");
-    });
-    el.removeEventListener("focusout", () => {
-      console.log(el, "is losing focus");
-    });
-  });
 
   const bind = onKeydown.bind(null, el);
   el.addEventListener("keydown", bind);
@@ -284,7 +261,7 @@ function setupSearchButtonRole() {
 }
 
 function setupLogoutButtonRole() {
-  const el = document.querySelector<HTMLElement>(`.logoutWrapper`);
+  const el = document.querySelector<HTMLElement>(`.logOutWrapper`);
   if (!el) {
     return;
   }
@@ -460,8 +437,10 @@ function setupUserMenuKeydown(): Teardown {
 
         const n = list.next(order, activeElement);
         if (n === "OOB_END") {
-          userButton?.click();
-          focusBackWhenTransitionEnds(userButton);
+          if (userButton) {
+            findClickableUserButtonEl(userButton)?.click();
+            focusBackWhenTransitionEnds(userButton);
+          }
         } else if (n === "OOB_START") {
           el.focus();
         } else {
@@ -521,6 +500,8 @@ export function updateSidebar() {
   );
 
   setupRoles();
+
+  teardown.push(setupUserButton());
   teardown.push(setupRegularButtonsKeydown());
   teardown.push(setupUserMenuKeydown());
 
@@ -535,7 +516,15 @@ export function updateSidebar() {
   // where tab rovering breaks upon a new lobby joined
   const first = sidebarItems[0];
   sidebarItems.forEach((el) => el.setAttribute("tabIndex", "-1"));
-  first.setAttribute("tabIndex", "0");
+  if (first) {
+    first.setAttribute("tabIndex", "0");
+  }
+}
+
+// The event listener upstream is listening for clicks on the img
+// userButton should be .userButton
+function findClickableUserButtonEl(userButton: HTMLElement) {
+  return userButton.querySelector<HTMLElement>(".userAvatarWrapper");
 }
 
 function focusBackWhenTransitionEnds(userButton: HTMLElement | null) {
