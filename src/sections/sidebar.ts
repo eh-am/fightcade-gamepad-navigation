@@ -426,7 +426,7 @@ function setupUserMenuKeydown(): Teardown {
         e.stopPropagation();
 
         const n = list.prev(order, activeElement);
-        if (n === "OOB_START" || n === "OOB_END") {
+        if (n === "OOB") {
           el.focus();
         } else {
           n.focus();
@@ -436,13 +436,11 @@ function setupUserMenuKeydown(): Teardown {
         e.stopPropagation();
 
         const n = list.next(order, activeElement);
-        if (n === "OOB_END") {
+        if (n === "OOB") {
           if (userButton) {
             findClickableUserButtonEl(userButton)?.click();
             focusBackWhenTransitionEnds(userButton);
           }
-        } else if (n === "OOB_START") {
-          el.focus();
         } else {
           n.focus();
         }

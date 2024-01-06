@@ -3,7 +3,8 @@
 import { initGamepad } from "./gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
 import { initAbout } from "./sections/about";
-import { initSearch } from "./sections/search";
+//import { initSearch } from "./sections/search";
+import * as welcomePage from "./pages/welcome";
 import {
   initSearchResults,
   updateSearchResults,
@@ -105,8 +106,16 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     initialized.about = initAbout();
   }
 
-  if (!initialized.search) {
-    initialized.search = initSearch();
+  const welcomeRoot = document.querySelector(".welcomeWrapper");
+  if (!initialized.search && welcomeRoot) {
+    initialized.search = welcomePage.init();
+    welcomePage.update();
+
+    const observer = new MutationObserver(() => {
+      welcomePage.update();
+    });
+
+    observer.observe(welcomeRoot, observerOptions);
   }
 
   // There are multiple search headers lol
