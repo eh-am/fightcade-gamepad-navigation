@@ -6,6 +6,7 @@ import {
 import { setupGrid } from "@app/pages/search/grid";
 import { updateSearchHeader } from "@app/components/search-header";
 import { setupFooter, setupFooterKeydown } from "./footer";
+import { dispatchOOBEvent } from "@app/oobNavigator";
 
 let teardown: Teardown[] = [];
 
@@ -49,14 +50,14 @@ export function update(root: HTMLElement) {
 
   const grid = setupGrid(
     root,
-    onHorizontalOOB,
+    onHorizontalOOB.bind(null, root),
     onGridVerticalOOB.bind(null, searchHeader, footer)
   );
   teardown.push(grid.teardown);
 
   updateSearchHeader({
     root: searchHeader,
-    onHorizontalOOB,
+    onHorizontalOOB: onHorizontalOOB.bind(null, root),
     onVerticalOOB: (direction) => {
       if (direction === "END") {
         onBackToGrid(grid.allCards);
@@ -67,7 +68,7 @@ export function update(root: HTMLElement) {
   teardown.push(
     setupFooterKeydown(
       root,
-      onHorizontalOOB,
+      onHorizontalOOB.bind(null, root),
       onBackToGrid.bind(null, grid.allCards)
     )
   );
@@ -80,19 +81,8 @@ function onBackToGrid(allCards: HTMLElement[]) {
   }
 }
 //
-function onHorizontalOOB(direction: "START" | "END") {
-  if (direction === "START") {
-    document.dispatchEvent(
-      new CustomEvent("OOB_Event", {
-        bubbles: true,
-        detail: {
-          axis: "HORIZONTAL",
-          direction,
-        },
-      })
-    );
-    console.warn("Should move to next section horizontally", direction);
-  }
+function onHorizontalOOB(root: HTMLElement, direction: "START" | "END") {
+  dispatchOOBEvent(root, "HORIZONTAL", direction);
 }
 
 function onGridVerticalOOB(

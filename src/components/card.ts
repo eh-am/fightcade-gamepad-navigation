@@ -3,7 +3,7 @@ import {
   makeFocusableIfNeeded,
   rovingTabIndex,
 } from "@app/dom";
-import * as list from "@app/ds/list";
+import * as gridList from "@app/ds/gridList";
 import { setupActionButton } from "./actionButtons";
 
 const actionSel = ".channelActions a, .eventActions a, .categoryActions a";
@@ -16,7 +16,8 @@ export function setupCard(
     currCard: HTMLElement,
     direction: "ArrowUp" | "ArrowDown"
   ) => void,
-  onHorizontalOOB: (direction: "START" | "END") => void
+  onHorizontalOOB: (direction: "START" | "END") => void,
+  cardsPerRow: number = Infinity
 ): Teardown {
   makeFocusableIfNeeded(card, true);
   const teardown1 = handleFocusOut(card);
@@ -24,7 +25,8 @@ export function setupCard(
     allCards,
     card,
     onVerticalMovement,
-    onHorizontalOOB
+    onHorizontalOOB,
+    cardsPerRow
   );
 
   const actionButtons = Array.from(
@@ -37,7 +39,13 @@ export function setupCard(
     return setupActionButton(
       actionButtons,
       ab,
-      moveToNextCardHorizontally.bind(null, allCards, card, onHorizontalOOB)
+      moveToNextCardHorizontally.bind(
+        null,
+        allCards,
+        card,
+        onHorizontalOOB,
+        cardsPerRow
+      )
     );
   });
 
@@ -57,7 +65,8 @@ function setupCardKeydown(
     currCard: HTMLElement,
     direction: "ArrowUp" | "ArrowDown"
   ) => void,
-  onHorizontalOOB: Parameters<typeof setupCard>["3"]
+  onHorizontalOOB: Parameters<typeof setupCard>["3"],
+  cardsPerRow: number
 ): Teardown {
   function onKeydown(e: KeyboardEvent) {
     const keyPressed = e.key;
@@ -65,10 +74,22 @@ function setupCardKeydown(
     if (keyPressed === "ArrowLeft") {
       e.preventDefault();
 
-      moveToNextCardHorizontally(allCards, card, onHorizontalOOB, list.prev);
+      moveToNextCardHorizontally(
+        allCards,
+        card,
+        onHorizontalOOB,
+        cardsPerRow,
+        gridList.prev
+      );
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();
-      moveToNextCardHorizontally(allCards, card, onHorizontalOOB, list.next);
+      moveToNextCardHorizontally(
+        allCards,
+        card,
+        onHorizontalOOB,
+        cardsPerRow,
+        gridList.next
+      );
     } else if (keyPressed === "Enter") {
       const channelActionsWrapper = getChannelActionsWrapper(card);
 
@@ -125,9 +146,10 @@ function moveToNextCardHorizontally(
   allCards: HTMLElement[],
   curr: HTMLElement,
   onHorizontalOOB: Parameters<typeof setupCard>["3"],
-  nextFn: typeof list.next
+  cardsPerRow: number,
+  nextFn: typeof gridList.next
 ) {
-  const next = nextFn(allCards, curr);
+  const next = nextFn(allCards, curr, cardsPerRow);
   if (next.status === "OOB") {
     onHorizontalOOB(next.value);
     return;

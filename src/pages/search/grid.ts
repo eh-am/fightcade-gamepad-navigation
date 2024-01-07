@@ -12,6 +12,10 @@ export function setupGrid(
     root.querySelectorAll<HTMLElement>(".channelWrapper")
   );
 
+  const baseOffset = cards[0].offsetTop;
+  const breakIndex = cards.findIndex((item) => item.offsetTop > baseOffset);
+  const cardsPerRow = breakIndex === -1 ? cards.length : breakIndex;
+
   teardown.push(
     ...cards.map((el) => {
       return setupCard(
@@ -36,7 +40,8 @@ export function setupGrid(
         },
         (direction) => {
           onHorizontalOOB(direction);
-        }
+        },
+        cardsPerRow
       );
     })
   );

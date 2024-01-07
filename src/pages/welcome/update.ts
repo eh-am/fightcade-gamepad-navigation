@@ -1,14 +1,11 @@
-import {
-  findFirstFocusable,
-  findFirstFocusableChild,
-  makeFocusableIfNeeded,
-} from "@app/dom";
+import { findFirstFocusableChild, makeFocusableIfNeeded } from "@app/dom";
 import {
   findFirstFocusableCardInCategory,
   setupCategory,
 } from "@app/pages/welcome/category";
 import { updateSearchHeader } from "@app/components/search-header";
 import { Direction } from "@app/types/navigation";
+import { dispatchOOBEvent } from "@app/oobNavigator";
 
 const teardown: Teardown[] = [];
 
@@ -48,7 +45,7 @@ export function update(root: HTMLElement) {
       return setupCategory(
         categories,
         category,
-        onHorizontalOOB,
+        onHorizontalOOB.bind(null, root),
         onCardVerticalOOB.bind(null, searchHeader)
       );
     })
@@ -57,7 +54,7 @@ export function update(root: HTMLElement) {
   if (searchHeader) {
     updateSearchHeader({
       root: searchHeader,
-      onHorizontalOOB: onHeaderHorizontalNavigation,
+      onHorizontalOOB: onHeaderHorizontalNavigation.bind(null, root),
       onVerticalOOB: onHeaderVerticalNavigation.bind(null, categories),
     });
   }
@@ -71,9 +68,10 @@ function onCardVerticalOOB(searchHeader: HTMLElement, direction: Direction) {
     next?.focus();
   }
 }
-function onHeaderHorizontalNavigation(direction: Direction) {
-  onHorizontalOOB(direction);
+function onHeaderHorizontalNavigation(root: HTMLElement, direction: Direction) {
+  onHorizontalOOB(root, direction);
 }
+
 function onHeaderVerticalNavigation(
   categories: HTMLElement[],
   direction: Direction
@@ -89,10 +87,6 @@ function onHeaderVerticalNavigation(
   }
 }
 
-function onHorizontalOOB(direction: "START" | "END") {
-  console.warn("Should move to next section horizontally", direction);
-}
-
-function onVerticalOOB(direction: "START" | "END") {
-  console.warn("Should move to next section vertically", direction);
+function onHorizontalOOB(root: HTMLElement, direction: "START" | "END") {
+  dispatchOOBEvent(root, "HORIZONTAL", direction);
 }

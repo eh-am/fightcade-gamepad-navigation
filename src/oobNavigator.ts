@@ -24,6 +24,28 @@ export function startOOBNavigator(props: Props) {
       props.sidebar.removeEventListener("OOB_Event", sidebarFn)
     );
   }
+
+  // These all should be the same vertically
+  if (props.welcome && props.sidebar) {
+    const fn = onPageOOB.bind(null, props.sidebar);
+
+    props.welcome.addEventListener("OOB_Event", fn);
+    teardown.push(() => props.welcome.removeEventListener("OOB_Event", fn));
+  }
+
+  if (props.search && props.sidebar) {
+    const fn = onPageOOB.bind(null, props.sidebar);
+
+    props.search.addEventListener("OOB_Event", fn);
+    teardown.push(() => props.search.removeEventListener("OOB_Event", fn));
+  }
+}
+
+function onPageOOB(sidebar: HTMLElement, e: CustomEvent<OOB_Event>) {
+  if (e.detail.axis === "HORIZONTAL" && e.detail.direction === "START") {
+    const next = findFirstFocusableChild(sidebar);
+    next?.focus();
+  }
 }
 
 function onSidebarOOB(pages: HTMLElement[], e: CustomEvent<OOB_Event>) {

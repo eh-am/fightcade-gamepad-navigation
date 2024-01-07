@@ -123,10 +123,18 @@ export function findFirstFakeFocusable(
 
 export function findFirstFocusableChild(root: HTMLElement): HTMLElement | null {
   // Sort to prefer items with higher tabindex
-  const focusable = findFocusableElements(root).sort((a, b) => {
-    return a.tabIndex - b.tabIndex;
-  });
+  const focusable = findFocusableElements(root);
 
+  // If there's one with tabindex 0 and first in the dom, let's prefer it
+  const higherPriority = focusable.find(
+    (el) => el.getAttribute("tabindex") === "0"
+  );
+  if (higherPriority) {
+    return higherPriority;
+  }
+
+  // Otherwise just default to the first item we see
+  // Notice we don't care about positive tabindex
   if (focusable.length) {
     return focusable[0];
   }
