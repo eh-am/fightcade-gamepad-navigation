@@ -2,10 +2,11 @@ import { initGamepad } from "./gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
 import { initAbout } from "./sections/about";
 import * as welcomePage from "./pages/welcome";
-import {
-  initSearchResults,
-  updateSearchResults,
-} from "./sections/search_results";
+import * as searchPage from "./pages/search";
+//import {
+//  initSearchResults,
+//  updateSearchResults,
+//} from "./sections/search_results";
 import { log } from "./log";
 import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
 import "./devOnly";
@@ -14,8 +15,8 @@ import { updateLobby } from "./sections/lobby";
 const initialized = {
   sidebar: false,
   about: false,
+  welcome: false,
   search: false,
-  search_results: false,
   search_header: false,
   gamepad: false,
 
@@ -103,9 +104,9 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
   }
 
   const welcomeRoot = welcomePage.getRoot();
-  if (!initialized.search && welcomeRoot) {
+  if (!initialized.welcome && welcomeRoot) {
     welcomePage.init();
-    initialized.search = true;
+    initialized.welcome = true;
     welcomePage.update(welcomeRoot);
 
     const observer = new MutationObserver((mr) => {
@@ -170,16 +171,31 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
   //    }
   //  }
 
-  const searchResultsRoot = document.querySelector(PAGES.SEARCH_RESULTS);
-  if (!initialized.search_results && searchResultsRoot) {
-    log("Initializing search results");
+  const searchPageRoot = document.querySelector<HTMLElement>(
+    PAGES.SEARCH_RESULTS
+  );
+  if (!initialized.search && searchPageRoot) {
+    searchPage.init();
+    initialized.search = true;
 
-    initialized.search_results = initSearchResults();
+    searchPage.update(searchPageRoot);
 
-    // Trigger manually the first time
-    updateSearchResults();
+    const observer = new MutationObserver((mr) => {
+      // Since we add a custom SELECT element,
+      // this mutation observer is triggered again
+      const addedOptions = mr.some((m) => {
+        return (
+          m.type === "childList" &&
+          (m.target as HTMLElement).tagName === "SELECT"
+        );
+      });
 
-    searchResultsObserver.observe(searchResultsRoot, observerOptions);
+      if (addedOptions) {
+        searchPage.update(searchPageRoot);
+      }
+    });
+
+    observer.observe(searchPageRoot, observerOptions);
   }
 });
 
@@ -189,6 +205,6 @@ const PAGES = {
   SEARCH_RESULTS: ".searchWrapper",
 };
 
-const searchResultsObserver = new MutationObserver(() => {
-  updateSearchResults();
-});
+//const searchResultsObserver = new MutationObserver(() => {
+//  updateSearchResults();
+//});

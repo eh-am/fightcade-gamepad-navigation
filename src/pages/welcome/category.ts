@@ -1,10 +1,10 @@
 import {
-  makeFocusableIfNeeded,
   getFakeRovingTabindex,
   findFocusableElements,
+  rovingTabIndex,
 } from "@app/dom";
 import * as list from "@app/ds/list";
-import { setupCardForCategory as setupCard } from "./card";
+import { setupCard } from "@app/components/card";
 
 export function setupCategory(
   allCategories: HTMLElement[],
@@ -19,18 +19,21 @@ export function setupCategory(
     return () => {};
   }
 
-  // makeFocusableIfNeeded(cards[0], true, "0");
-
   const teardown = cards.map((card) => {
     return setupCard(
       cards,
       card,
-      moveToNextCategory.bind(
-        null,
-        Array.from(allCategories),
-        category,
-        onVerticalOOB
-      ),
+      (allCards, currCard, direction) => {
+        const nextFn = direction === "ArrowUp" ? list.prev : list.next;
+
+        moveToNextCategory(
+          currCard,
+          Array.from(allCategories),
+          category,
+          onVerticalOOB,
+          nextFn
+        );
+      },
       onHorizontalOOB
     );
   });
@@ -41,6 +44,7 @@ export function setupCategory(
 }
 
 function moveToNextCategory(
+  currCard: HTMLElement,
   allCategories: HTMLElement[],
   currentCategory: HTMLElement,
   onVerticalOOB: (direction: "START" | "END") => void,
@@ -53,15 +57,21 @@ function moveToNextCategory(
     return;
   }
 
-  const focusableElements = findFocusableElements(next.value);
+  const focusableCards = findFocusableElements(next.value).filter((el) => {
+    // TODO: kinda ugly, but we need to know only cards
+    return el.classList.contains("gridWrapper");
+  });
 
-  // Try to mimic the rovering tabindex technique
-  const lastVisited = focusableElements.find((el) => {
+  // Try to mimic the rovering tabindex technique per category
+  // So that we come back to the previous item in that category
+  const lastVisited = focusableCards.find((el) => {
     return getFakeRovingTabindex(el) === "0";
   });
   if (lastVisited) {
     lastVisited.focus();
+    rovingTabIndex(currCard, lastVisited);
   } else {
-    focusableElements[0]?.focus();
+    focusableCards[0]?.focus();
+    rovingTabIndex(currCard, focusableCards[0]);
   }
 }

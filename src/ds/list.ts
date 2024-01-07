@@ -12,6 +12,14 @@ export function prev(
   return list(items, current, -1);
 }
 
+export function to(
+  items: HTMLElement[],
+  current: HTMLElement,
+  index: number
+): ReturnType<typeof list> {
+  return list(items, current, index);
+}
+
 function list(
   items: HTMLElement[],
   current: HTMLElement,

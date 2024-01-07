@@ -32,9 +32,13 @@ export function setupSecondRow(root: HTMLElement): {
     !systemCustomSelect ||
     !rankedCustomSelect
   ) {
-    throw new Error(
-      "Could not initialize filters, looks like something is missing"
+    console.warn(
+      `Could not initialize filters, looks like something is missing: Genre="${genreCustomSelect}" Release_Year="${releaseYearCustomSelect} System="${systemCustomSelect}" ranked="${rankedCustomSelect}"`
     );
+    return {
+      teardown: () => {},
+      allItems: [],
+    };
   }
   return {
     teardown: () => {

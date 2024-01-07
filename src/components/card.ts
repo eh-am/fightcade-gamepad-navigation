@@ -1,15 +1,21 @@
-import { fakeRovingTabIndex, makeFocusableIfNeeded } from "@app/dom";
+import {
+  fakeRovingTabIndex,
+  makeFocusableIfNeeded,
+  rovingTabIndex,
+} from "@app/dom";
 import * as list from "@app/ds/list";
-import { setupActionButton } from "@app/pages/welcome/actionButtons";
-
-type onChangeCategory = (nextFn: typeof list.next) => void;
+import { setupActionButton } from "./actionButtons";
 
 const actionSel = ".channelActions a, .eventActions a, .categoryActions a";
 
-export function setupCardForCategory(
+export function setupCard(
   allCards: HTMLElement[],
   card: HTMLElement,
-  onChangeCategory: onChangeCategory,
+  onVerticalMovement: (
+    allCards: HTMLElement[],
+    currCard: HTMLElement,
+    direction: "ArrowUp" | "ArrowDown"
+  ) => void,
   onHorizontalOOB: (direction: "START" | "END") => void
 ): Teardown {
   makeFocusableIfNeeded(card, true);
@@ -17,7 +23,7 @@ export function setupCardForCategory(
   const teardown2 = setupCardKeydown(
     allCards,
     card,
-    onChangeCategory,
+    onVerticalMovement,
     onHorizontalOOB
   );
 
@@ -41,11 +47,15 @@ export function setupCardForCategory(
   };
 }
 
-export function setupCardKeydown(
+function setupCardKeydown(
   allCards: HTMLElement[],
   card: HTMLElement,
-  onChangeCategory: onChangeCategory,
-  onHorizontalOOB: Parameters<typeof setupCardForCategory>["3"]
+  onVerticalMovement: (
+    allCards: HTMLElement[],
+    currCard: HTMLElement,
+    direction: "ArrowUp" | "ArrowDown"
+  ) => void,
+  onHorizontalOOB: Parameters<typeof setupCard>["3"]
 ): Teardown {
   function onKeydown(e: KeyboardEvent) {
     const keyPressed = e.key;
@@ -68,10 +78,10 @@ export function setupCardKeydown(
       firstChannelAction?.focus();
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
-      onChangeCategory(list.prev);
+      onVerticalMovement(allCards, card, keyPressed);
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
-      onChangeCategory(list.next);
+      onVerticalMovement(allCards, card, keyPressed);
     }
   }
 
@@ -112,7 +122,7 @@ export function handleFocusOut(card: HTMLElement): Teardown {
 function moveToNextCardHorizontally(
   allCards: HTMLElement[],
   curr: HTMLElement,
-  onHorizontalOOB: Parameters<typeof setupCardForCategory>["3"],
+  onHorizontalOOB: Parameters<typeof setupCard>["3"],
   nextFn: typeof list.next
 ) {
   const next = nextFn(allCards, curr);
@@ -122,6 +132,7 @@ function moveToNextCardHorizontally(
   }
 
   fakeRovingTabIndex(curr, next.value);
+  rovingTabIndex(curr, next.value);
 
   // TODO: rovering tab?
   next.value.scrollIntoView({

@@ -118,3 +118,18 @@ export function findFirstFakeFocusable(
   }
   return null;
 }
+
+export function findFirstFocusable(items: HTMLElement[]): HTMLElement | null {
+  const firstFocusable = items.find((el) => {
+    return el.getAttribute("tabindex") === "0" && isFocusable(el);
+  });
+
+  if (firstFocusable) {
+    return firstFocusable;
+  }
+
+  if (items[0] && isFocusable(items[0])) {
+    return items[0];
+  }
+  return null;
+}

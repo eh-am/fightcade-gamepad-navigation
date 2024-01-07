@@ -18,6 +18,7 @@ export function update(root: HTMLElement) {
   }
 
   teardown.forEach((v) => v());
+  teardown.length = 0;
 
   // Only the first card should be initially tabbable (tabindex 0)
   // ATENTION! Order matters here, since it's only set if needed
