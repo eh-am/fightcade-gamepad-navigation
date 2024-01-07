@@ -1,6 +1,7 @@
 import * as cl from "@app/ds/circularList";
 import tabsequence from "ally.js/src/query/tabsequence";
 import focusable from "ally.js/src/query/focusable";
+import isFocusable from "ally.js/src/is/focusable";
 
 /**
  * Very naive implementation, since it doesn't deal with
@@ -99,4 +100,21 @@ export function makeFocusableIfNeeded(
   if (fakeRoving && !hasFakeRovingTabindex(el)) {
     setFakeRovingTabindex(el, index);
   }
+}
+
+export function findFirstFakeFocusable(
+  items: HTMLElement[]
+): HTMLElement | null {
+  const firstFocusable = items.find((el) => {
+    return getFakeRovingTabindex(el) === "0" && isFocusable(el);
+  });
+
+  if (firstFocusable) {
+    return firstFocusable;
+  }
+
+  if (items[0] && isFocusable(items[0])) {
+    return items[0];
+  }
+  return null;
 }

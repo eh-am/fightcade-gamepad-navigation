@@ -1,6 +1,6 @@
 import { makeFocusableIfNeeded } from "@app/dom";
 import { setupCategory } from "@app/pages/welcome/category";
-import { updateSearchHeader } from "@app/sections/components/search-header";
+import { updateSearchHeader } from "@app/components/search-header";
 
 const teardown: Teardown[] = [];
 
