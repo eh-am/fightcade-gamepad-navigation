@@ -1,9 +1,6 @@
-//import "../vendor/controllerjs/unminified/Controller.js";
-
 import { initGamepad } from "./gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
 import { initAbout } from "./sections/about";
-//import { initSearch } from "./sections/search";
 import * as welcomePage from "./pages/welcome";
 import {
   initSearchResults,
@@ -12,8 +9,7 @@ import {
 import { log } from "./log";
 import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
 import "./devOnly";
-import { addCSS } from "./dom";
-import { initLobby, updateLobby } from "./sections/lobby";
+import { updateLobby } from "./sections/lobby";
 
 const initialized = {
   sidebar: false,
@@ -106,13 +102,14 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     initialized.about = initAbout();
   }
 
-  const welcomeRoot = document.querySelector(".welcomeWrapper");
+  const welcomeRoot = welcomePage.getRoot();
   if (!initialized.search && welcomeRoot) {
-    initialized.search = welcomePage.init();
-    welcomePage.update();
+    welcomePage.init();
+    initialized.search = true;
+    welcomePage.update(welcomeRoot);
 
     const observer = new MutationObserver(() => {
-      welcomePage.update();
+      welcomePage.update(welcomeRoot);
     });
 
     observer.observe(welcomeRoot, observerOptions);

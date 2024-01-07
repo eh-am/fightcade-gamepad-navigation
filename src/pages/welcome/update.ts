@@ -2,12 +2,7 @@ import { setupCategory } from "@app/pages/welcome/category";
 
 const teardown: Teardown[] = [];
 
-export function update() {
-  const root = document.querySelector<HTMLElement>(".welcomeWrapper");
-  if (!root) {
-    return false;
-  }
-
+export function update(root: HTMLElement) {
   // Find all categories
   const categories = Array.from(
     document.querySelectorAll<HTMLElement>(
