@@ -62,7 +62,6 @@ function syncToMirror(originalSelect: HTMLSelectElement) {
 
 function syncFromMirror(target: HTMLSelectElement) {
   const mirror = findMirrorSelect(target);
-  console.log("syncing from mirror. original", target, "mirror", mirror);
 
   if (!mirror) {
     return;
@@ -222,7 +221,6 @@ function setupFakeOptionsKeydownListeners(
 ) {
   el.addEventListener("keydown", (e) => {
     const keyPressed = (e as KeyboardEvent).key;
-    console.log("received key", keyPressed);
 
     switch (keyPressed) {
       case "Enter": {
@@ -292,7 +290,6 @@ function createFakeOption(
     const normalHeight = originalSelect.offsetHeight;
     parent.style.height = `${normalHeight}px`;
 
-    console.log("should be focusing on parent now", parent);
     parent.focus();
 
     clone.scrollIntoView();
@@ -445,7 +442,6 @@ function moveVertically(
 
   if (items.length > 0) {
     const next = items[0];
-    console.log("focusing on", next);
     // Notice we don't do the roving tabindex trick here
     // since we always want users to easily go to the input
     //    rovingTabIndex(currentFocused, next);

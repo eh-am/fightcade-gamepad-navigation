@@ -58,7 +58,7 @@ function getFooterButtons(root: HTMLElement) {
 }
 
 export function setupFooter(root: HTMLElement) {
-  moveFooterUpTheDOM(root);
+  const footer = moveFooterUpTheDOM(root);
 
   const footerButtons = getFooterButtons(root);
 
@@ -67,6 +67,7 @@ export function setupFooter(root: HTMLElement) {
   Array.from(footerButtons).forEach((el, i) => {
     makeFocusableIfNeeded(el, false, i === 0 ? "0" : "-1");
   });
+  return footer;
 }
 
 /*
@@ -92,4 +93,5 @@ function moveFooterUpTheDOM(root: HTMLElement) {
     footerWrapper.append(footer);
     parent.append(footerWrapper);
   }
+  return footer;
 }

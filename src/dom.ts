@@ -119,6 +119,19 @@ export function findFirstFakeFocusable(
   return null;
 }
 
+export function findFirstFocusableChild(root: HTMLElement): HTMLElement | null {
+  // Sort to prefer items with higher tabindex
+  const focusable = findFocusableElements(root).sort((a, b) => {
+    return a.tabIndex - b.tabIndex;
+  });
+
+  if (focusable.length) {
+    return focusable[0];
+  }
+
+  return null;
+}
+
 export function findFirstFocusable(items: HTMLElement[]): HTMLElement | null {
   const firstFocusable = items.find((el) => {
     return el.getAttribute("tabindex") === "0" && isFocusable(el);

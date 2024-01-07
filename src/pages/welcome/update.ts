@@ -1,4 +1,8 @@
-import { findFirstFocusable, makeFocusableIfNeeded } from "@app/dom";
+import {
+  findFirstFocusable,
+  findFirstFocusableChild,
+  makeFocusableIfNeeded,
+} from "@app/dom";
 import {
   findFirstFocusableCardInCategory,
   setupCategory,
@@ -32,20 +36,24 @@ export function update(root: HTMLElement) {
     makeFocusableIfNeeded(card, true, "0");
   }
 
+  const searchHeader = root.querySelector<HTMLElement>(
+    ".contentWrapper > header"
+  );
+  if (!searchHeader) {
+    return;
+  }
+
   teardown.push(
     ...categories.map((category) => {
       return setupCategory(
         categories,
         category,
         onHorizontalOOB,
-        onVerticalOOB
+        onCardVerticalOOB.bind(null, searchHeader)
       );
     })
   );
 
-  const searchHeader = root.querySelector<HTMLElement>(
-    ".contentWrapper > header"
-  );
   if (searchHeader) {
     updateSearchHeader({
       root: searchHeader,
@@ -57,6 +65,12 @@ export function update(root: HTMLElement) {
   return true;
 }
 
+function onCardVerticalOOB(searchHeader: HTMLElement, direction: Direction) {
+  if (direction === "START") {
+    const next = findFirstFocusableChild(searchHeader);
+    next?.focus();
+  }
+}
 function onHeaderHorizontalNavigation(direction: Direction) {
   onHorizontalOOB(direction);
 }
@@ -64,7 +78,6 @@ function onHeaderVerticalNavigation(
   categories: HTMLElement[],
   direction: Direction
 ) {
-  console.log("should be navigatttttttttting?");
   if (direction === "END") {
     const lastCategory = categories[0];
     if (lastCategory) {

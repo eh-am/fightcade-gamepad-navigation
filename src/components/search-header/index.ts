@@ -39,8 +39,8 @@ export function updateSearchHeader({
       firstRow.allItems,
       secondRow.allItems,
       thirdRow.allItems,
-      onVerticalOOB,
-      onHorizontalOOB
+      onHorizontalOOB,
+      onVerticalOOB
     )
   );
   teardown.push(

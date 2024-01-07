@@ -3,12 +3,6 @@ import { initSidebar, updateSidebar } from "./sections/sidebar";
 import { initAbout } from "./sections/about";
 import * as welcomePage from "./pages/welcome";
 import * as searchPage from "./pages/search";
-//import {
-//  initSearchResults,
-//  updateSearchResults,
-//} from "./sections/search_results";
-import { log } from "./log";
-import { initSearchHeader, updateSearchHeader } from "./sections/search-header";
 import "./devOnly";
 import { updateLobby } from "./sections/lobby";
 
@@ -17,10 +11,7 @@ const initialized = {
   about: false,
   welcome: false,
   search: false,
-  search_header: false,
   gamepad: false,
-
-  global_css: false,
   lobby: false,
 };
 
@@ -48,11 +39,8 @@ const lobbiesObservers: MutationObserver[] = [];
  * TODO: ideally we should wait until the app is initialized
  */
 const observer = new MutationObserver(function (mr: MutationRecord[]) {
-  //  if (!initialized.global_css) {
   //  TODO: only do this if gamepad is detected
   makeExternalLinksNotFocusable();
-  //    initialized.global_css = true;
-  //  }
 
   if (!initialized.gamepad) {
     initGamepad();
@@ -93,12 +81,6 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     })
   );
 
-  if (initialized.sidebar) {
-    updateSidebar();
-  } else {
-    initialized.sidebar = initSidebar();
-  }
-
   if (!initialized.about) {
     initialized.about = initAbout();
   }
@@ -127,53 +109,7 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     observer.observe(welcomeRoot, observerOptions);
   }
 
-  // There are multiple search headers lol
-  //  const searchHeaderInWelcomeRoot = document.querySelector<HTMLElement>(
-  //    ".welcomeWrapper > .contentWrapper > header"
-  //  );
-  //  const searchHeaderInSearchRoot = document.querySelector<HTMLElement>(
-  //    ".searchWrapper > .contentWrapper > header"
-  //  );
-
-  // There are 2 search headers, depending on the page
-  //  if (
-  //    !initialized.search_header &&
-  //    searchHeaderInWelcomeRoot &&
-  //    searchHeaderInSearchRoot
-  //  ) {
-  //    const init1 = initSearchHeader(searchHeaderInWelcomeRoot);
-  //    const init2 = initSearchHeader(searchHeaderInSearchRoot);
-  //
-  //    // TODO: does this make any sense?
-  //    initialized.search_header = init1 && init2;
-  //    //    x
-  //    //    initialized.search_header = true;
-  //    if (initialized.search_header) {
-  //      [searchHeaderInSearchRoot, searchHeaderInWelcomeRoot].forEach((root) => {
-  //        // Kinda naive but does the job
-  //        // Only run when options are added
-  //        // Otherwise, when we create our fake options, it will trigger an infinite loop
-  //        const observer = new MutationObserver((mr) => {
-  //          const addedOptions = mr.some((m) => {
-  //            return (
-  //              m.type === "childList" &&
-  //              (m.target as HTMLElement).tagName === "SELECT"
-  //            );
-  //          });
-  //
-  //          if (addedOptions) {
-  //            updateSearchHeader(root);
-  //          }
-  //        });
-  //
-  //        observer.observe(root, observerOptions);
-  //      });
-  //    }
-  //  }
-
-  const searchPageRoot = document.querySelector<HTMLElement>(
-    PAGES.SEARCH_RESULTS
-  );
+  const searchPageRoot = document.querySelector<HTMLElement>(".searchWrapper");
   if (!initialized.search && searchPageRoot) {
     searchPage.init();
     initialized.search = true;
@@ -200,11 +136,3 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
 });
 
 observer.observe(document, observerOptions);
-
-const PAGES = {
-  SEARCH_RESULTS: ".searchWrapper",
-};
-
-//const searchResultsObserver = new MutationObserver(() => {
-//  updateSearchResults();
-//});

@@ -1,4 +1,8 @@
-import { findFirstFocusable, makeFocusableIfNeeded } from "@app/dom";
+import {
+  findFirstFocusable,
+  findFirstFocusableChild,
+  makeFocusableIfNeeded,
+} from "@app/dom";
 import { setupGrid } from "@app/pages/search/grid";
 import { updateSearchHeader } from "@app/components/search-header";
 import { setupFooter, setupFooterKeydown } from "./footer";
@@ -29,25 +33,35 @@ export function update(root: HTMLElement) {
     makeFocusableIfNeeded(card, true, "0");
   }
 
-  const grid = setupGrid(root, onHorizontalOOB, onGridVerticalOOB);
-  teardown.push(grid.teardown);
-
   const searchHeader = root.querySelector<HTMLElement>(
     ".contentWrapper > header"
   );
-  if (searchHeader) {
-    updateSearchHeader({
-      root: searchHeader,
-      onHorizontalOOB: () => {},
-      onVerticalOOB: (direction) => {
-        if (direction === "END") {
-          onBackToGrid(grid.allCards);
-        }
-      },
-    });
+  if (!searchHeader) {
+    return;
   }
 
-  setupFooter(root);
+  const footer = setupFooter(root);
+  if (!footer) {
+    return;
+  }
+
+  const grid = setupGrid(
+    root,
+    onHorizontalOOB,
+    onGridVerticalOOB.bind(null, searchHeader, footer)
+  );
+  teardown.push(grid.teardown);
+
+  updateSearchHeader({
+    root: searchHeader,
+    onHorizontalOOB: () => {},
+    onVerticalOOB: (direction) => {
+      if (direction === "END") {
+        onBackToGrid(grid.allCards);
+      }
+    },
+  });
+
   teardown.push(
     setupFooterKeydown(
       root,
@@ -68,12 +82,16 @@ function onHorizontalOOB(direction: "START" | "END") {
   console.warn("Should move to next section horizontally", direction);
 }
 
-function onGridVerticalOOB(direction: "START" | "END") {
+function onGridVerticalOOB(
+  searchHeader: HTMLElement,
+  footer: HTMLElement,
+  direction: "START" | "END"
+) {
   if (direction === "START") {
-    // Go to search header
-    console.warn("go to header");
+    const next = findFirstFocusableChild(searchHeader);
+    next?.focus();
   } else if (direction === "END") {
-    // Go to footer
-    console.warn("go to footer");
+    const next = findFirstFocusableChild(footer);
+    next?.focus();
   }
 }
