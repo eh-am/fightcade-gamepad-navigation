@@ -5,6 +5,7 @@ import * as welcomePage from "./pages/welcome";
 import * as searchPage from "./pages/search";
 import "./devOnly";
 import { updateLobby } from "./sections/lobby";
+import { startOOBNavigator } from "@app/oobNavigator";
 
 const initialized = {
   sidebar: false,
@@ -46,20 +47,18 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     initGamepad();
     initialized.gamepad = true;
   }
-  if (!initialized.sidebar) {
-    initialized.sidebar = initSidebar();
-    updateSidebar();
 
-    if (initialized.sidebar) {
-      const observer = new MutationObserver((mr) => {
-        updateSidebar();
-      });
+  const sidebarRoot = document.querySelector<HTMLElement>(".mainToolbar");
+  if (!initialized.sidebar && sidebarRoot) {
+    initSidebar();
+    initialized.sidebar = true;
+    updateSidebar(sidebarRoot);
 
-      const root = document.querySelector(".mainToolbarWrapper");
-      if (root) {
-        observer.observe(root, observerOptions);
-      }
-    }
+    const observer = new MutationObserver((mr) => {
+      updateSidebar(sidebarRoot);
+    });
+
+    observer.observe(sidebarRoot, observerOptions);
   }
 
   // Lobbies (.channelWrapper) are added asynchronously (upon load, and upon joining)
@@ -67,7 +66,9 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
   // We take the easy approach and ALWAYS disconnect/reconnect for every DOM change
   // TODO: this is not very peformant
   lobbiesObservers.forEach((lo) => lo.disconnect());
-  const lobbies = document.querySelectorAll<HTMLElement>(".channelWrapper");
+  const lobbies = document.querySelectorAll<HTMLElement>(
+    "#app > .channelWrapper"
+  );
   lobbiesObservers.push(
     ...Array.from(lobbies).map((l) => {
       const observer = new MutationObserver(() => {
@@ -132,6 +133,16 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     });
 
     observer.observe(searchPageRoot, observerOptions);
+  }
+
+  if (sidebarRoot && welcomeRoot && searchPageRoot) {
+    console.log("starting navifator");
+    startOOBNavigator({
+      sidebar: sidebarRoot,
+      welcome: welcomeRoot,
+      search: searchPageRoot,
+      lobbies: Array.from(lobbies),
+    });
   }
 });
 

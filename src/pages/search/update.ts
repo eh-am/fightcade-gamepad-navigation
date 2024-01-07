@@ -56,7 +56,7 @@ export function update(root: HTMLElement) {
 
   updateSearchHeader({
     root: searchHeader,
-    onHorizontalOOB: () => {},
+    onHorizontalOOB,
     onVerticalOOB: (direction) => {
       if (direction === "END") {
         onBackToGrid(grid.allCards);
@@ -81,7 +81,18 @@ function onBackToGrid(allCards: HTMLElement[]) {
 }
 //
 function onHorizontalOOB(direction: "START" | "END") {
-  console.warn("Should move to next section horizontally", direction);
+  if (direction === "START") {
+    document.dispatchEvent(
+      new CustomEvent("OOB_Event", {
+        bubbles: true,
+        detail: {
+          axis: "HORIZONTAL",
+          direction,
+        },
+      })
+    );
+    console.warn("Should move to next section horizontally", direction);
+  }
 }
 
 function onGridVerticalOOB(

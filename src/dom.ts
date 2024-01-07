@@ -2,7 +2,9 @@ import * as cl from "@app/ds/circularList";
 import tabsequence from "ally.js/src/query/tabsequence";
 import focusable from "ally.js/src/query/focusable";
 import isFocusable from "ally.js/src/is/focusable";
+import isVisible from "ally.js/src/is/visible";
 
+export { isFocusable, isVisible };
 /**
  * Very naive implementation, since it doesn't deal with
  * tabIndex, disabled/items etc

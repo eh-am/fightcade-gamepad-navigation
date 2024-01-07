@@ -1,17 +1,9 @@
 import * as cl from "@app/ds/circularList";
-import { addCSS } from "../dom";
-import isVisible from "ally.js/src/is/visible";
+import { addCSS, isVisible } from "../dom";
 import * as list from "@app/ds/list";
+import { dispatchOOBEvent } from "@app/oobNavigator";
 
-// TODO: take a root node
-export function initSidebar(): boolean {
-  const me = document.querySelector(".mainToolbar");
-  if (!me) {
-    // TODO: error?
-    return false;
-  }
-  console.log("initializing sidebar...");
-
+export function initSidebar() {
   // Make leave lobby/mute channel items always visible
   addCSS(`
   /* Copied from the hover status */
@@ -55,8 +47,6 @@ position: relative !important;
   outline: 5px auto -webkit-focus-ring-color;
 }
 `);
-
-  return true;
 }
 
 function swap(node1: Element, node2: Element) {
@@ -74,7 +64,10 @@ function swap(node1: Element, node2: Element) {
   }
 }
 
-function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
+function setupLobbyButtons(
+  root: HTMLElement,
+  channelItemWrapper: HTMLElement
+): Teardown {
   const muteChannelButton =
     channelItemWrapper.querySelector<HTMLElement>(".muteChannelItem");
   const leaveChannelButton =
@@ -111,10 +104,12 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
       leaveChannelButton.focus();
     } else if (keyPressed === "ArrowDown") {
       // Go outside
-      const items = getHighLevelVerticalItems();
+      const items = getHighLevelVerticalItems(root);
       cl.next(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowLeft") {
       joinLobbyButton.focus();
+    } else if (keyPressed === "ArrowRight") {
+      dispatchOOBEvent(root, "HORIZONTAL", "END");
     }
   };
 
@@ -132,6 +127,8 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowLeft") {
       e.preventDefault();
       joinLobbyButton.focus();
+    } else if (keyPressed === "ArrowRight") {
+      dispatchOOBEvent(root, "HORIZONTAL", "END");
     }
   };
 
@@ -143,11 +140,11 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
       joinLobbyButton.click();
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
-      const items = getHighLevelVerticalItems();
+      const items = getHighLevelVerticalItems(root);
       cl.prev(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
-      const items = getHighLevelVerticalItems();
+      const items = getHighLevelVerticalItems(root);
       const next = cl.next(items, joinLobbyButton);
       next.focus();
     } else if (keyPressed === "ArrowRight") {
@@ -172,18 +169,22 @@ function setupLobbyButtons(channelItemWrapper: HTMLElement): Teardown {
   };
 }
 
-function getHighLevelVerticalItems() {
-  return document.querySelectorAll<HTMLElement>(
-    `.mainToolbar .channelsList .channelItemWrapper .channelItem,
-    .mainToolbar .buttonItemWrapper,
+function getHighLevelVerticalItems(root: HTMLElement) {
+  return root.querySelectorAll<HTMLElement>(
+    `.channelsList .channelItemWrapper .channelItem,
+    .buttonItemWrapper,
     .buttonBar > *`
   );
 }
 
-function moveVertically(el: HTMLElement, keyPressed: string) {
+function moveVertically(
+  root: HTMLElement,
+  el: HTMLElement,
+  keyPressed: string
+) {
   const nextFn = keyPressed === "ArrowUp" ? cl.prev : cl.next;
 
-  const items = getHighLevelVerticalItems();
+  const items = getHighLevelVerticalItems(root);
   const nextItem = nextFn(items, el);
 
   el.setAttribute("tabIndex", "-1");
@@ -191,9 +192,9 @@ function moveVertically(el: HTMLElement, keyPressed: string) {
   nextItem.focus();
 }
 
-function setupUserButton(): Teardown {
-  const el = document.querySelector<HTMLElement>(`.buttonBar > .userButton`);
-  const buttons = document.querySelectorAll<HTMLElement>(
+function setupUserButton(root: HTMLElement): Teardown {
+  const el = root.querySelector<HTMLElement>(`.buttonBar > .userButton`);
+  const buttons = root.querySelectorAll<HTMLElement>(
     `.buttonBar > .userButton > .userStateMenu > *`
   );
 
@@ -210,7 +211,7 @@ function setupUserButton(): Teardown {
     // TODO: we should only trigger a click
     // then the click would handle focus automatically
     if (keyPressed === "Enter") {
-      const logoutButton = document.querySelector<HTMLElement>(
+      const logoutButton = root.querySelector<HTMLElement>(
         '[role="button"][aria-label="Logout"]'
       );
 
@@ -239,7 +240,9 @@ function setupUserButton(): Teardown {
         );
       }
     } else if (keyPressed === "ArrowUp" || keyPressed === "ArrowDown") {
-      moveVertically(el, keyPressed);
+      moveVertically(root, el, keyPressed);
+    } else if (keyPressed === "ArrowRight") {
+      dispatchOOBEvent(root, "HORIZONTAL", "END");
     }
   }
 
@@ -250,8 +253,8 @@ function setupUserButton(): Teardown {
   };
 }
 
-function setupSearchButtonRole() {
-  const el = document.querySelector<HTMLElement>(`a.buttonItemWrapper`);
+function setupSearchButtonRole(root: HTMLElement) {
+  const el = root.querySelector<HTMLElement>(`a.buttonItemWrapper`);
   if (!el) {
     return;
   }
@@ -260,8 +263,8 @@ function setupSearchButtonRole() {
   el.setAttribute("aria-label", "Search");
 }
 
-function setupLogoutButtonRole() {
-  const el = document.querySelector<HTMLElement>(`.logOutWrapper`);
+function setupLogoutButtonRole(root: HTMLElement) {
+  const el = root.querySelector<HTMLElement>(`.logOutWrapper`);
   if (!el) {
     return;
   }
@@ -270,8 +273,8 @@ function setupLogoutButtonRole() {
   el.setAttribute("aria-label", "Logout");
 }
 
-function setupOnlineButtonRole() {
-  const el = document.querySelector<HTMLElement>(`.optionWrapper .online`)
+function setupOnlineButtonRole(root: HTMLElement) {
+  const el = root.querySelector<HTMLElement>(`.optionWrapper .online`)
     ?.parentNode as Element;
   if (!el) {
     return;
@@ -281,8 +284,8 @@ function setupOnlineButtonRole() {
   el.setAttribute("aria-label", "Online");
 }
 
-function setupAwayButtonRole() {
-  const el = document.querySelector<HTMLElement>(`.optionWrapper .away`)
+function setupAwayButtonRole(root: HTMLElement) {
+  const el = root.querySelector<HTMLElement>(`.optionWrapper .away`)
     ?.parentNode as Element;
   if (!el) {
     return;
@@ -292,19 +295,19 @@ function setupAwayButtonRole() {
   el.setAttribute("aria-label", "Away");
 }
 
-function setupRoles() {
-  setupSearchButtonRole();
+function setupRoles(root: HTMLElement) {
+  setupSearchButtonRole(root);
   setupUserButtonRole();
   setupSettingsButtonRole();
-  setupNotificationsButtonRole();
+  setupNotificationsButtonRole(root);
 
-  setupLogoutButtonRole();
-  setupOnlineButtonRole();
-  setupAwayButtonRole();
+  setupLogoutButtonRole(root);
+  setupOnlineButtonRole(root);
+  setupAwayButtonRole(root);
 }
 
-function setupNotificationsButtonRole() {
-  const el = document.querySelector<HTMLElement>(".notificationsButton");
+function setupNotificationsButtonRole(root: HTMLElement) {
+  const el = root.querySelector<HTMLElement>(".notificationsButton");
   if (!el) {
     return;
   }
@@ -339,7 +342,7 @@ function setupUserButtonRole() {
  * - notificationsButton
  * - settingsButton
  */
-function setupRegularButtonsKeydown(): Teardown {
+function setupRegularButtonsKeydown(root: HTMLElement): Teardown {
   const el = document.querySelectorAll<HTMLElement>(
     `a.buttonItemWrapper, .buttonBar > a:not(.userButton)`
   );
@@ -362,8 +365,10 @@ function setupRegularButtonsKeydown(): Teardown {
     } else if (keyPressed === "ArrowUp" || keyPressed === "ArrowDown") {
       // Dunno why i need this
       if (el) {
-        moveVertically(b, keyPressed);
+        moveVertically(root, b, keyPressed);
       }
+    } else if (keyPressed === "ArrowRight") {
+      dispatchOOBEvent(root, "HORIZONTAL", "END");
     }
   }
 
@@ -464,16 +469,14 @@ function setupUserMenuKeydown(): Teardown {
 }
 
 let teardown: Teardown[] = [];
-export function updateSidebar() {
+export function updateSidebar(root: HTMLElement) {
   teardown.forEach((fn) => {
     fn();
   });
   teardown = [];
 
   const lobbyItems = Array.from(
-    document.querySelectorAll<HTMLElement>(
-      `.mainToolbar .channelsList .channelItemWrapper`
-    )
+    root.querySelectorAll<HTMLElement>(`.channelsList .channelItemWrapper`)
   );
 
   // Make buttons focusable
@@ -493,21 +496,21 @@ export function updateSidebar() {
 
   teardown.push(
     ...Array.from(lobbyItems).map((lobbyItem) => {
-      return setupLobbyButtons(lobbyItem);
+      return setupLobbyButtons(root, lobbyItem);
     })
   );
 
-  setupRoles();
+  setupRoles(root);
 
-  teardown.push(setupUserButton());
-  teardown.push(setupRegularButtonsKeydown());
+  teardown.push(setupUserButton(root));
+  teardown.push(setupRegularButtonsKeydown(root));
   teardown.push(setupUserMenuKeydown());
 
   // Query open lobbies and the search button
   // Then the first one tabbable
-  const sidebarItems = document.querySelectorAll<HTMLElement>(
-    `.mainToolbar .channelsList .channelItemWrapper > *,
-    .mainToolbar .buttonItemWrapper`
+  const sidebarItems = root.querySelectorAll<HTMLElement>(
+    `.channelsList .channelItemWrapper > *,
+    .buttonItemWrapper`
   );
 
   // TODO: doing this at this point introduces a bug
