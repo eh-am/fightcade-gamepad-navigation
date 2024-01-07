@@ -1,15 +1,44 @@
-import {
-  fakeRovingTabIndex,
-  findFocusableElements,
-  getFakeRovingTabindex,
-} from "@app/dom";
+import { fakeRovingTabIndex, makeFocusableIfNeeded } from "@app/dom";
 import * as list from "@app/ds/list";
+import { setupActionButton } from "@app/pages/welcome/actionButtons";
+
+type onChangeCategory = (nextFn: typeof list.next) => void;
+
+const actionSel = ".channelActions a, .eventActions a, .categoryActions a";
+
+export function setupCardForCategory(
+  allCards: HTMLElement[],
+  card: HTMLElement,
+  onChangeCategory: onChangeCategory
+): Teardown {
+  makeFocusableIfNeeded(card, true);
+  const teardown1 = handleFocusOut(card);
+  const teardown2 = setupCardKeydown(allCards, card, onChangeCategory);
+
+  const actionButtons = Array.from(
+    card.querySelectorAll<HTMLElement>(actionSel)
+  );
+
+  const teardown3 = actionButtons.map((ab) => {
+    return setupActionButton(
+      actionButtons,
+      ab,
+      moveToNextCardHorizontally.bind(null, allCards, card)
+    );
+  });
+
+  return () => {
+    teardown1();
+    teardown2();
+
+    teardown3.forEach((v) => v());
+  };
+}
 
 export function setupCardKeydown(
-  allCategories: HTMLElement[],
   allCards: HTMLElement[],
-  currentCategory: HTMLElement,
-  card: HTMLElement
+  card: HTMLElement,
+  onChangeCategory: onChangeCategory
 ): Teardown {
   function onKeydown(e: KeyboardEvent) {
     const keyPressed = e.key;
@@ -28,17 +57,19 @@ export function setupCardKeydown(
         el.style.opacity = "1";
       });
 
-      const firstChannelAction = card.querySelector<HTMLElement>(
-        ".channelActions a, .categoryActions a"
-      );
+      const firstChannelAction = card.querySelector<HTMLElement>(actionSel);
+      //      const firstChannelAction = card.querySelector<HTMLElement>(
+      //        ".channelActions a, .categoryActions a"
+      //      );
 
+      console.log("focusing on", firstChannelAction);
       firstChannelAction?.focus();
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
-      moveToNextCategory(allCategories, currentCategory, list.prev);
+      onChangeCategory(list.prev);
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
-      moveToNextCategory(allCategories, currentCategory, list.next);
+      onChangeCategory(list.next);
     }
   }
 
@@ -96,28 +127,4 @@ function moveToNextCardHorizontally(
     inline: "nearest",
   });
   next.focus();
-}
-
-function moveToNextCategory(
-  allCategories: HTMLElement[],
-  currentCategory: HTMLElement,
-  nextFn: typeof list.next
-) {
-  const next = nextFn(allCategories, currentCategory);
-
-  if (next === "OOB") {
-    throw new Error("Implement OOB");
-  }
-
-  const focusableElements = findFocusableElements(next);
-
-  // Try to mimic the rovering tabindex technique
-  const lastVisited = focusableElements.find((el) => {
-    return getFakeRovingTabindex(el) === "0";
-  });
-  if (lastVisited) {
-    lastVisited.focus();
-  } else {
-    focusableElements[0]?.focus();
-  }
 }
