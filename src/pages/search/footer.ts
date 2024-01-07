@@ -76,6 +76,12 @@ export function setupFooter(root: HTMLElement) {
 function moveFooterUpTheDOM(root: HTMLElement) {
   // Only move if necessary
   // Otherwise it may trigger an infinite loop with the Mutation Observer
+  const desiredFooter = root.querySelector<HTMLElement>(
+    ".searchResultsWrapper > .paginationWrapper:only-child"
+  );
+  if (desiredFooter) {
+    return desiredFooter;
+  }
 
   // Move footer up the DOM, the query is very specific
   // so that it won't run erroneously

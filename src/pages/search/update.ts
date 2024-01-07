@@ -37,11 +37,13 @@ export function update(root: HTMLElement) {
     ".contentWrapper > header"
   );
   if (!searchHeader) {
+    console.warn("Aborting since searchHeader was not found.");
     return;
   }
 
   const footer = setupFooter(root);
   if (!footer) {
+    console.warn("Aborting since footer was not found.");
     return;
   }
 
