@@ -62,11 +62,10 @@ function moveToNextCategory(
     return el.classList.contains("gridWrapper");
   });
 
-  // Try to mimic the rovering tabindex technique per category
-  // So that we come back to the previous item in that category
-  const lastVisited = focusableCards.find((el) => {
-    return getFakeRovingTabindex(el) === "0";
-  });
+  //  const lastVisited = focusableCards.find((el) => {
+  //    return getFakeRovingTabindex(el) === "0";
+  //  });
+  const lastVisited = findFirstFocusableCardInCategory(next.value);
   if (lastVisited) {
     lastVisited.focus();
     rovingTabIndex(currCard, lastVisited);
@@ -74,4 +73,17 @@ function moveToNextCategory(
     focusableCards[0]?.focus();
     rovingTabIndex(currCard, focusableCards[0]);
   }
+}
+
+export function findFirstFocusableCardInCategory(category: HTMLElement) {
+  const focusableCards = findFocusableElements(category).filter((el) => {
+    // TODO: kinda ugly, but we need to know only cards
+    return el.classList.contains("gridWrapper");
+  });
+
+  // Try to mimic the rovering tabindex technique per category
+  // So that we come back to the previous item in that category
+  return focusableCards.find((el) => {
+    return getFakeRovingTabindex(el) === "0";
+  });
 }

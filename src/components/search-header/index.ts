@@ -1,8 +1,17 @@
+import { onHorizontalOOB, onVerticalOOB } from "@app/types/navigation";
 import { setupFirstRow, setupFirstRowListeners } from "./first-row";
 import { setupSecondRow, setupSecondRowListeners } from "./second-row";
 import { setupThirdRow, setupThirdRowListeners } from "./third-row";
 
-export function updateSearchHeader(root: HTMLElement): Teardown {
+export function updateSearchHeader({
+  root,
+  onHorizontalOOB,
+  onVerticalOOB,
+}: {
+  root: HTMLElement;
+  onHorizontalOOB: onHorizontalOOB;
+  onVerticalOOB: onVerticalOOB;
+}): Teardown {
   const teardown: Teardown[] = [];
 
   // First Row
@@ -30,28 +39,20 @@ export function updateSearchHeader(root: HTMLElement): Teardown {
       firstRow.allItems,
       secondRow.allItems,
       thirdRow.allItems,
-      onHorizontalOOB,
-      onVerticalOOB
+      onVerticalOOB,
+      onHorizontalOOB
     )
   );
   teardown.push(
     setupThirdRowListeners(
       secondRow.allItems,
       thirdRow.allItems,
-      onVerticalOOB,
-      onHorizontalOOB
+      onHorizontalOOB,
+      onVerticalOOB
     )
   );
 
   return () => {
     teardown.forEach((v) => v());
   };
-}
-
-function onHorizontalOOB(direction: "START" | "END") {
-  console.warn("Should move to next section horizontally", direction);
-}
-
-function onVerticalOOB(direction: "START" | "END") {
-  console.warn("Should move to next section vertically", direction);
 }

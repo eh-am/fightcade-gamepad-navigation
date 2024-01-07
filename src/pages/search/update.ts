@@ -29,14 +29,22 @@ export function update(root: HTMLElement) {
     makeFocusableIfNeeded(card, true, "0");
   }
 
-  const grid = setupGrid(root, onHorizontalOOB, onVerticalOOB);
+  const grid = setupGrid(root, onHorizontalOOB, onGridVerticalOOB);
   teardown.push(grid.teardown);
 
   const searchHeader = root.querySelector<HTMLElement>(
     ".contentWrapper > header"
   );
   if (searchHeader) {
-    updateSearchHeader(searchHeader);
+    updateSearchHeader({
+      root: searchHeader,
+      onHorizontalOOB: () => {},
+      onVerticalOOB: (direction) => {
+        if (direction === "END") {
+          onBackToGrid(grid.allCards);
+        }
+      },
+    });
   }
 
   setupFooter(root);
@@ -60,6 +68,12 @@ function onHorizontalOOB(direction: "START" | "END") {
   console.warn("Should move to next section horizontally", direction);
 }
 
-function onVerticalOOB(direction: "START" | "END") {
-  console.warn("Should move to next section vertically", direction);
+function onGridVerticalOOB(direction: "START" | "END") {
+  if (direction === "START") {
+    // Go to search header
+    console.warn("go to header");
+  } else if (direction === "END") {
+    // Go to footer
+    console.warn("go to footer");
+  }
 }

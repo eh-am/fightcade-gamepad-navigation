@@ -1,6 +1,10 @@
-import { makeFocusableIfNeeded } from "@app/dom";
-import { setupCategory } from "@app/pages/welcome/category";
+import { findFirstFocusable, makeFocusableIfNeeded } from "@app/dom";
+import {
+  findFirstFocusableCardInCategory,
+  setupCategory,
+} from "@app/pages/welcome/category";
 import { updateSearchHeader } from "@app/components/search-header";
+import { Direction } from "@app/types/navigation";
 
 const teardown: Teardown[] = [];
 
@@ -43,10 +47,33 @@ export function update(root: HTMLElement) {
     ".contentWrapper > header"
   );
   if (searchHeader) {
-    updateSearchHeader(searchHeader);
+    updateSearchHeader({
+      root: searchHeader,
+      onHorizontalOOB: onHeaderHorizontalNavigation,
+      onVerticalOOB: onHeaderVerticalNavigation.bind(null, categories),
+    });
   }
 
   return true;
+}
+
+function onHeaderHorizontalNavigation(direction: Direction) {
+  onHorizontalOOB(direction);
+}
+function onHeaderVerticalNavigation(
+  categories: HTMLElement[],
+  direction: Direction
+) {
+  console.log("should be navigatttttttttting?");
+  if (direction === "END") {
+    const lastCategory = categories[0];
+    if (lastCategory) {
+      // Focus on the next item in the grid
+      const lastVisited = findFirstFocusableCardInCategory(lastCategory);
+      lastVisited?.focus();
+      // TODO: set tabindex to 0, and remove tabindex from other place?
+    }
+  }
 }
 
 function onHorizontalOOB(direction: "START" | "END") {

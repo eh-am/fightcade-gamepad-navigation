@@ -31,7 +31,7 @@ export function setupGrid(
             rovingTabIndex(currCard, next.value);
             next.value.focus();
           } else {
-            onVerticalOOB("START");
+            onVerticalOOB(direction === "ArrowUp" ? "START" : "END");
           }
         },
         (direction) => {
