@@ -19,7 +19,7 @@ export function setupCategory(
     return () => {};
   }
 
-  makeFocusableIfNeeded(cards[0], true, "0");
+  // makeFocusableIfNeeded(cards[0], true, "0");
 
   const teardown = cards.map((card) => {
     return setupCard(

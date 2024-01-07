@@ -1,3 +1,4 @@
+import { makeFocusableIfNeeded } from "@app/dom";
 import { setupCategory } from "@app/pages/welcome/category";
 
 const teardown: Teardown[] = [];
@@ -16,6 +17,15 @@ export function update(root: HTMLElement) {
   }
 
   teardown.forEach((v) => v());
+
+  // Only the first card should be initially tabbable (tabindex 0)
+  // ATENTION! Order matters here, since it's only set if needed
+  // and the category code down below will initialize to -1
+  const card = root.querySelector<HTMLElement>(".gridWrapper");
+  if (card) {
+    makeFocusableIfNeeded(card, true, "0");
+  }
+
   teardown.push(
     ...categories.map((category) => {
       return setupCategory(
