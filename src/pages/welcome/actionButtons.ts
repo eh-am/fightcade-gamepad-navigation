@@ -56,9 +56,9 @@ function moveVertically(
   nextFn: typeof list.next
 ) {
   const next = nextFn(allButtons, button);
-  if (next === "OOB") {
+  if (next.status === "OOB") {
     return;
   }
 
-  next.focus();
+  next.value.focus();
 }

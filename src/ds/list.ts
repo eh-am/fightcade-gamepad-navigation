@@ -16,7 +16,9 @@ function list(
   items: HTMLElement[],
   current: HTMLElement,
   addIndex: number
-): HTMLElement | "OOB" | "OOB" {
+):
+  | { status: "OK"; value: HTMLElement }
+  | { status: "OOB"; value: "START" | "END" } {
   const myIndex = Array.from(items).findIndex((a) => a === current);
 
   if (myIndex === -1) {
@@ -31,12 +33,12 @@ function list(
 
   // TODO: it may be possible to go outside by multiple items
   if (nextIndex < 0) {
-    return "OOB";
+    return { status: "OOB", value: "START" };
   }
 
   if (nextIndex >= items.length) {
-    return "OOB";
+    return { status: "OOB", value: "END" };
   }
 
-  return items[nextIndex];
+  return { status: "OK", value: items[nextIndex] };
 }

@@ -426,23 +426,23 @@ function setupUserMenuKeydown(): Teardown {
         e.stopPropagation();
 
         const n = list.prev(order, activeElement);
-        if (n === "OOB") {
+        if (n.status === "OOB") {
           el.focus();
         } else {
-          n.focus();
+          n.value.focus();
         }
       } else if (keyPressed === "ArrowDown") {
         e.preventDefault();
         e.stopPropagation();
 
         const n = list.next(order, activeElement);
-        if (n === "OOB") {
+        if (n.status === "OOB") {
           if (userButton) {
             findClickableUserButtonEl(userButton)?.click();
             focusBackWhenTransitionEnds(userButton);
           }
         } else {
-          n.focus();
+          n.value.focus();
         }
       }
     }

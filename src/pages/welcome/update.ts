@@ -5,7 +5,7 @@ const teardown: Teardown[] = [];
 export function update(root: HTMLElement) {
   // Find all categories
   const categories = Array.from(
-    document.querySelectorAll<HTMLElement>(
+    root.querySelectorAll<HTMLElement>(
       ".welcomeWrapper .contentWrapper .welcomeListWrapper"
     )
   );
@@ -18,9 +18,22 @@ export function update(root: HTMLElement) {
   teardown.forEach((v) => v());
   teardown.push(
     ...categories.map((category) => {
-      return setupCategory(categories, category);
+      return setupCategory(
+        categories,
+        category,
+        onHorizontalOOB,
+        onVerticalOOB
+      );
     })
   );
 
   return true;
+}
+
+function onHorizontalOOB(direction: "START" | "END") {
+  console.warn("Should move to next section horizontally", direction);
+}
+
+function onVerticalOOB(direction: "START" | "END") {
+  console.warn("Should move to next section vertically", direction);
 }

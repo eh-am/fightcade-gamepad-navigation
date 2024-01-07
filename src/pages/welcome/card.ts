@@ -9,11 +9,17 @@ const actionSel = ".channelActions a, .eventActions a, .categoryActions a";
 export function setupCardForCategory(
   allCards: HTMLElement[],
   card: HTMLElement,
-  onChangeCategory: onChangeCategory
+  onChangeCategory: onChangeCategory,
+  onHorizontalOOB: (direction: "START" | "END") => void
 ): Teardown {
   makeFocusableIfNeeded(card, true);
   const teardown1 = handleFocusOut(card);
-  const teardown2 = setupCardKeydown(allCards, card, onChangeCategory);
+  const teardown2 = setupCardKeydown(
+    allCards,
+    card,
+    onChangeCategory,
+    onHorizontalOOB
+  );
 
   const actionButtons = Array.from(
     card.querySelectorAll<HTMLElement>(actionSel)
@@ -23,7 +29,7 @@ export function setupCardForCategory(
     return setupActionButton(
       actionButtons,
       ab,
-      moveToNextCardHorizontally.bind(null, allCards, card)
+      moveToNextCardHorizontally.bind(null, allCards, card, onHorizontalOOB)
     );
   });
 
@@ -38,7 +44,8 @@ export function setupCardForCategory(
 export function setupCardKeydown(
   allCards: HTMLElement[],
   card: HTMLElement,
-  onChangeCategory: onChangeCategory
+  onChangeCategory: onChangeCategory,
+  onHorizontalOOB: Parameters<typeof setupCardForCategory>["3"]
 ): Teardown {
   function onKeydown(e: KeyboardEvent) {
     const keyPressed = e.key;
@@ -46,10 +53,10 @@ export function setupCardKeydown(
     if (keyPressed === "ArrowLeft") {
       e.preventDefault();
 
-      moveToNextCardHorizontally(allCards, card, list.prev);
+      moveToNextCardHorizontally(allCards, card, onHorizontalOOB, list.prev);
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();
-      moveToNextCardHorizontally(allCards, card, list.next);
+      moveToNextCardHorizontally(allCards, card, onHorizontalOOB, list.next);
     } else if (keyPressed === "Enter") {
       const channelActionsWrapper = getChannelActionsWrapper(card);
 
@@ -58,11 +65,6 @@ export function setupCardKeydown(
       });
 
       const firstChannelAction = card.querySelector<HTMLElement>(actionSel);
-      //      const firstChannelAction = card.querySelector<HTMLElement>(
-      //        ".channelActions a, .categoryActions a"
-      //      );
-
-      console.log("focusing on", firstChannelAction);
       firstChannelAction?.focus();
     } else if (keyPressed === "ArrowUp") {
       e.preventDefault();
@@ -110,21 +112,23 @@ export function handleFocusOut(card: HTMLElement): Teardown {
 function moveToNextCardHorizontally(
   allCards: HTMLElement[],
   curr: HTMLElement,
+  onHorizontalOOB: Parameters<typeof setupCardForCategory>["3"],
   nextFn: typeof list.next
 ) {
   const next = nextFn(allCards, curr);
-  if (next === "OOB") {
+  if (next.status === "OOB") {
+    onHorizontalOOB(next.value);
     return;
   }
 
-  fakeRovingTabIndex(curr, next);
+  fakeRovingTabIndex(curr, next.value);
 
   // TODO: rovering tab?
-  next.scrollIntoView({
+  next.value.scrollIntoView({
     // TODO: behavior: smooth will scroll in the center??
     behavior: "auto",
     block: "nearest",
     inline: "nearest",
   });
-  next.focus();
+  next.value.focus();
 }
