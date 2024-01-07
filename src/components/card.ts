@@ -31,6 +31,8 @@ export function setupCard(
     card.querySelectorAll<HTMLElement>(actionSel)
   );
 
+  setupRole(card);
+
   const teardown3 = actionButtons.map((ab) => {
     return setupActionButton(
       actionButtons,
@@ -142,4 +144,15 @@ function moveToNextCardHorizontally(
     inline: "nearest",
   });
   next.value.focus();
+}
+
+function setupRole(el: HTMLElement) {
+  el.setAttribute("role", "gridcell");
+
+  const title =
+    el
+      .querySelector<HTMLElement>(".channelPreviewWrapper")
+      ?.getAttribute("title") || "";
+
+  el.setAttribute("aria-label", title);
 }
