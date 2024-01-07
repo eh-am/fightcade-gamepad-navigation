@@ -1,5 +1,6 @@
 import { makeFocusableIfNeeded } from "@app/dom";
 import { setupCategory } from "@app/pages/welcome/category";
+import { updateSearchHeader } from "@app/sections/components/search-header";
 
 const teardown: Teardown[] = [];
 
@@ -36,6 +37,13 @@ export function update(root: HTMLElement) {
       );
     })
   );
+
+  const searchHeader = root.querySelector<HTMLElement>(
+    ".contentWrapper > header"
+  );
+  if (searchHeader) {
+    updateSearchHeader(searchHeader);
+  }
 
   return true;
 }

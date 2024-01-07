@@ -1,6 +1,18 @@
 import * as cl from "@app/ds/circularList";
 import { log } from "../log";
 
+export function updateSearchHeader(root: HTMLElement) {
+  // Instead of remove all event listeners and such
+  // We just delete the root node of the custom select
+  // TODO: apparently the listeners continue existing?
+  // https://stackoverflow.com/a/76239226
+  const fakeSelects = root.querySelectorAll<HTMLElement>(".fgn-custom-select");
+  fakeSelects.forEach((el) => el.remove());
+
+  const selects = root.querySelectorAll<HTMLSelectElement>("select");
+  selects.forEach((select) => setupSelect(select));
+}
+
 function findSelectedFakeOption(el: HTMLSelectElement) {
   return el
     .closest(".filterItem")
@@ -81,18 +93,6 @@ function syncFromMirror(target: HTMLSelectElement) {
     option.scrollIntoView();
     wrapper.classList.remove("active");
   }
-}
-
-export function updateSearchHeader(root: HTMLElement) {
-  // Instead of remove all event listeners and such
-  // We just delete the root node of the custom select
-  // TODO: apparently the listeners continue existing?
-  // https://stackoverflow.com/a/76239226
-  const fakeSelects = root.querySelectorAll<HTMLElement>(".fgn-custom-select");
-  fakeSelects.forEach((el) => el.remove());
-
-  const selects = root.querySelectorAll<HTMLSelectElement>("select");
-  selects.forEach((select) => setupSelect(select));
 }
 
 /**
@@ -361,16 +361,14 @@ function moveToNextOption(
 }
 
 function setupKeyDownListeners(root: HTMLElement): Teardown {
-  const fn = (e: Event) => {
+  const fn = (e: KeyboardEvent) => {
     const currentFocused = document.activeElement as HTMLElement;
 
     if (!currentFocused) {
       return;
     }
 
-    // TODO: figure out why setting KeyboardEvent in the event doesn't type check
-    const keyPressed = (e as KeyboardEvent).key;
-    log("keypressed", keyPressed);
+    const keyPressed = e.key;
 
     if (keyPressed === "ArrowLeft" || keyPressed === "ArrowRight") {
       e.preventDefault();
@@ -394,10 +392,8 @@ function setupKeyDownListeners(root: HTMLElement): Teardown {
     }
   };
 
-  log("adding listener to", root);
   root.addEventListener("keydown", fn);
   return () => {
-    log("tearing down keydown");
     root.removeEventListener("keydown", fn);
   };
 }
@@ -421,7 +417,6 @@ function moveVertically(
 ) {
   const row = identifyRow(currentFocused);
   let items: ReturnType<typeof getSecondRowItems>;
-  console.log("move vertically, found row", row);
 
   switch (row) {
     case "FIRST": {

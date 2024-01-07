@@ -108,56 +108,67 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     initialized.search = true;
     welcomePage.update(welcomeRoot);
 
-    const observer = new MutationObserver(() => {
-      welcomePage.update(welcomeRoot);
+    const observer = new MutationObserver((mr) => {
+      // Since we add a custom SELECT element,
+      // this mutation observer is triggered again
+      const addedOptions = mr.some((m) => {
+        return (
+          m.type === "childList" &&
+          (m.target as HTMLElement).tagName === "SELECT"
+        );
+      });
+
+      if (addedOptions) {
+        welcomePage.update(welcomeRoot);
+      }
     });
 
     observer.observe(welcomeRoot, observerOptions);
   }
 
   // There are multiple search headers lol
-  const searchHeaderInWelcomeRoot = document.querySelector<HTMLElement>(
-    ".welcomeWrapper > .contentWrapper > header"
-  );
-  const searchHeaderInSearchRoot = document.querySelector<HTMLElement>(
-    ".searchWrapper > .contentWrapper > header"
-  );
+  //  const searchHeaderInWelcomeRoot = document.querySelector<HTMLElement>(
+  //    ".welcomeWrapper > .contentWrapper > header"
+  //  );
+  //  const searchHeaderInSearchRoot = document.querySelector<HTMLElement>(
+  //    ".searchWrapper > .contentWrapper > header"
+  //  );
 
   // There are 2 search headers, depending on the page
-  if (
-    !initialized.search_header &&
-    searchHeaderInWelcomeRoot &&
-    searchHeaderInSearchRoot
-  ) {
-    const init1 = initSearchHeader(searchHeaderInWelcomeRoot);
-    const init2 = initSearchHeader(searchHeaderInSearchRoot);
-
-    // TODO: does this make any sense?
-    initialized.search_header = init1 && init2;
-    //    x
-    //    initialized.search_header = true;
-    if (initialized.search_header) {
-      [searchHeaderInSearchRoot, searchHeaderInWelcomeRoot].forEach((root) => {
-        // Kinda naive but does the job
-        // Only run when options are added
-        // Otherwise, when we create our fake options, it will trigger an infinite loop
-        const observer = new MutationObserver((mr) => {
-          const addedOptions = mr.some((m) => {
-            return (
-              m.type === "childList" &&
-              (m.target as HTMLElement).tagName === "SELECT"
-            );
-          });
-
-          if (addedOptions) {
-            updateSearchHeader(root);
-          }
-        });
-
-        observer.observe(root, observerOptions);
-      });
-    }
-  }
+  //  if (
+  //    !initialized.search_header &&
+  //    searchHeaderInWelcomeRoot &&
+  //    searchHeaderInSearchRoot
+  //  ) {
+  //    const init1 = initSearchHeader(searchHeaderInWelcomeRoot);
+  //    const init2 = initSearchHeader(searchHeaderInSearchRoot);
+  //
+  //    // TODO: does this make any sense?
+  //    initialized.search_header = init1 && init2;
+  //    //    x
+  //    //    initialized.search_header = true;
+  //    if (initialized.search_header) {
+  //      [searchHeaderInSearchRoot, searchHeaderInWelcomeRoot].forEach((root) => {
+  //        // Kinda naive but does the job
+  //        // Only run when options are added
+  //        // Otherwise, when we create our fake options, it will trigger an infinite loop
+  //        const observer = new MutationObserver((mr) => {
+  //          const addedOptions = mr.some((m) => {
+  //            return (
+  //              m.type === "childList" &&
+  //              (m.target as HTMLElement).tagName === "SELECT"
+  //            );
+  //          });
+  //
+  //          if (addedOptions) {
+  //            updateSearchHeader(root);
+  //          }
+  //        });
+  //
+  //        observer.observe(root, observerOptions);
+  //      });
+  //    }
+  //  }
 
   const searchResultsRoot = document.querySelector(PAGES.SEARCH_RESULTS);
   if (!initialized.search_results && searchResultsRoot) {

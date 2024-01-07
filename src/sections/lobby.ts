@@ -186,7 +186,6 @@ export function updateLobby(root: HTMLElement) {
   const challenges = Array.from(
     root.querySelectorAll<HTMLElement>(".challengeWrapper .challengeContent")
   );
-  console.log({ challenges });
   teardown.push(...challenges.map((el) => setupBeenChallenged(el)));
 }
 
