@@ -57,8 +57,13 @@ function onPageOOB(sidebar: HTMLElement, e: CustomEvent<OOB_Event>) {
 function onSidebarOOB(pages: HTMLElement[], e: CustomEvent<OOB_Event>) {
   if (e.detail.axis === "HORIZONTAL" && e.detail.direction === "END") {
     if (cameFrom && isVisible(cameFrom)) {
-      cameFrom.focus();
-      cameFrom = undefined;
+      // https://stackoverflow.com/a/54581689
+      // not exactly the same issue but it works nevertheless
+      window.setTimeout(function () {
+        cameFrom?.focus();
+        cameFrom = undefined;
+      }, 0);
+
       return;
     }
 

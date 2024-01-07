@@ -136,7 +136,6 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
   }
 
   if (sidebarRoot && welcomeRoot && searchPageRoot) {
-    console.log("starting navifator");
     startOOBNavigator({
       sidebar: sidebarRoot,
       welcome: welcomeRoot,

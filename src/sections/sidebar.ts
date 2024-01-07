@@ -1,5 +1,5 @@
 import * as cl from "@app/ds/circularList";
-import { addCSS, isVisible } from "../dom";
+import { addCSS, isVisible, rovingTabIndex } from "../dom";
 import * as list from "@app/ds/list";
 import { dispatchOOBEvent } from "@app/oobNavigator";
 
@@ -101,14 +101,18 @@ function setupLobbyButtons(
       e.preventDefault();
       muteChannelButton.click();
     } else if (keyPressed === "ArrowUp") {
+      e.preventDefault();
       leaveChannelButton.focus();
     } else if (keyPressed === "ArrowDown") {
+      e.preventDefault();
       // Go outside
       const items = getHighLevelVerticalItems(root);
       cl.next(items, joinLobbyButton).focus();
     } else if (keyPressed === "ArrowLeft") {
+      e.preventDefault();
       joinLobbyButton.focus();
     } else if (keyPressed === "ArrowRight") {
+      e.preventDefault();
       dispatchOOBEvent({ root, axis: "HORIZONTAL", direction: "END" });
     }
   };
@@ -146,6 +150,7 @@ function setupLobbyButtons(
       e.preventDefault();
       const items = getHighLevelVerticalItems(root);
       const next = cl.next(items, joinLobbyButton);
+      rovingTabIndex(joinLobbyButton, next);
       next.focus();
     } else if (keyPressed === "ArrowRight") {
       leaveChannelButton.focus();

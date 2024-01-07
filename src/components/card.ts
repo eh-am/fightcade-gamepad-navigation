@@ -5,7 +5,7 @@ import {
 } from "@app/dom";
 import * as gridList from "@app/ds/gridList";
 import { setupActionButton } from "./actionButtons";
-import { onHorizontalOOB2 } from "@app/types/navigation";
+import { onOOBNavigation } from "@app/types/navigation";
 
 const actionSel = ".channelActions a, .eventActions a, .categoryActions a";
 
@@ -17,7 +17,7 @@ export function setupCard(
     currCard: HTMLElement,
     direction: "ArrowUp" | "ArrowDown"
   ) => void,
-  onHorizontalOOB: onHorizontalOOB2,
+  onHorizontalOOB: onOOBNavigation,
   cardsPerRow: number = Infinity
 ): Teardown {
   makeFocusableIfNeeded(card, true);

@@ -3,4 +3,4 @@ export type onHorizontalOOB = (direction: Direction) => void;
 export type onVerticalOOB = (direction: Direction) => void;
 
 export type NavigationProps = OOB_Event;
-export type onHorizontalOOB2 = (props: NavigationProps) => void;
+export type onOOBNavigation = (props: NavigationProps) => void;

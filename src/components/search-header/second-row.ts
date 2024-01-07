@@ -1,7 +1,7 @@
 import * as list from "@app/ds/list";
 import { fakeRovingTabIndex, findFirstFakeFocusable } from "@app/dom";
 import { setupCustomSelect } from "./fake-select";
-import { onHorizontalOOB2 } from "@app/types/navigation";
+import { onOOBNavigation } from "@app/types/navigation";
 
 export function setupSecondRow(root: HTMLElement): {
   teardown: Teardown;
@@ -58,7 +58,7 @@ export function setupSecondRowListeners(
   firstRowItems: HTMLElement[],
   secondRowItems: HTMLElement[],
   thirdRowItems: HTMLElement[],
-  onHorizontalOOB: onHorizontalOOB2,
+  onHorizontalOOB: onOOBNavigation,
   onVerticalOOB: (direction: "START" | "END") => void
 ) {
   function onKeydown(currEl: HTMLElement, e: KeyboardEvent) {

@@ -1,10 +1,10 @@
 import { makeFocusableIfNeeded, rovingTabIndex } from "@app/dom";
 import * as list from "@app/ds/list";
-import { onHorizontalOOB2 } from "@app/types/navigation";
+import { onOOBNavigation } from "@app/types/navigation";
 
 export function setupFooterKeydown(
   root: HTMLElement,
-  onHorizontalOOB: onHorizontalOOB2,
+  onHorizontalOOB: onOOBNavigation,
   onArrowUp: () => void
 ): Teardown {
   const footerButtons = getFooterButtons(root);
