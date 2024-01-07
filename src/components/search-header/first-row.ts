@@ -1,5 +1,6 @@
 import * as list from "@app/ds/list";
 import { findFirstFakeFocusable, makeFocusableIfNeeded } from "@app/dom";
+import { onHorizontalOOB2 } from "@app/types/navigation";
 
 export function setupFirstRow(root: HTMLElement) {
   const input = root.querySelector<HTMLElement>("input");
@@ -23,7 +24,7 @@ export function setupFirstRow(root: HTMLElement) {
 export function setupFirstRowListeners(
   firstRowItems: HTMLElement[],
   secondRowItems: HTMLElement[],
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   onVerticalOOB: (direction: "START" | "END") => void
 ): Teardown {
   function onKeydown(currEl: HTMLElement, e: KeyboardEvent) {
@@ -36,7 +37,11 @@ export function setupFirstRowListeners(
       if (next.status === "OK") {
         next.value.focus();
       } else {
-        onHorizontalOOB("START");
+        onHorizontalOOB({
+          axis: "HORIZONTAL",
+          el: currEl,
+          direction: "START",
+        });
       }
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();

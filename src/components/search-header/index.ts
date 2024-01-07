@@ -1,4 +1,4 @@
-import { onHorizontalOOB, onVerticalOOB } from "@app/types/navigation";
+import { onHorizontalOOB2, onVerticalOOB } from "@app/types/navigation";
 import { setupFirstRow, setupFirstRowListeners } from "./first-row";
 import { setupSecondRow, setupSecondRowListeners } from "./second-row";
 import { setupThirdRow, setupThirdRowListeners } from "./third-row";
@@ -9,7 +9,7 @@ export function updateSearchHeader({
   onVerticalOOB,
 }: {
   root: HTMLElement;
-  onHorizontalOOB: onHorizontalOOB;
+  onHorizontalOOB: onHorizontalOOB2;
   onVerticalOOB: onVerticalOOB;
 }): Teardown {
   const teardown: Teardown[] = [];

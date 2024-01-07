@@ -1,4 +1,5 @@
 import { findFirstFakeFocusable } from "@app/dom";
+import { onHorizontalOOB2 } from "@app/types/navigation";
 
 export function setupThirdRow(root: HTMLElement) {
   const clearFilterButton = root.querySelector<HTMLElement>(
@@ -36,7 +37,7 @@ export function setupThirdRow(root: HTMLElement) {
 export function setupThirdRowListeners(
   secondRowItems: HTMLElement[],
   thirdRowItems: HTMLElement[],
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   onVerticalOOB: (direction: "START" | "END") => void
 ) {
   function onKeydown(el: HTMLElement, e: KeyboardEvent) {
@@ -47,7 +48,11 @@ export function setupThirdRowListeners(
     } else if (keyPressed === "ArrowDown") {
       onVerticalOOB("END");
     } else if (keyPressed === "ArrowLeft") {
-      onHorizontalOOB("START");
+      onHorizontalOOB({
+        axis: "HORIZONTAL",
+        direction: "START",
+        el: el,
+      });
     } else if (keyPressed === "Enter") {
       el.click();
     }

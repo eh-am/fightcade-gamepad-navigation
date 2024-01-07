@@ -1,6 +1,7 @@
 import * as list from "@app/ds/list";
 import { fakeRovingTabIndex, findFirstFakeFocusable } from "@app/dom";
 import { setupCustomSelect } from "./fake-select";
+import { onHorizontalOOB2 } from "@app/types/navigation";
 
 export function setupSecondRow(root: HTMLElement): {
   teardown: Teardown;
@@ -57,7 +58,7 @@ export function setupSecondRowListeners(
   firstRowItems: HTMLElement[],
   secondRowItems: HTMLElement[],
   thirdRowItems: HTMLElement[],
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   onVerticalOOB: (direction: "START" | "END") => void
 ) {
   function onKeydown(currEl: HTMLElement, e: KeyboardEvent) {
@@ -71,7 +72,11 @@ export function setupSecondRowListeners(
         fakeRovingTabIndex(currEl, next.value);
         next.value.focus();
       } else {
-        onHorizontalOOB("START");
+        onHorizontalOOB({
+          axis: "HORIZONTAL",
+          el: currEl,
+          direction: "START",
+        });
       }
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();

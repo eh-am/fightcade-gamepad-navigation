@@ -4,7 +4,7 @@ import {
   setupCategory,
 } from "@app/pages/welcome/category";
 import { updateSearchHeader } from "@app/components/search-header";
-import { Direction } from "@app/types/navigation";
+import { Direction, NavigationProps } from "@app/types/navigation";
 import { dispatchOOBEvent } from "@app/oobNavigator";
 
 const teardown: Teardown[] = [];
@@ -68,8 +68,11 @@ function onCardVerticalOOB(searchHeader: HTMLElement, direction: Direction) {
     next?.focus();
   }
 }
-function onHeaderHorizontalNavigation(root: HTMLElement, direction: Direction) {
-  onHorizontalOOB(root, direction);
+function onHeaderHorizontalNavigation(
+  root: HTMLElement,
+  props: NavigationProps
+) {
+  onHorizontalOOB(root, props);
 }
 
 function onHeaderVerticalNavigation(
@@ -87,6 +90,6 @@ function onHeaderVerticalNavigation(
   }
 }
 
-function onHorizontalOOB(root: HTMLElement, direction: "START" | "END") {
-  dispatchOOBEvent(root, "HORIZONTAL", direction);
+function onHorizontalOOB(root: HTMLElement, props: NavigationProps) {
+  dispatchOOBEvent({ ...props, root });
 }

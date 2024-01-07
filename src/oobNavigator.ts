@@ -1,4 +1,5 @@
 import { findFirstFocusableChild, isFocusable, isVisible } from "@app/dom";
+import { NavigationProps } from "@app/types/navigation";
 
 interface Props {
   sidebar: HTMLElement;
@@ -8,6 +9,8 @@ interface Props {
 }
 
 const teardown: Teardown[] = [];
+let cameFrom: HTMLElement | undefined;
+
 export function startOOBNavigator(props: Props) {
   teardown.forEach((fn) => {
     fn();
@@ -43,6 +46,9 @@ export function startOOBNavigator(props: Props) {
 
 function onPageOOB(sidebar: HTMLElement, e: CustomEvent<OOB_Event>) {
   if (e.detail.axis === "HORIZONTAL" && e.detail.direction === "START") {
+    if (e.detail.el) {
+      cameFrom = e.detail.el;
+    }
     const next = findFirstFocusableChild(sidebar);
     next?.focus();
   }
@@ -50,9 +56,15 @@ function onPageOOB(sidebar: HTMLElement, e: CustomEvent<OOB_Event>) {
 
 function onSidebarOOB(pages: HTMLElement[], e: CustomEvent<OOB_Event>) {
   if (e.detail.axis === "HORIZONTAL" && e.detail.direction === "END") {
+    if (cameFrom && isVisible(cameFrom)) {
+      cameFrom.focus();
+      cameFrom = undefined;
+      return;
+    }
+
     const visiblePages = pages.filter((e) => isVisible(e));
     if (visiblePages.length > 1) {
-      console.warn("More than page visible at the same time", visiblePages);
+      console.warn("More than one page visible at the same time", visiblePages);
     }
 
     if (visiblePages[0]) {
@@ -64,16 +76,16 @@ function onSidebarOOB(pages: HTMLElement[], e: CustomEvent<OOB_Event>) {
 }
 
 export function dispatchOOBEvent(
-  from: HTMLElement,
-  axis: "HORIZONTAL" | "VERTICAL",
-  direction: "START" | "END"
+  props: NavigationProps & { root: HTMLElement }
 ) {
-  from.dispatchEvent(
+  const { root, axis, direction, el } = props;
+  root.dispatchEvent(
     new CustomEvent("OOB_Event", {
       bubbles: true,
       detail: {
-        axis: axis,
+        axis,
         direction,
+        el,
       },
     })
   );

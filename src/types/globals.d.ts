@@ -5,6 +5,7 @@ declare global {
   type OOB_Event = {
     direction: "START" | "END";
     axis: "HORIZONTAL" | "VERTICAL";
+    el?: HTMLElement;
   };
 
   interface HTMLElementEventMap {

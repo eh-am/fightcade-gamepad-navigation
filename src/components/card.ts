@@ -5,6 +5,7 @@ import {
 } from "@app/dom";
 import * as gridList from "@app/ds/gridList";
 import { setupActionButton } from "./actionButtons";
+import { onHorizontalOOB2 } from "@app/types/navigation";
 
 const actionSel = ".channelActions a, .eventActions a, .categoryActions a";
 
@@ -16,7 +17,7 @@ export function setupCard(
     currCard: HTMLElement,
     direction: "ArrowUp" | "ArrowDown"
   ) => void,
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   cardsPerRow: number = Infinity
 ): Teardown {
   makeFocusableIfNeeded(card, true);
@@ -151,7 +152,11 @@ function moveToNextCardHorizontally(
 ) {
   const next = nextFn(allCards, curr, cardsPerRow);
   if (next.status === "OOB") {
-    onHorizontalOOB(next.value);
+    onHorizontalOOB({
+      el: curr,
+      axis: "HORIZONTAL",
+      direction: next.value,
+    });
     return;
   }
 

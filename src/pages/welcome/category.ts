@@ -5,11 +5,12 @@ import {
 } from "@app/dom";
 import * as list from "@app/ds/list";
 import { setupCard } from "@app/components/card";
+import { NavigationProps, onHorizontalOOB2 } from "@app/types/navigation";
 
 export function setupCategory(
   allCategories: HTMLElement[],
   category: HTMLElement,
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   onVerticalOOB: (direction: "START" | "END") => void
 ): Teardown {
   const cards = Array.from(

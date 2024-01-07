@@ -109,7 +109,7 @@ function setupLobbyButtons(
     } else if (keyPressed === "ArrowLeft") {
       joinLobbyButton.focus();
     } else if (keyPressed === "ArrowRight") {
-      dispatchOOBEvent(root, "HORIZONTAL", "END");
+      dispatchOOBEvent({ root, axis: "HORIZONTAL", direction: "END" });
     }
   };
 
@@ -128,7 +128,7 @@ function setupLobbyButtons(
       e.preventDefault();
       joinLobbyButton.focus();
     } else if (keyPressed === "ArrowRight") {
-      dispatchOOBEvent(root, "HORIZONTAL", "END");
+      dispatchOOBEvent({ root, axis: "HORIZONTAL", direction: "END" });
     }
   };
 
@@ -242,7 +242,7 @@ function setupUserButton(root: HTMLElement): Teardown {
     } else if (keyPressed === "ArrowUp" || keyPressed === "ArrowDown") {
       moveVertically(root, el, keyPressed);
     } else if (keyPressed === "ArrowRight") {
-      dispatchOOBEvent(root, "HORIZONTAL", "END");
+      dispatchOOBEvent({ root, axis: "HORIZONTAL", direction: "END" });
     }
   }
 
@@ -368,7 +368,7 @@ function setupRegularButtonsKeydown(root: HTMLElement): Teardown {
         moveVertically(root, b, keyPressed);
       }
     } else if (keyPressed === "ArrowRight") {
-      dispatchOOBEvent(root, "HORIZONTAL", "END");
+      dispatchOOBEvent({ root, axis: "HORIZONTAL", direction: "END", el: b });
     }
   }
 

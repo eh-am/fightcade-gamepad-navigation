@@ -7,6 +7,7 @@ import { setupGrid } from "@app/pages/search/grid";
 import { updateSearchHeader } from "@app/components/search-header";
 import { setupFooter, setupFooterKeydown } from "./footer";
 import { dispatchOOBEvent } from "@app/oobNavigator";
+import { NavigationProps } from "@app/types/navigation";
 
 let teardown: Teardown[] = [];
 
@@ -81,8 +82,8 @@ function onBackToGrid(allCards: HTMLElement[]) {
   }
 }
 //
-function onHorizontalOOB(root: HTMLElement, direction: "START" | "END") {
-  dispatchOOBEvent(root, "HORIZONTAL", direction);
+function onHorizontalOOB(root: HTMLElement, props: NavigationProps) {
+  dispatchOOBEvent({ root, ...props });
 }
 
 function onGridVerticalOOB(

@@ -1,9 +1,10 @@
 import { makeFocusableIfNeeded, rovingTabIndex } from "@app/dom";
 import * as list from "@app/ds/list";
+import { onHorizontalOOB2 } from "@app/types/navigation";
 
 export function setupFooterKeydown(
   root: HTMLElement,
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   onArrowUp: () => void
 ): Teardown {
   const footerButtons = getFooterButtons(root);
@@ -22,7 +23,11 @@ export function setupFooterKeydown(
         rovingTabIndex(el, next.value);
         next.value.focus();
       } else {
-        onHorizontalOOB("START");
+        onHorizontalOOB({
+          el,
+          direction: "START",
+          axis: "HORIZONTAL",
+        });
       }
     } else if (keyPressed === "ArrowRight") {
       e.preventDefault();

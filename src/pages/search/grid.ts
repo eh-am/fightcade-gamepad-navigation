@@ -1,10 +1,11 @@
 import * as list from "@app/ds/list";
 import { setupCard } from "@app/components/card";
 import { rovingTabIndex } from "../../dom";
+import { onHorizontalOOB2 } from "@app/types/navigation";
 
 export function setupGrid(
   root: HTMLElement,
-  onHorizontalOOB: (direction: "START" | "END") => void,
+  onHorizontalOOB: onHorizontalOOB2,
   onVerticalOOB: (direction: "START" | "END") => void
 ): { teardown: Teardown; allCards: HTMLElement[] } {
   const teardown: Teardown[] = [];
@@ -38,9 +39,14 @@ export function setupGrid(
             onVerticalOOB(direction === "ArrowUp" ? "START" : "END");
           }
         },
-        (direction) => {
-          onHorizontalOOB(direction);
-        },
+        onHorizontalOOB,
+        //        (direction) => {
+        //          onHorizontalOOB({
+        //            axis: "HORIZONTAL",
+        //            el,
+        //            direction: direction,
+        //          });
+        //        },
         cardsPerRow
       );
     })
