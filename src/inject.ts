@@ -1,8 +1,8 @@
 import { initGamepad } from "./gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
-import { initAbout } from "./sections/about";
 import * as welcomePage from "./pages/welcome";
 import * as searchPage from "./pages/search";
+import * as aboutPage from "./pages/about";
 import "./devOnly";
 import { updateLobby } from "./sections/lobby";
 import { startOOBNavigator } from "@app/oobNavigator";
@@ -82,8 +82,16 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     })
   );
 
-  if (!initialized.about) {
-    initialized.about = initAbout();
+  const aboutRoot = aboutPage.getRoot();
+  if (!initialized.about && aboutRoot) {
+    aboutPage.init(aboutRoot);
+    aboutPage.update(aboutRoot);
+
+    initialized.about = true;
+    const observer = new MutationObserver((mr) => {
+      aboutPage.update(aboutRoot);
+    });
+    observer.observe(aboutRoot, observerOptions);
   }
 
   const welcomeRoot = welcomePage.getRoot();
