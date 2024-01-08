@@ -3,8 +3,8 @@ import { initSidebar, updateSidebar } from "./sections/sidebar";
 import * as welcomePage from "./pages/welcome";
 import * as searchPage from "./pages/search";
 import * as aboutPage from "./pages/about";
+import * as lobbyPage from "./pages/lobby";
 import "./devOnly";
-import { updateLobby } from "./sections/lobby";
 import { startOOBNavigator } from "@app/oobNavigator";
 
 const initialized = {
@@ -66,18 +66,19 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
   // We take the easy approach and ALWAYS disconnect/reconnect for every DOM change
   // TODO: this is not very peformant
   lobbiesObservers.forEach((lo) => lo.disconnect());
+  lobbiesObservers.length = 0;
   const lobbies = document.querySelectorAll<HTMLElement>(
     "#app > .channelWrapper"
   );
   lobbiesObservers.push(
     ...Array.from(lobbies).map((l) => {
       const observer = new MutationObserver(() => {
-        updateLobby(l);
+        lobbyPage.updateLobby(l);
       });
 
       observer.observe(l, observerOptions);
 
-      updateLobby(l);
+      lobbyPage.updateLobby(l);
       return observer;
     })
   );
