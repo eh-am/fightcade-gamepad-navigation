@@ -64,7 +64,7 @@ export function setupCustomSelect(el: HTMLSelectElement): Teardown {
   wrapper.appendChild(el);
   wrapper.appendChild(newSelect);
 
-  syncFromMirror(el);
+  //  syncFromMirror(el);
 
   return () => {
     console.log("I am supposed to tear down");
@@ -130,12 +130,22 @@ function createFakeOption(
   // Eyeballed it
   clone.style.paddingTop = "5px";
 
+  // If that item was originally selected, scroll into te fake option to make it look like it was selected
+  if (originalSelect.value === el.value) {
+    console.log("trying to scroll here", originalSelect.value);
+    // TODO: this is not working
+    // it needs to be scrolled when the filter is visible
+    // I wonder if we can set offset height
+    // TODO: use https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+    clone.scrollIntoView();
+  }
   // Copied from the original
   //  clone.style.boxShadow =
   //    "inset 0 0 12px var(--accentColor),0 0 12px var(--accentColor)";
   //  clone.style.borderColor = "var(--accentColor)";
 
   const onClick = function (e: Event) {
+    console.log("clicked on", el);
     e.preventDefault();
     // Since the parent tends focus back on the first item
     e.stopPropagation();
@@ -146,18 +156,24 @@ function createFakeOption(
 
     // TODO: kinda ugly, but we need to make sure other instances have the same content
     // otherwise when changing views (eg welcome -> search), data will be out of sync
-    syncToMirror(originalSelect);
+    //syncToMirror(originalSelect);
 
     originalSelect.value = el.value;
+    syncToMirror(originalSelect);
+
     originalSelect.dispatchEvent(new Event("change"));
+    //originalSelect.value = el.value;
 
     // Couldn't find an well supported way to do that, hint: we want to use fill-available
     const normalHeight = originalSelect.offsetHeight;
     parent.style.height = `${normalHeight}px`;
 
-    console.log("should be focusing on parent now", parent);
     parent.focus();
 
+    // Scroll to the selected value so that's visible
+    // Useful in 2 situations:
+    // 1. Dev,
+    // 2. and when a search has already happened, otherwise it opens an "All Games" page
     clone.scrollIntoView();
 
     // TODO: make all parent's styles go back to initial state
@@ -209,13 +225,19 @@ function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
 }
 
 function syncFromMirror(target: HTMLSelectElement) {
+  console.log("syncing from mirror, original", target);
   const mirror = findMirrorSelect(target);
+  console.log("mirror is", mirror);
 
   if (!mirror) {
     return;
   }
 
+  console.log("mirorr value", mirror.value);
+  console.log("target value", target.value);
+
   target.value = mirror.value;
+  console.log("after syncing", target.value, mirror.value);
 
   // Find the mirror of the option of the mirror
   // Aka my own option

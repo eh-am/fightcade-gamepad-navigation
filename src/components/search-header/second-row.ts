@@ -12,6 +12,11 @@ export function setupSecondRow(root: HTMLElement): {
   );
   const teardown: Teardown[] = [];
 
+  console.log("selects", selects);
+  selects.forEach((sel) => {
+    console.log(sel, "value", sel.value);
+  });
+
   // Create the custom select
   teardown.push(...selects.map((select) => setupCustomSelect(select)));
 
@@ -43,6 +48,16 @@ export function setupSecondRow(root: HTMLElement): {
   }
   return {
     teardown: () => {
+      // Instead of remove all event listeners and such
+      // We just delete the root node of the custom select
+      // TODO: apparently the listeners continue existing?
+      // https://stackoverflow.com/a/76239226
+      const fakeSelects =
+        root.querySelectorAll<HTMLElement>(".fgn-custom-select");
+
+      console.log("tearing down all fake selects", fakeSelects);
+      fakeSelects.forEach((el) => el.remove());
+
       teardown.forEach((v) => v());
     },
     allItems: [
