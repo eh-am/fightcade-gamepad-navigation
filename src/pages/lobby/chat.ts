@@ -3,6 +3,8 @@ import {
   onOOBNavigation,
   onVerticalOOB,
 } from "@app/types/navigation";
+import * as list from "@app/ds/list";
+import { findFirstFocusableChild, rovingTabIndex } from "@app/dom";
 
 type onHorizontalOOB = (direction: Direction, el: HTMLElement) => void;
 
@@ -12,8 +14,6 @@ type Props = {
   onHorizontalOOB: onHorizontalOOB;
   onOOBNavigation: onOOBNavigation;
 };
-import * as list from "@app/ds/list";
-import { findFirstFocusableChild, rovingTabIndex } from "@app/dom";
 
 export function setupChat(props: Props): Teardown {
   const { root } = props;
@@ -32,12 +32,7 @@ export function setupChat(props: Props): Teardown {
 
   teardown.push(
     ...rows.map((currentRow) => {
-      const onVerticalOOB = moveVertically.bind(
-        null,
-        props.onVerticalOOB,
-        rows,
-        currentRow
-      );
+      const onVerticalOOB = moveVertically.bind(null, rows, currentRow);
 
       // TODO: kinda poor
       if (currentRow.classList.contains("challengeRequested")) {
@@ -66,7 +61,6 @@ export function setupChat(props: Props): Teardown {
 }
 
 function moveVertically(
-  onVerticalOOB: onVerticalOOB,
   rows: HTMLElement[],
   currentRow: HTMLElement,
   direction: Direction
@@ -101,7 +95,6 @@ function setupCancelChallengeButtons({
   onVerticalOOB,
   onHorizontalOOB,
 }: Exclude<Props, "onOOBNavigation">): Teardown {
-  // TODO: lazy, should handle keyboard navigation to/from maybe?
   const el = root.querySelector<HTMLElement>(
     ".challengeContainer .cancel-challenge"
   );
@@ -138,7 +131,6 @@ function setupCancelChallengeButtons({
 function setupBeenChallenged({
   root,
   onHorizontalOOB,
-  //  onOOBNavigation,
   onVerticalOOB,
 }: Props): Teardown {
   const acceptChallengeBtn =
