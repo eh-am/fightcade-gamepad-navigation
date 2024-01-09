@@ -3,10 +3,7 @@ import { findFirstFocusableChild } from "@app/dom";
 import { dispatchOOBEvent } from "@app/oobNavigator";
 
 export function onOOBNavigation(root: HTMLElement, props: NavigationProps) {
-  dispatchOOBEvent({
-    ...props,
-    root,
-  });
+  dispatchOOBEvent({ ...props, root });
 }
 
 export function onToolbarVerticalOOB(
@@ -16,6 +13,20 @@ export function onToolbarVerticalOOB(
   if (direction === "END") {
     const next = findFirstFocusableChild(usersListRoot);
     next?.focus();
+  }
+}
+
+export function onToolbarHorizontalOOB(
+  root: HTMLElement,
+  direction: Direction,
+  el: HTMLElement
+) {
+  if (direction === "START") {
+    onOOBNavigation(root, {
+      axis: "HORIZONTAL",
+      direction,
+      el,
+    });
   }
 }
 
@@ -49,7 +60,6 @@ export function onChatHorizontalOOB(
     const next = findFirstFocusableChild(userList);
     next?.focus();
   } else if (direction === "START") {
-    // Dispatch to
     onOOBNavigation(root, {
       axis: "HORIZONTAL",
       direction,

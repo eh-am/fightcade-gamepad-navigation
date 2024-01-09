@@ -1,11 +1,12 @@
-import { findFirstFocusableChild, makeFocusableIfNeeded } from "@app/dom";
-import {
-  findFirstFocusableCardInCategory,
-  setupCategory,
-} from "@app/pages/welcome/category";
+import { makeFocusableIfNeeded } from "@app/dom";
+import { setupCategory } from "@app/pages/welcome/category";
 import { updateSearchHeader } from "@app/components/search-header";
-import { Direction, NavigationProps } from "@app/types/navigation";
-import { dispatchOOBEvent } from "@app/oobNavigator";
+import {
+  onCardVerticalOOB,
+  onCategoryHorizontalOOB,
+  onHeaderHorizontalNavigation,
+  onHeaderVerticalNavigation,
+} from "@app/pages/welcome/navigation";
 
 const teardown: Teardown[] = [];
 
@@ -13,12 +14,13 @@ export function update(root: HTMLElement) {
   // Find all categories
   const categories = Array.from(
     root.querySelectorAll<HTMLElement>(
-      ".welcomeWrapper .contentWrapper .welcomeListWrapper"
+      //".welcomeWrapper .contentWrapper .welcomeListWrapper"
+      ".contentWrapper .welcomeListWrapper"
     )
   );
 
   if (categories.length <= 0) {
-    console.warn("Search: No items found. Returning early");
+    console.warn("Search: No categories found. Returning early");
     return false;
   }
 
@@ -45,7 +47,7 @@ export function update(root: HTMLElement) {
       return setupCategory(
         categories,
         category,
-        onHorizontalOOB.bind(null, root),
+        onCategoryHorizontalOOB.bind(null, root),
         onCardVerticalOOB.bind(null, searchHeader)
       );
     })
@@ -60,36 +62,4 @@ export function update(root: HTMLElement) {
   }
 
   return true;
-}
-
-function onCardVerticalOOB(searchHeader: HTMLElement, direction: Direction) {
-  if (direction === "START") {
-    const next = findFirstFocusableChild(searchHeader);
-    next?.focus();
-  }
-}
-function onHeaderHorizontalNavigation(
-  root: HTMLElement,
-  props: NavigationProps
-) {
-  onHorizontalOOB(root, props);
-}
-
-function onHeaderVerticalNavigation(
-  categories: HTMLElement[],
-  direction: Direction
-) {
-  if (direction === "END") {
-    const lastCategory = categories[0];
-    if (lastCategory) {
-      // Focus on the next item in the grid
-      const lastVisited = findFirstFocusableCardInCategory(lastCategory);
-      lastVisited?.focus();
-      // TODO: set tabindex to 0, and remove tabindex from other place?
-    }
-  }
-}
-
-function onHorizontalOOB(root: HTMLElement, props: NavigationProps) {
-  dispatchOOBEvent({ ...props, root });
 }

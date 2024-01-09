@@ -60,3 +60,18 @@ Use
 `PWDEBUG=1 npm run test:ui`
 
 to open Playwright Inspector
+
+# About the code
+
+## Keyboard Navigation
+
+Note: (OOB refers to "Out of Boudns")
+
+Each component should handle its local navigation as close as possible to where it happens.
+
+For components with other subcomponents, the navigation between these subcomponents
+should be handled by the parent, via calls to`onHorizontalOOB` and `onVerticalOOB`.
+
+When it's leaving the entire component (most likely a Page), call the `dispatchOOBEvent`.
+Reasoning to use an Event system here is that it's hard to keep track of all components state,
+so we deal with out of bounds navigation "lazily".

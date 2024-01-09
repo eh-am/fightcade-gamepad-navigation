@@ -1,14 +1,20 @@
 import { makeFocusableIfNeeded, rovingTabIndex } from "@app/dom";
 import * as list from "@app/ds/list";
-import { SectionProps } from "@app/pages/lobby/props";
+import { Direction, onVerticalOOB } from "@app/types/navigation";
 
-export function setupToolbar(props: SectionProps): Teardown {
+type Props = {
+  root: HTMLElement;
+  onVerticalOOB: onVerticalOOB;
+  onHorizontalOOB: (direction: Direction, el: HTMLElement) => void;
+};
+
+export function setupToolbar(props: Props): Teardown {
   setupButtons(props.root);
   return setupKeydownListeners(props);
 }
 
-function setupKeydownListeners(props: SectionProps): Teardown {
-  const { root, onVerticalOOB, onOOBNavigation } = props;
+function setupKeydownListeners(props: Props): Teardown {
+  const { root, onVerticalOOB, onHorizontalOOB } = props;
   const buttons = Array.from(
     root.querySelectorAll<HTMLElement>(".channelActions > *")
   );
@@ -38,12 +44,7 @@ function setupKeydownListeners(props: SectionProps): Teardown {
         rovingTabIndex(focusedElement, next.value);
         next.value.focus();
       } else {
-        console.log("Going outside");
-        onOOBNavigation({
-          axis: "HORIZONTAL",
-          direction: "START",
-          el: focusedElement,
-        });
+        onHorizontalOOB("START", focusedElement);
       }
     } else if (pressed === "ArrowDown") {
       onVerticalOOB("END");

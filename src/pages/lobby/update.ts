@@ -5,6 +5,7 @@ import {
   onChatHorizontalOOB,
   onChatVerticalOOB,
   onOOBNavigation,
+  onToolbarHorizontalOOB,
   onToolbarVerticalOOB,
   onUserListHorizontalOOB,
   onUserListVerticalOOB,
@@ -43,7 +44,7 @@ export function updateLobby(root: HTMLElement) {
   teardown.push(
     setupToolbar({
       root,
-      onOOBNavigation: onOOBNavigation.bind(null, root),
+      onHorizontalOOB: onToolbarHorizontalOOB.bind(null, root),
       onVerticalOOB: onToolbarVerticalOOB.bind(null, usersListRoot),
     })
   );
@@ -53,7 +54,6 @@ export function updateLobby(root: HTMLElement) {
       root: chatRoot,
       onHorizontalOOB: onChatHorizontalOOB.bind(null, root, usersListRoot),
       onVerticalOOB: onChatVerticalOOB.bind(null, toolbarRoot),
-      onOOBNavigation: onOOBNavigation.bind(null, root),
     })
   );
 }

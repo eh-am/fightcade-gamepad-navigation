@@ -13,6 +13,10 @@ export function setupGrid(
     root.querySelectorAll<HTMLElement>(".channelWrapper")
   );
 
+  if (!cards.length) {
+    return { teardown: () => {}, allCards: cards };
+  }
+
   const baseOffset = cards[0].offsetTop;
   const breakIndex = cards.findIndex((item) => item.offsetTop > baseOffset);
   const cardsPerRow = breakIndex === -1 ? cards.length : breakIndex;

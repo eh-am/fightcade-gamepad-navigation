@@ -1,8 +1,4 @@
-import {
-  Direction,
-  onOOBNavigation,
-  onVerticalOOB,
-} from "@app/types/navigation";
+import { Direction, onVerticalOOB } from "@app/types/navigation";
 import * as list from "@app/ds/list";
 import { findFirstFocusableChild, rovingTabIndex } from "@app/dom";
 
@@ -12,7 +8,6 @@ type Props = {
   root: HTMLElement;
   onVerticalOOB: onVerticalOOB;
   onHorizontalOOB: onHorizontalOOB;
-  onOOBNavigation: onOOBNavigation;
 };
 
 export function setupChat(props: Props): Teardown {
@@ -26,9 +21,9 @@ export function setupChat(props: Props): Teardown {
   );
 
   // TODO: enable input box once I figure out how to type
-  root
-    .querySelector<HTMLElement>(".chatInput input")
-    ?.setAttribute("tabindex", "-1");
+  const input = root.querySelector<HTMLElement>(".chatInput input");
+  input?.setAttribute("tabindex", "-1");
+  input?.setAttribute("disabled", "true");
 
   teardown.push(
     ...rows.map((currentRow) => {
@@ -78,15 +73,8 @@ function moveVertically(
       next?.focus();
     }
   } else {
-    // TODO: it looks weird moving to the toolbar since it's right aligned
-    // onVerticalOOB(direction);
-    //    console.log("dispatching");
-    //    onOOBNavigation({
-    //      axis: "VERTICAL",
-    //      direction,
-    //      el: focusedElement,
-    //    });
-    // TODO
+    // Don't do anything, since it looks weird to move to the toolbar
+    // since its buttons are right aligned
   }
 }
 
@@ -94,7 +82,7 @@ function setupCancelChallengeButtons({
   root,
   onVerticalOOB,
   onHorizontalOOB,
-}: Exclude<Props, "onOOBNavigation">): Teardown {
+}: Props): Teardown {
   const el = root.querySelector<HTMLElement>(
     ".challengeContainer .cancel-challenge"
   );

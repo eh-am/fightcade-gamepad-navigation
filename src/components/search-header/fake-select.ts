@@ -210,7 +210,6 @@ function findMirrorSelectedFakeOption(originalSelect: HTMLSelectElement) {
 
 function syncFromMirror(target: HTMLSelectElement) {
   const mirror = findMirrorSelect(target);
-  console.log("syncing from mirror. original", target, "mirror", mirror);
 
   if (!mirror) {
     return;

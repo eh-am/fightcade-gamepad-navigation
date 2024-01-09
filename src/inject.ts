@@ -102,16 +102,19 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     welcomePage.update(welcomeRoot);
 
     const observer = new MutationObserver((mr) => {
-      // Since we add a custom SELECT element,
+      // Since we add a custom select element,
       // this mutation observer is triggered again
-      const addedOptions = mr.some((m) => {
-        return (
-          m.type === "childList" &&
-          (m.target as HTMLElement).tagName === "SELECT"
+      const addedCustomSelect = mr.some((m) => {
+        const addedNodes = Array.from(m.addedNodes) as HTMLElement[];
+        return addedNodes.some(
+          (node) =>
+            node &&
+            node.classList &&
+            node.classList.contains("fgn-custom-select")
         );
       });
 
-      if (addedOptions) {
+      if (!addedCustomSelect) {
         welcomePage.update(welcomeRoot);
       }
     });
@@ -129,14 +132,17 @@ const observer = new MutationObserver(function (mr: MutationRecord[]) {
     const observer = new MutationObserver((mr) => {
       // Since we add a custom SELECT element,
       // this mutation observer is triggered again
-      const addedOptions = mr.some((m) => {
-        return (
-          m.type === "childList" &&
-          (m.target as HTMLElement).tagName === "SELECT"
+      const addedCustomSelect = mr.some((m) => {
+        const addedNodes = Array.from(m.addedNodes) as HTMLElement[];
+        return addedNodes.some(
+          (node) =>
+            node &&
+            node.classList &&
+            node.classList.contains("fgn-custom-select")
         );
       });
 
-      if (addedOptions) {
+      if (!addedCustomSelect) {
         searchPage.update(searchPageRoot);
       }
     });
