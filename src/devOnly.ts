@@ -9,16 +9,6 @@ function init() {
     return;
   }
 
-  //  addCSS(`
-  //    `);
-
-  //  var d = document.createElement("div");
-  //  d.className = userButton.className;
-  //  d.innerHTML = userButton.innerHTML;
-  //
-  //  // debugger;
-  //  userButton.parentNode?.replaceChild(d, userButton);
-
   // Toggle the user menu
   document.querySelector(".userButton")?.addEventListener("click", () => {
     const userStateMenu = document.querySelector<HTMLElement>(".userStateMenu");
@@ -29,6 +19,26 @@ function init() {
       userStateMenu.classList.remove("active");
     } else {
       userStateMenu.classList.add("active");
+    }
+  });
+
+  // Toggle the filter
+  const filtersButton = document.querySelector(
+    ".contentWrapper .inputWrapper .filtersButton"
+  );
+
+  filtersButton?.addEventListener("click", () => {
+    const filtersWrapper = filtersButton
+      .closest(".contentWrapper")
+      ?.querySelector(".filtersWrapper");
+    if (!filtersWrapper) {
+      return;
+    }
+
+    if (filtersWrapper.classList.contains("active")) {
+      filtersWrapper.classList.remove("active");
+    } else {
+      filtersWrapper.classList.add("active");
     }
   });
 }

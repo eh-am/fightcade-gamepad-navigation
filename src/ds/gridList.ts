@@ -1,29 +1,33 @@
 export function next(
   items: HTMLElement[],
-  current: HTMLElement
+  current: HTMLElement,
+  perRow: number
 ): ReturnType<typeof list> {
-  return list(items, current, 1);
+  return list(items, current, 1, perRow);
 }
 
 export function prev(
   items: HTMLElement[],
-  current: HTMLElement
-): ReturnType<typeof list> {
-  return list(items, current, -1);
-}
-
-export function to(
-  items: HTMLElement[],
   current: HTMLElement,
-  index: number
+  perRow: number
 ): ReturnType<typeof list> {
-  return list(items, current, index);
+  return list(items, current, -1, perRow);
 }
 
+//export function to(
+//  items: HTMLElement[],
+//  current: HTMLElement,
+//  index: number,
+//  perRow: number
+//): ReturnType<typeof list> {
+//  return list(items, current, index, perRow);
+//}
+//
 function list(
   items: HTMLElement[],
   current: HTMLElement,
-  addIndex: number
+  addIndex: number,
+  perRow: number
 ):
   | { status: "OK"; value: HTMLElement }
   | { status: "OOB"; value: "START" | "END" } {
@@ -46,6 +50,14 @@ function list(
 
   if (nextIndex >= items.length) {
     return { status: "OOB", value: "END" };
+  }
+
+  if (nextIndex % perRow === 0 && nextIndex > myIndex) {
+    return { status: "OOB", value: "END" };
+  }
+
+  if (nextIndex % perRow === perRow - 1 && nextIndex < myIndex) {
+    return { status: "OOB", value: "START" };
   }
 
   return { status: "OK", value: items[nextIndex] };

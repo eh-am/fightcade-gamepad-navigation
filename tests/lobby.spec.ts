@@ -1,6 +1,4 @@
-import { test, expect, Page } from "@playwright/test";
-//import { test, expect } from "./baseTest";
-import { disableAnimations, focusedElement } from "snippets";
+import { test, expect } from "@playwright/test";
 
 test("it navigates the toolbar", async ({ page }) => {
   await page.goto("/testdata/lobby-with-training/");
@@ -10,7 +8,7 @@ test("it navigates the toolbar", async ({ page }) => {
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("button", { name: "Training" })).toBeFocused();
 
-  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowLeft");
   await expect(page.getByRole("button", { name: "Test Game" })).toBeFocused();
 });
 
@@ -36,7 +34,7 @@ test("it navigates the user list", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Player 6" })).toBeFocused();
 
   await page.keyboard.press("ArrowDown");
-  await expect(page.getByRole("button", { name: "Player 1" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Player 6" })).toBeFocused();
 });
 
 test("it allows focusing a challenge cancel", async ({ page }) => {
@@ -61,15 +59,8 @@ test("it allows focusing a challenge received", async ({ page }) => {
     page.getByRole("button", { name: "Decline Challenge" })
   ).toBeFocused();
 
-  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowLeft");
   await expect(
     page.getByRole("button", { name: "Accept Challenge" })
   ).toBeFocused();
 });
-
-//test("it navigaaaaaaaaates", async ({ page }) => {
-//  await page.goto("/testdata/lobby-with-training/");
-//
-//  await page.locator("tag=.channelToolbar").focus();
-//  await expect(page.getByRole("button", { name: "Training" })).toBeFocused();
-//});

@@ -1,4 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
+import { focusedElement } from "./snippets";
 
 const PO = {
   FILTER_BTN: (page: Page) =>
@@ -33,8 +34,6 @@ test.describe("navigates back and forth horizontally", () => {
 
     await input.focus();
     await expect(input).toBeFocused();
-    // TODO: navigate here via tab
-    //    await PO.INPUT_BOX(page).focus();
 
     await page.keyboard.press("ArrowDown");
     await expect(page.getByRole("listbox", { name: "Genre" })).toBeFocused();
@@ -54,9 +53,9 @@ test.describe("navigates back and forth horizontally", () => {
       page.getByRole("listbox", { name: "Ranked", exact: true })
     ).toBeFocused();
 
-    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowLeft");
     await expect(
-      page.getByRole("listbox", { name: "Genre", exact: true })
+      page.getByRole("listbox", { name: "System", exact: true })
     ).toBeFocused();
   });
 });
@@ -77,7 +76,16 @@ test("navigates vertically", async ({ page }) => {
   ).toBeFocused();
 
   await page.keyboard.press("ArrowDown");
-  await expect(INPUT_BOX).toBeFocused();
+  const focus = await focusedElement(page);
+
+  await expect(
+    page.getByRole("gridcell", {
+      name: "The King of Fighters 2002 (NGM-2650) - Arcade FC2",
+      exact: true,
+    })
+  ).toBeFocused();
+
+  //  await expect(INPUT_BOX).toBeFocused();
 });
 
 test("selects items", async ({ page }) => {
