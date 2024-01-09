@@ -1,13 +1,21 @@
-import * as cl from "@app/ds/circularList";
+import { makeFocusableIfNeeded, rovingTabIndex } from "@app/dom";
+import * as list from "@app/ds/list";
+import { SectionProps } from "@app/pages/lobby/props";
 
-export function setupToolbar(root: HTMLElement): Teardown {
-  const buttons = root.querySelectorAll<HTMLElement>(".channelActions > *");
+export function setupToolbar(props: SectionProps): Teardown {
+  setupButtons(props.root);
+  return setupKeydownListeners(props);
+}
+
+function setupKeydownListeners(props: SectionProps): Teardown {
+  const { root, onVerticalOOB, onOOBNavigation } = props;
+  const buttons = Array.from(
+    root.querySelectorAll<HTMLElement>(".channelActions > *")
+  );
   const channelActions = root.querySelector<HTMLElement>(".channelActions");
   if (!channelActions) {
     return () => {};
   }
-
-  setupButtons(root);
 
   function onKeydown(e: KeyboardEvent) {
     const pressed = e.key;
@@ -15,16 +23,30 @@ export function setupToolbar(root: HTMLElement): Teardown {
 
     if (pressed === "Enter") {
       e.preventDefault();
-      focusedElement?.click();
+      focusedElement.click();
     } else if (pressed === "ArrowRight") {
       e.preventDefault();
-      const next = cl.next(buttons, focusedElement);
-      console.log("focusing on", next);
-      next.focus();
+      const next = list.next(buttons, focusedElement);
+      if (next.status === "OK") {
+        rovingTabIndex(focusedElement, next.value);
+        next.value.focus();
+      }
     } else if (pressed === "ArrowLeft") {
       e.preventDefault();
-      const next = cl.prev(buttons, focusedElement);
-      next.focus();
+      const next = list.prev(buttons, focusedElement);
+      if (next.status === "OK") {
+        rovingTabIndex(focusedElement, next.value);
+        next.value.focus();
+      } else {
+        console.log("Going outside");
+        onOOBNavigation({
+          axis: "HORIZONTAL",
+          direction: "START",
+          el: focusedElement,
+        });
+      }
+    } else if (pressed === "ArrowDown") {
+      onVerticalOOB("END");
     }
   }
 
@@ -37,14 +59,23 @@ export function setupToolbar(root: HTMLElement): Teardown {
 }
 
 function setupButtons(root: HTMLElement) {
-  const testGameBtn = root.querySelector(".channelActions .testGame");
-  const trainingBtn = root.querySelector(".channelActions .trainingGame");
+  const testGameBtn = root.querySelector<HTMLElement>(
+    ".channelActions .testGame"
+  );
+  const trainingBtn = root.querySelector<HTMLElement>(
+    ".channelActions .trainingGame"
+  );
 
-  testGameBtn?.setAttribute("tabindex", "0");
-  testGameBtn?.setAttribute("role", "button");
-  testGameBtn?.setAttribute("aria-label", "Test Game");
+  // Should be always visible, I think
+  if (testGameBtn) {
+    makeFocusableIfNeeded(testGameBtn, false, "0");
+    testGameBtn.setAttribute("role", "button");
+    testGameBtn.setAttribute("aria-label", "Test Game");
+  }
 
-  trainingBtn?.setAttribute("role", "button");
-  trainingBtn?.setAttribute("aria-label", "Training");
-  trainingBtn?.setAttribute("tabindex", "-1");
+  if (trainingBtn) {
+    makeFocusableIfNeeded(trainingBtn, false, "-1");
+    trainingBtn?.setAttribute("role", "button");
+    trainingBtn?.setAttribute("aria-label", "Training");
+  }
 }

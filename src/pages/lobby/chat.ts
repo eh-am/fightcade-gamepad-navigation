@@ -1,54 +1,156 @@
-export function setupChat(root: HTMLElement): Teardown {
+import {
+  Direction,
+  onOOBNavigation,
+  onVerticalOOB,
+} from "@app/types/navigation";
+
+type onHorizontalOOB = (direction: Direction, el: HTMLElement) => void;
+
+type Props = {
+  root: HTMLElement;
+  onVerticalOOB: onVerticalOOB;
+  onHorizontalOOB: onHorizontalOOB;
+  onOOBNavigation: onOOBNavigation;
+};
+import * as list from "@app/ds/list";
+import { findFirstFocusableChild, rovingTabIndex } from "@app/dom";
+
+export function setupChat(props: Props): Teardown {
+  const { root } = props;
   const teardown: Teardown[] = [];
-  const challenges = Array.from(
-    root.querySelectorAll<HTMLElement>(".challengeWrapper .challengeContent")
+
+  const rows = Array.from(
+    root.querySelectorAll<HTMLElement>(
+      ".messageWrapper.challengeRequested, .messageWrapper.requestChallenge"
+    )
   );
 
-  teardown.push(...challenges.map((el) => setupBeenChallenged(el)));
-  teardown.push(...setupCancelChallengeButtons(root));
+  // TODO: enable input box once I figure out how to type
+  root
+    .querySelector<HTMLElement>(".chatInput input")
+    ?.setAttribute("tabindex", "-1");
+
+  teardown.push(
+    ...rows.map((currentRow) => {
+      const onVerticalOOB = moveVertically.bind(
+        null,
+        props.onVerticalOOB,
+        rows,
+        currentRow
+      );
+
+      // TODO: kinda poor
+      if (currentRow.classList.contains("challengeRequested")) {
+        return setupBeenChallenged({
+          ...props,
+          root: currentRow,
+          onVerticalOOB,
+        });
+      }
+
+      if (currentRow.classList.contains("requestChallenge")) {
+        return setupCancelChallengeButtons({
+          ...props,
+          root: currentRow,
+          onVerticalOOB,
+        });
+      }
+
+      return () => {};
+    })
+  );
 
   return () => {
     teardown.forEach((f) => f());
   };
 }
-function setupCancelChallengeButtons(root: HTMLElement): Teardown[] {
-  // TODO: lazy, should handle keyboard navigation to/from maybe?
-  const cancelChallengeBtns = Array.from(
-    root.querySelectorAll<HTMLElement>(".challengeContainer .cancel-challenge")
-  );
 
-  cancelChallengeBtns.forEach((el) => {
-    el.setAttribute("role", "button");
-    el.setAttribute("aria-label", "Cancel Challenge");
-    el.setAttribute("tabindex", "0");
-  });
+function moveVertically(
+  onVerticalOOB: onVerticalOOB,
+  rows: HTMLElement[],
+  currentRow: HTMLElement,
+  direction: Direction
+) {
+  const nextFn = direction === "START" ? list.prev : list.next;
+  const nextRow = nextFn(rows, currentRow);
 
-  return cancelChallengeBtns.map((el) => {
-    function onKeydown(e: KeyboardEvent) {
-      const pressed = e.key;
-      if (pressed === "Enter") {
-        e.preventDefault();
-        el.click();
-      }
+  // TODO: this should be receivd as a parameter
+  const focusedElement = document.activeElement as HTMLElement;
+  if (nextRow.status === "OK") {
+    const next = findFirstFocusableChild(nextRow.value);
+    if (next) {
+      rovingTabIndex(focusedElement, next);
+
+      next?.focus();
     }
-    el.addEventListener("keydown", onKeydown);
-    return () => el.removeEventListener("keydown", onKeydown);
-  });
+  } else {
+    // TODO: it looks weird moving to the toolbar since it's right aligned
+    // onVerticalOOB(direction);
+    //    console.log("dispatching");
+    //    onOOBNavigation({
+    //      axis: "VERTICAL",
+    //      direction,
+    //      el: focusedElement,
+    //    });
+    // TODO
+  }
+}
+
+function setupCancelChallengeButtons({
+  root,
+  onVerticalOOB,
+  onHorizontalOOB,
+}: Exclude<Props, "onOOBNavigation">): Teardown {
+  // TODO: lazy, should handle keyboard navigation to/from maybe?
+  const el = root.querySelector<HTMLElement>(
+    ".challengeContainer .cancel-challenge"
+  );
+  if (!el) {
+    return () => {};
+  }
+
+  el.setAttribute("role", "button");
+  el.setAttribute("aria-label", "Cancel Challenge");
+  el.setAttribute("tabindex", "0");
+
+  function onKeydown(el: HTMLElement, e: KeyboardEvent) {
+    const pressed = e.key;
+    if (pressed === "Enter") {
+      e.preventDefault();
+      el?.click();
+    } else if (pressed === "ArrowUp") {
+      e.preventDefault();
+      onVerticalOOB("START");
+    } else if (pressed === "ArrowDown") {
+      onVerticalOOB("END");
+    } else if (pressed === "ArrowLeft") {
+      onHorizontalOOB("START", el);
+    } else if (pressed === "ArrowRight") {
+      onHorizontalOOB("END", el);
+    }
+  }
+  const bind = onKeydown.bind(null, el);
+  el.addEventListener("keydown", bind);
+  return () => el.removeEventListener("keydown", bind);
 }
 
 // root should be .challengeContent
-function setupBeenChallenged(root: HTMLElement): Teardown {
-  if (root.classList.contains("challengeContainer")) {
-    throw new Error("Expected '.challengeContainer' as the root");
-  }
+function setupBeenChallenged({
+  root,
+  onHorizontalOOB,
+  //  onOOBNavigation,
+  onVerticalOOB,
+}: Props): Teardown {
   const acceptChallengeBtn =
     root.querySelector<HTMLElement>(".accept-challenge");
 
   const declineChallengeBtn =
     root.querySelector<HTMLElement>(".decline-challenge");
 
-  const parent = acceptChallengeBtn?.parentNode as HTMLElement;
   if (!acceptChallengeBtn || !declineChallengeBtn || !parent) {
+    console.warn(
+      `Could not initialize buttons, since one of '.accept-challenge=${acceptChallengeBtn}' or '.decline-challenge=${declineChallengeBtn}' were not found. This is not expected.`
+    );
     return () => {};
   }
 
@@ -71,17 +173,31 @@ function setupBeenChallenged(root: HTMLElement): Teardown {
       focusedElement?.click();
     } else if (pressed === "ArrowRight") {
       e.preventDefault();
-      const next = cl.next(buttons, focusedElement);
-      next.focus();
+      const next = list.next(buttons, focusedElement);
+      if (next.status === "OK") {
+        rovingTabIndex(focusedElement, next.value);
+        next.value.focus();
+      } else {
+        onHorizontalOOB("END", focusedElement);
+      }
     } else if (pressed === "ArrowLeft") {
       e.preventDefault();
-      const next = cl.prev(buttons, focusedElement);
-      next.focus();
+      const next = list.prev(buttons, focusedElement);
+      if (next.status === "OK") {
+        rovingTabIndex(focusedElement, next.value);
+        next.value.focus();
+      } else {
+        onHorizontalOOB("START", focusedElement);
+      }
+    } else if (pressed === "ArrowUp") {
+      onVerticalOOB("START");
+    } else if (pressed === "ArrowDown") {
+      onVerticalOOB("END");
     }
   };
 
-  parent.addEventListener("keydown", onKeydown);
+  root.addEventListener("keydown", onKeydown);
   return () => {
-    parent.removeEventListener("keydown", onKeydown);
+    root.removeEventListener("keydown", onKeydown);
   };
 }

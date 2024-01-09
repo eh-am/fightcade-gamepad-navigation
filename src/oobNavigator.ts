@@ -42,6 +42,17 @@ export function startOOBNavigator(props: Props) {
     props.search.addEventListener("OOB_Event", fn);
     teardown.push(() => props.search.removeEventListener("OOB_Event", fn));
   }
+
+  if (props.lobbies.length && props.sidebar) {
+    const fn = onPageOOB.bind(null, props.sidebar);
+
+    teardown.push(
+      ...props.lobbies.map((lobby) => {
+        lobby.addEventListener("OOB_Event", fn);
+        return () => lobby.removeEventListener("OOB_Event", fn);
+      })
+    );
+  }
 }
 
 function onPageOOB(sidebar: HTMLElement, e: CustomEvent<OOB_Event>) {
