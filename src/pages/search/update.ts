@@ -56,15 +56,17 @@ export function update(root: HTMLElement) {
   );
   teardown.push(grid.teardown);
 
-  updateSearchHeader({
-    root: searchHeader,
-    onHorizontalOOB: onHorizontalOOB.bind(null, root),
-    onVerticalOOB: (direction) => {
-      if (direction === "END") {
-        onBackToGrid(grid.allCards);
-      }
-    },
-  });
+  teardown.push(
+    updateSearchHeader({
+      root: searchHeader,
+      onHorizontalOOB: onHorizontalOOB.bind(null, root),
+      onVerticalOOB: (direction) => {
+        if (direction === "END") {
+          onBackToGrid(grid.allCards);
+        }
+      },
+    })
+  );
 
   teardown.push(
     setupFooterKeydown(
