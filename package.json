@@ -11,9 +11,9 @@
     "build:test": "esbuild --define:FGN_DEBUG=true --bundle src/inject.ts --outfile=out/inject.js",
     "type-check": "tsc --noEmit --p tsconfig.json",
     "watch": "esbuild --watch --define:FGN_DEBUG=true --bundle src=src/inject.ts --outfile=out/inject.js",
-    "live-reload": "live-server --port=5001 --no-browser --host=0.0.0.0 --quiet --watch='out, *.html' .",
+    "live-reload": "alive-server --port=5001 --no-browser --host=0.0.0.0 --quiet --watch='out, *.html' .",
     "start": "concurrently 'npm run watch' 'npm run live-reload'",
-    "test:start-server": "live-server --port=5002 --no-browser --host=127.0.0.1 --quiet --watch='noop' ."
+    "test:start-server": "alive-server --port=5002 --no-browser --host=127.0.0.1 --quiet --watch='noop' ."
   },
   "keywords": [],
   "author": "",
@@ -21,12 +21,12 @@
   "dependencies": {
     "ally.js": "^1.4.1",
     "concurrently": "^8.2.2",
-    "live-server": "^1.2.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",
     "@types/node": "^20.10.5",
+    "alive-server": "^1.3.0",
     "esbuild": "0.19.10"
   }
 }
