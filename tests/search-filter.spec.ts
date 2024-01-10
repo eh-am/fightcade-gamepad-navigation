@@ -36,26 +36,26 @@ test.describe("navigates back and forth horizontally", () => {
     await expect(input).toBeFocused();
 
     await page.keyboard.press("ArrowDown");
-    await expect(page.getByRole("listbox", { name: "Genre" })).toBeFocused();
+    await expect(page.getByRole("combobox", { name: "Genre" })).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
     await expect(
-      page.getByRole("listbox", { name: "Release Year" })
+      page.getByRole("combobox", { name: "Release Year" })
     ).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
     await expect(
-      page.getByRole("listbox", { name: "System", exact: true })
+      page.getByRole("combobox", { name: "System", exact: true })
     ).toBeFocused();
 
     await page.keyboard.press("ArrowRight");
     await expect(
-      page.getByRole("listbox", { name: "Ranked", exact: true })
+      page.getByRole("combobox", { name: "Ranked", exact: true })
     ).toBeFocused();
 
     await page.keyboard.press("ArrowLeft");
     await expect(
-      page.getByRole("listbox", { name: "System", exact: true })
+      page.getByRole("combobox", { name: "System", exact: true })
     ).toBeFocused();
   });
 });
@@ -68,7 +68,7 @@ test("navigates vertically", async ({ page }) => {
   await INPUT_BOX.focus();
 
   await page.keyboard.press("ArrowDown");
-  await expect(page.getByLabel("Genre").nth(1)).toBeFocused();
+  await expect(page.getByRole("combobox", { name: "Genre" })).toBeFocused();
 
   await page.keyboard.press("ArrowDown");
   await expect(
@@ -91,49 +91,47 @@ test("navigates vertically", async ({ page }) => {
 test("selects items", async ({ page }) => {
   await page.goto("/testdata/search-filter/");
 
-  await page.getByRole("listbox", { name: "Genre" }).focus();
-  await page.getByRole("listbox", { name: "Genre" }).click();
-  await page.keyboard.press("ArrowDown");
+  await page.getByRole("combobox", { name: "Genre" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("select-genre").nth(1)).toHaveValue("1");
 
-  await page.getByRole("listbox", { name: "Release Year" }).focus();
-  await page.getByRole("listbox", { name: "Release Year" }).click();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("select-release year").nth(1)).toHaveValue("1");
+  await expect(page.getByRole("combobox", { name: "Genre" })).toHaveValue("1");
 
-  await page.getByRole("listbox", { name: "System", exact: true }).focus();
-  await page.getByRole("listbox", { name: "System", exact: true }).click();
+  await page.getByRole("combobox", { name: "Release Year" }).focus();
+  await page.keyboard.press("Enter");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("select-system").nth(1)).toHaveValue("1");
+  await expect(
+    page.getByRole("combobox", { name: "Release Year" })
+  ).toHaveValue("1");
 
-  await page.getByRole("listbox", { name: "Ranked" }).focus();
-  await page.getByRole("listbox", { name: "Ranked" }).click();
+  await page.getByRole("combobox", { name: "System", exact: true }).focus();
+  await page.keyboard.press("Enter");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("select-ranked").nth(1)).toHaveValue("1");
+  await expect(
+    page.getByRole("combobox", { name: "System", exact: true })
+  ).toHaveValue("1");
+
+  await page.getByRole("combobox", { name: "Ranked" }).focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("combobox", { name: "Ranked", exact: true })
+  ).toHaveValue("1");
 
   await page.getByRole("button", { name: "Clear Filters" }).click();
 
-  await expect(page.getByTestId("select-genre").nth(1)).toHaveValue("0");
-  await expect(page.getByTestId("select-release year").nth(1)).toHaveValue("0");
-  await expect(page.getByTestId("select-system").nth(1)).toHaveValue("0");
-  await expect(page.getByTestId("select-ranked").nth(1)).toHaveValue("0");
-});
-
-// TODO:
-test("upon clicking it should focus on the first item", async ({ page }) => {});
-
-test("it escapes to next item when pressing right arrow in an open select", async ({
-  page,
-}) => {
-  await page.goto("/testdata/search-filter/");
-
-  await page.getByLabel("Genre").nth(1).focus();
-  await page.getByLabel("Genre").nth(1).click();
-
-  await page.keyboard.press("ArrowRight");
-  await expect(page.getByLabel("Release year").nth(1)).toBeFocused();
+  await expect(page.getByRole("combobox", { name: "Genre" })).toHaveValue("0");
+  await expect(
+    page.getByRole("combobox", { name: "Release Year" })
+  ).toHaveValue("0");
+  await expect(
+    page.getByRole("combobox", { name: "System", exact: true })
+  ).toHaveValue("0");
+  await expect(
+    page.getByRole("combobox", { name: "Ranked", exact: true })
+  ).toHaveValue("0");
 });

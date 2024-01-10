@@ -43,10 +43,10 @@ export function update(root: HTMLElement) {
     return;
   }
 
-  const footer = setupFooter(root);
+  let footer = setupFooter(root);
   if (!footer) {
-    console.warn("Aborting since footer was not found.");
-    return;
+    // If the search returns no items there will be no footer
+    footer = document.createElement("div");
   }
 
   const grid = setupGrid(
@@ -56,15 +56,17 @@ export function update(root: HTMLElement) {
   );
   teardown.push(grid.teardown);
 
-  updateSearchHeader({
-    root: searchHeader,
-    onHorizontalOOB: onHorizontalOOB.bind(null, root),
-    onVerticalOOB: (direction) => {
-      if (direction === "END") {
-        onBackToGrid(grid.allCards);
-      }
-    },
-  });
+  teardown.push(
+    updateSearchHeader({
+      root: searchHeader,
+      onHorizontalOOB: onHorizontalOOB.bind(null, root),
+      onVerticalOOB: (direction) => {
+        if (direction === "END") {
+          onBackToGrid(grid.allCards);
+        }
+      },
+    })
+  );
 
   teardown.push(
     setupFooterKeydown(

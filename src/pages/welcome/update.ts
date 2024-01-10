@@ -11,6 +11,9 @@ import {
 const teardown: Teardown[] = [];
 
 export function update(root: HTMLElement) {
+  teardown.forEach((v) => v());
+  teardown.length = 0;
+
   // Find all categories
   const categories = Array.from(
     root.querySelectorAll<HTMLElement>(
@@ -23,9 +26,6 @@ export function update(root: HTMLElement) {
     console.warn("Search: No categories found. Returning early");
     return false;
   }
-
-  teardown.forEach((v) => v());
-  teardown.length = 0;
 
   // Only the first card should be initially tabbable (tabindex 0)
   // ATENTION! Order matters here, since it's only set if needed
@@ -54,11 +54,13 @@ export function update(root: HTMLElement) {
   );
 
   if (searchHeader) {
-    updateSearchHeader({
-      root: searchHeader,
-      onHorizontalOOB: onHeaderHorizontalNavigation.bind(null, root),
-      onVerticalOOB: onHeaderVerticalNavigation.bind(null, categories),
-    });
+    teardown.push(
+      updateSearchHeader({
+        root: searchHeader,
+        onHorizontalOOB: onHeaderHorizontalNavigation.bind(null, root),
+        onVerticalOOB: onHeaderVerticalNavigation.bind(null, categories),
+      })
+    );
   }
 
   return true;
