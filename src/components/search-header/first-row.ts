@@ -65,13 +65,15 @@ export function setupFirstRowListeners(
     }
   }
 
-  firstRowItems.forEach((el) => {
-    el.addEventListener("keydown", onKeydown.bind(null, el));
+  const teardown: Teardown[] = firstRowItems.map((el) => {
+    const bind = onKeydown.bind(null, el);
+    el.addEventListener("keydown", bind);
+    return () => {
+      el.removeEventListener("keydown", bind);
+    };
   });
 
   return () => {
-    firstRowItems.forEach((el) => {
-      el.removeEventListener("keydown", onKeydown.bind(null, el));
-    });
+    teardown.forEach((f) => f());
   };
 }

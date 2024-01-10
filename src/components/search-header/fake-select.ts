@@ -77,7 +77,6 @@ function setupFakeOptionsKeydownListeners(
 ) {
   el.addEventListener("keydown", (e) => {
     const keyPressed = (e as KeyboardEvent).key;
-    console.log("received key", keyPressed);
 
     switch (keyPressed) {
       case "Enter": {
@@ -101,6 +100,7 @@ function setupFakeOptionsKeydownListeners(
     }
   });
 }
+
 function findSelectedFakeOption(el: HTMLSelectElement) {
   return el
     .closest(".filterItem")

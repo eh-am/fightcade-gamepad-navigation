@@ -58,13 +58,13 @@ export function setupThirdRowListeners(
     }
   }
 
-  thirdRowItems.forEach((el) => {
-    el.addEventListener("keydown", onKeydown.bind(null, el));
+  const teardown = thirdRowItems.map((el) => {
+    const bind = onKeydown.bind(null, el);
+    el.addEventListener("keydown", bind);
+    return () => el.removeEventListener("keydown", bind);
   });
 
   return () => {
-    thirdRowItems.forEach((el) => {
-      el.addEventListener("keydown", onKeydown.bind(null, el));
-    });
+    teardown.forEach((f) => f());
   };
 }

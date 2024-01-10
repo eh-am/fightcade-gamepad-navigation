@@ -2,6 +2,7 @@ import * as list from "@app/ds/list";
 import { fakeRovingTabIndex, findFirstFakeFocusable } from "@app/dom";
 import { setupCustomSelect } from "./fake-select";
 import { onOOBNavigation } from "@app/types/navigation";
+import { setupSelect } from "@app/components/search-header/select";
 
 export function setupSecondRow(root: HTMLElement): {
   teardown: Teardown;
@@ -12,60 +13,13 @@ export function setupSecondRow(root: HTMLElement): {
   );
   const teardown: Teardown[] = [];
 
-  console.log("selects", selects);
-  selects.forEach((sel) => {
-    console.log(sel, "value", sel.value);
-  });
+  teardown.push(...selects.map((select) => setupSelect(select)));
 
-  // Create the custom select
-  teardown.push(...selects.map((select) => setupCustomSelect(select)));
-
-  const genreCustomSelect = root.querySelector<HTMLElement>(
-    '.fgn-custom-select[aria-label="Genre"]'
-  );
-  const releaseYearCustomSelect = root.querySelector<HTMLElement>(
-    '.fgn-custom-select[aria-label="Release year"]'
-  );
-  const systemCustomSelect = root.querySelector<HTMLElement>(
-    '.fgn-custom-select[aria-label="System"]'
-  );
-  const rankedCustomSelect = root.querySelector<HTMLElement>(
-    '.fgn-custom-select[aria-label="Ranked"]'
-  );
-  if (
-    !genreCustomSelect ||
-    !releaseYearCustomSelect ||
-    !systemCustomSelect ||
-    !rankedCustomSelect
-  ) {
-    console.warn(
-      `Could not initialize filters, looks like something is missing: Genre="${genreCustomSelect}" Release_Year="${releaseYearCustomSelect} System="${systemCustomSelect}" ranked="${rankedCustomSelect}"`
-    );
-    return {
-      teardown: () => {},
-      allItems: [],
-    };
-  }
   return {
     teardown: () => {
-      // Instead of remove all event listeners and such
-      // We just delete the root node of the custom select
-      // TODO: apparently the listeners continue existing?
-      // https://stackoverflow.com/a/76239226
-      const fakeSelects =
-        root.querySelectorAll<HTMLElement>(".fgn-custom-select");
-
-      console.log("tearing down all fake selects", fakeSelects);
-      fakeSelects.forEach((el) => el.remove());
-
       teardown.forEach((v) => v());
     },
-    allItems: [
-      genreCustomSelect,
-      releaseYearCustomSelect,
-      systemCustomSelect,
-      rankedCustomSelect,
-    ],
+    allItems: selects,
   };
 }
 
@@ -118,13 +72,13 @@ export function setupSecondRowListeners(
     }
   }
 
-  secondRowItems.forEach((el) => {
-    el.addEventListener("keydown", onKeydown.bind(null, el));
+  const teardown = secondRowItems.map((el) => {
+    const bind = onKeydown.bind(null, el);
+    el.addEventListener("keydown", bind);
+    return () => el.removeEventListener("keydown", bind);
   });
 
   return () => {
-    secondRowItems.forEach((el) => {
-      el.addEventListener("keydown", onKeydown.bind(null, el));
-    });
+    teardown.forEach((f) => f());
   };
 }
