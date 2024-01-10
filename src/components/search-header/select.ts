@@ -3,6 +3,8 @@ import * as cl from "@app/ds/circularList";
 export function setupSelect(select: HTMLSelectElement) {
   const teardown: Teardown[] = [];
 
+  select.setAttribute("aria-label", getClosestTitle(select) || "");
+
   teardown.push(setupKeydown(select));
   return () => {
     teardown.forEach((f) => f());
@@ -183,4 +185,8 @@ function findSelectedCustomOption(
   }
 
   return customOptions[0];
+}
+
+function getClosestTitle(el: HTMLSelectElement) {
+  return el.closest(".filterItem")?.querySelector(".title")?.textContent;
 }

@@ -1,6 +1,5 @@
 import * as list from "@app/ds/list";
 import { fakeRovingTabIndex, findFirstFakeFocusable } from "@app/dom";
-import { setupCustomSelect } from "./fake-select";
 import { onOOBNavigation } from "@app/types/navigation";
 import { setupSelect } from "@app/components/search-header/select";
 
