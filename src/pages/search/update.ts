@@ -43,10 +43,10 @@ export function update(root: HTMLElement) {
     return;
   }
 
-  const footer = setupFooter(root);
+  let footer = setupFooter(root);
   if (!footer) {
-    console.warn("Aborting since footer was not found.");
-    return;
+    // If the search returns no items there will be no footer
+    footer = document.createElement("div");
   }
 
   const grid = setupGrid(
