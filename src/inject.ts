@@ -1,4 +1,4 @@
-import { initGamepad } from "./gamepad";
+import { initGamepad } from "@app/gamepad";
 import { initSidebar, updateSidebar } from "./sections/sidebar";
 import * as welcomePage from "./pages/welcome";
 import * as searchPage from "./pages/search";
