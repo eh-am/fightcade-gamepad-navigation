@@ -106,6 +106,9 @@ function setupCardKeydown(
     } else if (keyPressed === "ArrowDown") {
       e.preventDefault();
       onVerticalMovement(allCards, card, keyPressed);
+    } else if (keyPressed === "Escape") {
+      hideChannelActions(card);
+      card.focus();
     }
   }
 
@@ -122,6 +125,13 @@ function getChannelActionsWrapper(card: HTMLElement) {
   );
 }
 
+function hideChannelActions(card: HTMLElement) {
+  const channelActionsWrapper = getChannelActionsWrapper(card);
+  channelActionsWrapper.forEach((el) => {
+    el.style.opacity = "0";
+  });
+}
+
 export function handleFocusOut(card: HTMLElement): Teardown {
   function onFocusOut(e: FocusEvent) {
     const target = e.relatedTarget as HTMLElement | null;
@@ -130,10 +140,7 @@ export function handleFocusOut(card: HTMLElement): Teardown {
     }
 
     if (!card.contains(target)) {
-      const channelActionsWrapper = getChannelActionsWrapper(card);
-      channelActionsWrapper.forEach((el) => {
-        el.style.opacity = "0";
-      });
+      hideChannelActions(card);
     }
   }
 
