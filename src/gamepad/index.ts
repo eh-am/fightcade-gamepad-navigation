@@ -3,6 +3,7 @@ import { notify } from "@app/notify";
 import { toKeyboardEvent } from "@app/gamepad/buttons";
 import { identifyLayout } from "@app/gamepad/layouts/identify";
 import { findFirstFocusableChild } from "@app/dom";
+import { ControllerButtonPressed } from "@app/gamepad/events";
 
 type ControllerInfo = {
   name: string;
@@ -10,6 +11,12 @@ type ControllerInfo = {
 };
 type ControllerIndex = number;
 const controllers: Record<ControllerIndex, ControllerInfo> = [];
+
+const lastValidPress: Record<
+  ControllerIndex,
+  ControllerButtonPressed["detail"]
+> = {};
+const THROTTLE_MS = 200;
 
 export function initGamepad() {
   Controller.globalSettings.useAnalogAsDpad = "left";
@@ -40,7 +47,17 @@ export function initGamepad() {
     false
   );
 
-  window.addEventListener("gc.button.press", function (event) {
+  window.addEventListener("gc.button.hold", function (event) {
+    const controllerIndex = event.detail.controllerIndex;
+    const prevEventTime = lastValidPress[controllerIndex].time;
+    const currEventTime = event.detail.time;
+
+    if (currEventTime - prevEventTime > THROTTLE_MS) {
+      onPress(event);
+    }
+  });
+
+  function onPress(event: ControllerButtonPressed) {
     const activeElement = document.activeElement;
 
     // If nothing is focused, navigation won't work
@@ -49,8 +66,11 @@ export function initGamepad() {
       firstFocusable?.focus();
     }
 
+    const controllerIndex = event.detail.controllerIndex;
+    lastValidPress[controllerIndex] = event.detail;
+
     // It may be possible that this event is dispatched before the controller initialization
-    const controller = controllers[event.detail.controllerIndex];
+    const controller = controllers[controllerIndex];
     if (!controller) {
       return;
     }
@@ -64,5 +84,9 @@ export function initGamepad() {
     if (ev) {
       ev();
     }
+  }
+
+  window.addEventListener("gc.button.press", (ev) => {
+    onPress(ev);
   });
 }

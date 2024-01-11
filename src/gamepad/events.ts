@@ -6,6 +6,7 @@ declare global {
     "gc.controller.found": ControllerConnectEvent;
     "gc.controller.lost": ControllerDisconnectEvent;
     "gc.button.press": ControllerButtonPressed;
+    "gc.button.hold": ControllerButtonPressed;
   }
 }
 
@@ -17,7 +18,7 @@ type ControllerConnectEvent = CustomEvent<{
   };
 }>;
 type ControllerDisconnectEvent = CustomEvent<{ index: number }>;
-type ControllerButtonPressed = CustomEvent<{
+export type ControllerButtonPressed = CustomEvent<{
   controllerIndex: number;
   name: Button;
   value: number;
