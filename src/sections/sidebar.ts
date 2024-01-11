@@ -454,6 +454,11 @@ function setupUserMenuKeydown(): Teardown {
         } else {
           n.value.focus();
         }
+      } else if (keyPressed === "Escape") {
+        if (userButton) {
+          findClickableUserButtonEl(userButton)?.click();
+          focusBackWhenTransitionEnds(userButton);
+        }
       }
     }
 
