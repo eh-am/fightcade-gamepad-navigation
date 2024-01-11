@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0](https://github.com/eh-am/fightcade-gamepad-navigation/compare/v1.1.0...v1.2.0) (2024-01-11)
+
+
+### Features
+
+* navigate with Shoulder buttons ([#34](https://github.com/eh-am/fightcade-gamepad-navigation/issues/34)) ([da1fea3](https://github.com/eh-am/fightcade-gamepad-navigation/commit/da1fea3be84c3ec202e099e554cb749a24ae4550))
+* support holding a button ([#36](https://github.com/eh-am/fightcade-gamepad-navigation/issues/36)) ([6f37319](https://github.com/eh-am/fightcade-gamepad-navigation/commit/6f37319ad3711333541a3dd68104333447b4a2c5))
+* support pressing escape ([#38](https://github.com/eh-am/fightcade-gamepad-navigation/issues/38)) ([215f698](https://github.com/eh-am/fightcade-gamepad-navigation/commit/215f69883430cf60c6ee5e3520d7f08d35605d2e))
+
 ## [1.1.0](https://github.com/eh-am/fightcade-gamepad-navigation/compare/v1.0.0...v1.1.0) (2024-01-10)
 
 
