@@ -21,12 +21,12 @@ Open Fightcade, then press any button for the plugin to recognize the controller
 a notification message should tell the controller has been recognized.
 
 Then navigate with the D-pad (or equivalent).
-By default, BUTTON_1 is translated to "Enter", and BUTTON_3 and BUTTON_4 as 
+By default, BUTTON_1 is translated to "Enter", and SHOULDER_LEFT and SHOULDER_RIGHT to
 Shift+Tab and Tab, respectively.
 
 # Caveats
 * It only handles the frontend, ie not the emulators part. So initial setup for the inputs still requires a mouse/keyboard.
-* It relies on the DOM structure, so if it ever changes, it will break this plugin and will require updates. PRs welcome :)
+* It relies on the DOM structure, so if it ever changes, it will break and require updates. PRs welcome :)
 
 # Strategy
 The approach is to make everything more keyboard accessible, and then translate gamepad
