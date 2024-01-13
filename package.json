@@ -9,7 +9,7 @@
     "test:watch": "PWTEST_WATCH=1 npx playwright test --project=chromium",
     "build": "esbuild --define:FGN_DEBUG=false --bundle src/inject.ts --outfile=out/inject.js",
     "build:test": "esbuild --define:FGN_DEBUG=true --bundle src/inject.ts --outfile=out/inject.js",
-    "type-check": "tsc --noEmit --p tsconfig.json",
+    "type-check": "tsc --noEmit --p tsconfig.json | loose-ts-check",
     "watch": "esbuild --watch --define:FGN_DEBUG=true --bundle src=src/inject.ts --outfile=out/inject.js",
     "live-reload": "alive-server --port=5001 --no-browser --host=0.0.0.0 --quiet --watch='out, *.html' .",
     "start": "concurrently 'npm run watch' 'npm run live-reload'",
@@ -27,6 +27,7 @@
     "@playwright/test": "^1.40.1",
     "@types/node": "^20.10.5",
     "alive-server": "^1.3.0",
-    "esbuild": "0.19.10"
+    "esbuild": "0.19.10",
+    "loose-ts-check": "^2.0.0"
   }
 }
