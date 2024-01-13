@@ -9,14 +9,12 @@
  *
  */
 
-Controller.globalSettings.register(new GC_Setting('mapAnalogToShape', 'none', function(value) {
-
-    if (value === 'none') {
-        return 'none';
-    } else if (value === 'square') {
-        return 'square';
-    } else {
-        return null;
-    }
-
-}));
+export function mapAnalogToShape(value) {
+  if (value === "none") {
+    return "none";
+  } else if (value === "square") {
+    return "square";
+  } else {
+    return null;
+  }
+}

@@ -8,13 +8,11 @@
  *
  */
 
-Controller.globalSettings.register(new GC_Setting('analogStickDpadThreshold', 0.7, function(value) {
-
-    if (typeof value === 'number' && value >=0 && value <= 1) {
-        return value;
-    } else {
-        console.warn('angry');
-        return null;
-    }
-
-}));
+export function analogStickDpadThreshold(value) {
+  if (typeof value === "number" && value >= 0 && value <= 1) {
+    return value;
+  } else {
+    console.warn("angry");
+    return null;
+  }
+}
