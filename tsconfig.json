@@ -1,7 +1,6 @@
 {
   "outDir": ["out"],
   "include": ["src", "forks"],
-  "exclude": ["vendor"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -34,8 +33,7 @@
      "baseUrl": ".",                                  /* Specify the base directory to resolve non-relative module names. */
      "paths": {
        "@app/*": ["./src/*"],
-       "@controllerjs": ["./vendor/controllerjs/unminified/Controller.js"],
-       "@controllerjs2": ["./forks/Controller.js-master/source/Controller.ts"]
+       "@controllerjs": ["./forks/Controller.js/source/Controller.ts"]
      },                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

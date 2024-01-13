@@ -1,5 +1,4 @@
-//import { Controller } from "@controllerjs";
-import { Controller } from "@controllerjs2";
+import { Controller } from "@controllerjs";
 import { notify } from "@app/notify";
 import { toKeyboardEvent } from "@app/gamepad/buttons";
 import { identifyLayout } from "@app/gamepad/layouts/identify";
