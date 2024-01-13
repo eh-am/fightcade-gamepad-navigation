@@ -19,12 +19,48 @@ const lastValidPress: Record<
 const THROTTLE_MS = 200;
 
 export function initGamepad() {
+  const steamLayout = {
+    match: "Microsoft X-Box 360 pad",
+    matchFn: (name: string) => {
+      return /Microsoft X-Box 360 pad \d/.test(name);
+    },
+    name: "Steam Deck Controller",
+    description: "",
+    buttons: {
+      FACE_1: 0,
+      FACE_2: 1,
+      FACE_3: 2,
+      FACE_4: 3,
+      LEFT_SHOULDER: 4,
+      RIGHT_SHOULDER: 5,
+      LEFT_ANALOG_BUTTON: 9,
+      RIGHT_ANALOG_BUTTON: 11,
+      START: 11,
+      SELECT: 10,
+    },
+    // The dpad is actually considered an axe
+    // So what this + useAnalogAsDpad effectively do
+    // is to enable dpad!
+    axes: {
+      LEFT_ANALOG_STICK_VERT: 7,
+      LEFT_ANALOG_STICK_HOR: 6,
+    },
+    options: {
+      useAnalogAsDpad: "left",
+    },
+  };
+
+  Controller.layouts.register(Controller, steamLayout);
+
   Controller.globalSettings.useAnalogAsDpad = "left";
   Controller.search();
 
   window.addEventListener(
     "gc.controller.found",
     function (event) {
+      //      Controller.unwatchAll();
+      //      Controller.watchAll();
+
       const ci: ControllerInfo = {
         layout: identifyLayout(event.detail.controller.name),
         name: event.detail.controller.name,
@@ -87,6 +123,7 @@ export function initGamepad() {
   }
 
   window.addEventListener("gc.button.press", (ev) => {
+    console.log("press ev", ev.detail);
     onPress(ev);
   });
 }
