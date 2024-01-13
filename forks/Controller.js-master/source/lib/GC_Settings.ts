@@ -7,9 +7,9 @@ const GC_Setting = function (name, defaultValue, setterFunction) {
 };
 
 const GC_Settings = function (isGlobalSettingList) {
-  const globalSettings = isGlobalSettingList
-    ? false
-    : Controller.globalSettings;
+  //  const globalSettings = isGlobalSettingList
+  //    ? false
+  //    : Controller.globalSettings;
 
   let localSettings = {};
 

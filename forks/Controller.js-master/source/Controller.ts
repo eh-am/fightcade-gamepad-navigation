@@ -1198,7 +1198,7 @@ Object.assign =
 Controller.events = new GC_Events();
 Controller.layouts = GC_Layouts;
 Controller.layouts.register(Controller, StandardLayout);
-Controller.globalSettings = new GC_Settings(true);
+Controller.globalSettings = new GC_Settings(Controller, true);
 
 Controller.globalSettings.register(
   new GC_Setting("useAnalogAsDpad", "none", useAnalogAsDpad)
@@ -1215,6 +1215,9 @@ Controller.globalSettings.register(
 Controller.globalSettings.register(
   new GC_Setting("mapAnalogToShape", "none", mapAnalogToShape)
 );
+
+// TODO: update underlying code so that it doesn't rely on this global instance
+window.Controller = Controller;
 
 // Added by me
 export { Controller };
