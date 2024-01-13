@@ -6,6 +6,8 @@ import * as aboutPage from "./pages/about";
 import * as lobbyPage from "./pages/lobby";
 import "./devOnly";
 import { startOOBNavigator } from "@app/oobNavigator";
+// Needed for its side effects
+import "./electron";
 
 const initialized = {
   sidebar: false,
@@ -42,6 +44,11 @@ const lobbiesObservers: MutationObserver[] = [];
 const observer = new MutationObserver(function (mr: MutationRecord[]) {
   //  TODO: only do this if gamepad is detected
   makeExternalLinksNotFocusable();
+
+  // TODO: disable Make all inputs non focusable for steam deck
+  document.querySelectorAll("input").forEach((el) => {
+    el.setAttribute("tabindex", "-1");
+  });
 
   if (!initialized.gamepad) {
     initGamepad();

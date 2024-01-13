@@ -4,6 +4,7 @@ import { toKeyboardEvent } from "@app/gamepad/buttons";
 import { identifyLayout } from "@app/gamepad/layouts/identify";
 import { findFirstFocusableChild } from "@app/dom";
 import { ControllerButtonPressed } from "@app/gamepad/events";
+import { hasFocus } from "@app/electron";
 
 type ControllerInfo = {
   name: string;
@@ -94,6 +95,9 @@ export function initGamepad() {
   });
 
   function onPress(event: ControllerButtonPressed) {
+    if (!hasFocus()) {
+      return;
+    }
     const activeElement = document.activeElement;
 
     // If nothing is focused, navigation won't work

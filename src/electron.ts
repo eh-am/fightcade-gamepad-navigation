@@ -1,3 +1,12 @@
+const name = "electron";
+const win = require(name);
+
+export function hasFocus() {
+  // TODO: this is deprecated and should be removed in electron 14
+  // https://www.electronjs.org/docs/latest/breaking-changes#removed-remote-module
+  return win.remote.BrowserWindow.getAllWindows()[0].isFocused();
+}
+
 // https://stackoverflow.com/a/61725416
 export function isElectron() {
   // Renderer process
