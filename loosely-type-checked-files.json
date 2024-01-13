@@ -1,0 +1,11 @@
+[
+  "forks/Controller.js-master/source/Controller.ts",
+  "forks/Controller.js-master/source/lib/GC_Events.ts",
+  "forks/Controller.js-master/source/lib/GC_Layouts.ts",
+  "forks/Controller.js-master/source/lib/GC_Settings.ts",
+  "forks/Controller.js-master/source/lib/settings/analogStickDeadzone.ts",
+  "forks/Controller.js-master/source/lib/settings/analogStickDpadThreshold.ts",
+  "forks/Controller.js-master/source/lib/settings/buttonThreshold.ts",
+  "forks/Controller.js-master/source/lib/settings/mapAnalogToShape.ts",
+  "forks/Controller.js-master/source/lib/settings/useAnalogAsDpad.ts"
+]

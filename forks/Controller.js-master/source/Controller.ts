@@ -1025,7 +1025,7 @@ function Controller(HTMLgamepad) {
 
 // Global Controller methods and properties
 
-Controller.search = function (options) {
+Controller.search = function (options?: any) {
   const timer = (options && options.interval) || 500;
   const limit = (options && options.limit) || undefined;
 
