@@ -42,6 +42,9 @@ function init() {
     }
   });
 }
+export function isDev() {
+  return FGN_DEBUG;
+}
 
 if (FGN_DEBUG) {
   init();

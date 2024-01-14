@@ -27,12 +27,34 @@ export const GC_Layouts = {
     layouts.list[id.toLowerCase()] = map;
   },
 
-  has: function (name) {
+  has: function has(name) {
+    // TODO: added by me
+    // Support regex as matchers
+    for (let i in Controller.layouts.list) {
+      const matchFn = Controller.layouts.list[i].matchFn;
+      if (typeof matchFn === "function") {
+        if (matchFn(name)) {
+          return true;
+        }
+      }
+    }
+
     name = name.toLowerCase();
     return name in Controller.layouts.list;
   },
 
-  get: function (name) {
+  get: function get(name) {
+    // TODO: added by me
+    // Support regex as matchers
+    for (let i in Controller.layouts.list) {
+      const matchFn = Controller.layouts.list[i].matchFn;
+      if (typeof matchFn === "function") {
+        if (matchFn(name)) {
+          return Controller.layouts.list[i];
+        }
+      }
+    }
+
     name = name.toLowerCase();
     return Controller.layouts.list[name];
   },

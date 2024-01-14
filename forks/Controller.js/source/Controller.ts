@@ -9,7 +9,7 @@ import {
   mapAnalogToShape,
 } from "./lib/settings";
 
-import "./lib/GC_Errors";
+import { GC_Errors } from "./lib/GC_Errors";
 
 // No turning back now…
 
@@ -66,6 +66,12 @@ function Controller(HTMLgamepad) {
 
     // Gets the gamepad for this frame
     gamepad = this.constructor.gamepads[index];
+    if (!gamepad) {
+      console.warn(
+        `Gamepad at index ${index} was not found. Skipping this frame.`
+      );
+      return;
+    }
 
     // Updates timestamp
     lastUpdated = performance.now();
@@ -1044,7 +1050,7 @@ Controller.search = function (options?: any) {
         return;
       }
 
-      for (let index in this.gamepads) {
+      for (let index in Array.from(this.gamepads)) {
         index = parseInt(index, 10);
 
         if (isNaN(index)) {
