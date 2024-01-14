@@ -59,9 +59,6 @@ export function initGamepad() {
   window.addEventListener(
     "gc.controller.found",
     function (event) {
-      //      Controller.unwatchAll();
-      //      Controller.watchAll();
-
       const ci: ControllerInfo = {
         layout: identifyLayout(event.detail.controller.name),
         name: event.detail.controller.name,
@@ -79,6 +76,7 @@ export function initGamepad() {
   window.addEventListener(
     "gc.controller.lost",
     function (event) {
+      console.log("disconnected controller", event.detail);
       notify(`[DISCONNECTED]: Controller at index ${event.detail.index}`);
     },
     false
@@ -127,7 +125,6 @@ export function initGamepad() {
   }
 
   window.addEventListener("gc.button.press", (ev) => {
-    console.log("press ev", ev.detail);
     onPress(ev);
   });
 }

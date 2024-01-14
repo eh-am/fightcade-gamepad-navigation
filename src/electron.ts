@@ -1,10 +1,23 @@
-const name = "electron";
-const win = require(name);
+import { isDev } from "@app/devOnly";
+
+function tryRequire(name: string) {
+  try {
+    return require(name);
+  } catch (e) {
+    return {};
+  }
+}
+const electronName = "electron";
+const win = tryRequire(electronName);
 
 export function hasFocus() {
-  // TODO: this is deprecated and should be removed in electron 14
-  // https://www.electronjs.org/docs/latest/breaking-changes#removed-remote-module
-  return win.remote.BrowserWindow.getAllWindows()[0].isFocused();
+  if (!isDev()) {
+    // TODO: this is deprecated and should be removed in electron 14
+    // https://www.electronjs.org/docs/latest/breaking-changes#removed-remote-module
+    return win.remote.BrowserWindow.getAllWindows()[0].isFocused();
+  }
+
+  return true;
 }
 
 // https://stackoverflow.com/a/61725416
