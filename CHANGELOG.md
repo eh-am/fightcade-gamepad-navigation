@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/eh-am/fightcade-gamepad-navigation/compare/v1.2.0...v1.3.0) (2024-01-14)
+
+
+### Features
+
+* support steam deck controller ([#43](https://github.com/eh-am/fightcade-gamepad-navigation/issues/43)) ([81c7443](https://github.com/eh-am/fightcade-gamepad-navigation/commit/81c74436d3179179a8c41d0cab62a13393ee756b))
+
 ## [1.2.0](https://github.com/eh-am/fightcade-gamepad-navigation/compare/v1.1.0...v1.2.0) (2024-01-11)
 
 
