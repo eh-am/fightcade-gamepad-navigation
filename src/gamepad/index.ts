@@ -1,4 +1,5 @@
-import { Controller } from "@controllerjs";
+//import { Controller } from "@controllerjs";
+import * as Controller from "./lib";
 import { notify } from "@app/notify";
 import { toKeyboardEvent } from "@app/gamepad/buttons";
 import { identifyLayout } from "@app/gamepad/layouts/identify";
@@ -51,9 +52,9 @@ export function initGamepad() {
     },
   };
 
-  Controller.layouts.register(Controller, steamLayout);
-
-  Controller.globalSettings.useAnalogAsDpad = "left";
+  //  Controller.layouts.register(Controller, steamLayout);
+  //
+  //  Controller.globalSettings.useAnalogAsDpad = "left";
   Controller.search();
 
   window.addEventListener(
@@ -125,6 +126,7 @@ export function initGamepad() {
   }
 
   window.addEventListener("gc.button.press", (ev) => {
+    console.log("pressed", ev);
     onPress(ev);
   });
 }

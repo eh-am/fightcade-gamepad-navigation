@@ -28,7 +28,7 @@ function Controller(HTMLgamepad) {
   const index = HTMLgamepad.index;
   const timestamp = Date.now();
 
-  let RAF = null; // Stores the requestAnimationFrame id
+  let RAF: ReturnType<typeof window.requestAnimationFrame> | null = null; // Stores the requestAnimationFrame id
   let lastUpdated = 0; // Timestamp of the last time the controller was updated
   let analogMap = {}; // Stores the mapping from input analog locations to their layout counterpart
   let eventQueue = {}; // Stores the input events that need to be queues
@@ -49,7 +49,7 @@ function Controller(HTMLgamepad) {
 
   function updateController() {
     // Makes sure the controller is still connected before continuing
-    if (!connected) {
+    if (!connected && RAF) {
       window.cancelAnimationFrame(RAF);
       RAF = null;
       return;
@@ -154,6 +154,7 @@ function Controller(HTMLgamepad) {
     // controllerCount will be 0 if this is the first controller connected
     // because it does not get updated until setupController() finishes
     if (this.constructor.controllerCount === 0) {
+      console.log("adding disconnected");
       window.addEventListener(
         "gamepaddisconnected",
         _disconnectController,
@@ -164,6 +165,9 @@ function Controller(HTMLgamepad) {
     // Start listening for input
     updateController.call(this);
   }
+
+  //console.log("adding listener to gamepaddisconnected");
+  //window.addEventListener("gamepaddisconnected", _disconnectController, false);
 
   function initControllerMapping() {
     let layout = {};
@@ -297,32 +301,60 @@ function Controller(HTMLgamepad) {
     this.settings.update(settings);
   }
 
-  function disconnectController(event) {
-    if (event.gamepad.index === this.index) {
-      connected = false;
+  function disconnectController(event: GamepadEvent) {
+    console.log("disconnected controller with index", event.gamepad.index);
+    const index = event.gamepad.index;
+    //connected = false;
 
-      this.unwatch.call(this);
+    Controller.getController(index)?.unwatch();
+    console.log("destructing", this.constructor.controllers[index]);
+    console.log("destructing", this.constructor.controllers);
+    delete this.constructor.controllers[index];
 
-      delete this.constructor.controllers[this.index];
-
-      if (this.constructor.controllerCount === 0) {
-        window.removeEventListener(
-          "gamepaddisconnected",
-          _disconnectController
-        );
-      }
-
-      dispatchCustomEvent(
-        this.constructor.events.getName("controller", "disconnect"),
-        {
-          index: this.index,
-          timestamp: Date.now(),
-        },
-        "Controller at index " + this.index + " disconnected."
-      );
+    if (this.constructor.controllerCount === 0) {
+      window.removeEventListener("gamepaddisconnected", _disconnectController);
     }
-  }
 
+    //    if (this.constructor.controllerCount === 0) {
+    //      connected = false;
+    //      window.removeEventListener("gamepaddisconnected", _disconnectController);
+    //    }
+
+    dispatchCustomEvent(
+      this.constructor.events.getName("controller", "disconnect"),
+      {
+        index,
+        timestamp: Date.now(),
+      },
+      "Controller at index " + index + " disconnected."
+    );
+  }
+  //  function disconnectController(event) {
+  //    if (event.gamepad.index === this.index) {
+  //      connected = false;
+  //
+  //      this.unwatch.call(this);
+  //
+  //      delete this.constructor.controllers[this.index];
+  //
+  //      if (this.constructor.controllerCount === 0) {
+  //        window.removeEventListener(
+  //          "gamepaddisconnected",
+  //          _disconnectController
+  //        );
+  //      }
+  //
+  //      dispatchCustomEvent(
+  //        this.constructor.events.getName("controller", "disconnect"),
+  //        {
+  //          index: this.index,
+  //          timestamp: Date.now(),
+  //        },
+  //        "Controller at index " + this.index + " disconnected."
+  //      );
+  //    }
+  //  }
+  //
   function setupExtraButtons(list, type) {
     const prefix = type === "buttons" ? "BUTTON" : "AXIS";
 
@@ -681,7 +713,12 @@ function Controller(HTMLgamepad) {
     return Math.abs(values.x) > 0 || Math.abs(values.y) > 0;
   }
 
-  function queueEvent(input, eventName, detail, info) {
+  function queueEvent(
+    input: unknown,
+    eventName: unknown,
+    detail: unknown,
+    info?: unknown
+  ) {
     eventQueue[input] = {
       name: eventName,
       detail: detail || {},
@@ -1032,9 +1069,6 @@ function Controller(HTMLgamepad) {
 // Global Controller methods and properties
 
 Controller.search = function (options?: any) {
-  const timer = (options && options.interval) || 500;
-  const limit = (options && options.limit) || undefined;
-
   // Check for GamepadAPI support and return if not
   if (!Controller.supported) {
     if (options && typeof options.unsupportedCallback === "function") {
@@ -1043,51 +1077,30 @@ Controller.search = function (options?: any) {
     return false;
   }
 
-  this.interval = setInterval(
-    function () {
-      if (limit !== undefined && this.controllerCount >= limit) {
-        clearInterval(this.interval);
-        return;
-      }
+  function onConnect(event: GamepadEvent) {
+    const index = event.gamepad.index;
+    console.log("✅ 🎮 A gamepad was connected:", event.gamepad);
+    if (!this.controllers) {
+      this.controllers = {};
+    }
+    let settings = {};
 
-      for (let index in Array.from(this.gamepads)) {
-        index = parseInt(index, 10);
+    if (options && "settings" in options) {
+      settings = options.settings;
+    }
+    this.controllers[index] = new Controller(event.gamepad, settings);
 
-        if (isNaN(index)) {
-          return;
-        }
+    // Calling this from outside of the object initializer ensures
+    // it's called post-initialization
+    this.controllers[index]._postSetup.call(this.controllers[index]);
+  }
 
-        if (
-          this.gamepads[index] !== undefined &&
-          this.gamepads[index] !== null &&
-          this.getController(index) === undefined
-        ) {
-          if (!this.controllers) {
-            this.controllers = {};
-          }
-
-          let settings = {};
-
-          if (options && "settings" in options) {
-            settings = options.settings;
-          }
-          this.controllers[index] = new Controller(
-            this.gamepads[index],
-            settings
-          );
-
-          // Calling this from outside of the object initializer ensures
-          // it's called post-initialization
-          this.controllers[index]._postSetup.call(this.controllers[index]);
-        }
-      }
-    }.bind(this),
-    timer
-  );
+  // TODO: teardown?
+  window.addEventListener("gamepadconnected", onConnect.bind(this));
 };
 
-Controller.getController = function (index) {
-  index = parseInt(index);
+Controller.getController = function (index: number | string) {
+  index = parseInt(`${index}`, 10);
 
   if (typeof index !== "number" || isNaN(index)) {
     console.warn(index + " must be a number");
